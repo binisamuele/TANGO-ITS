@@ -9,3 +9,8 @@ If your project requires simultaneous data flows, see Paul Stoffregen's AltSoftS
 
 https://www.pjrc.com/teensy/td_libs_AltSoftSerial.html
 
+ALTERNATIVE COME LIBRERIE:
+
+https://forum.arduino.cc/t/libreria-serialcmd-commenti-ed-osservazioni/948953/3
+
+GitHub: https://github.com/gpb01/SerialCmd
