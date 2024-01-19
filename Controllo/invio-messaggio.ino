@@ -1,12 +1,8 @@
-long rand;
-
 void setup() {
-    Serial.begin(9600);
-    rand = 0;
+  Serial.begin(9600);
 }
 
 void loop() {
-    rand = random(2, 10);
-    Serial.write("ciao");
-    delay(rand * 1000);
+  Serial.println("Messaggio da Arduino A");
+  delay(1000);
 }
