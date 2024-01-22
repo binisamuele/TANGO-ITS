@@ -7,10 +7,15 @@
 
 // Import modules
 var express = require('express');
+const http = require('http');
 
 //Consts 
 const port = 3000;
+const arduinoHost = '192.168.0.2';
+const arduinoPort = 80;
 
+//Vars
+let lastDirection = null;
 
 var app = express();
 app.use(express.json());
@@ -67,5 +72,43 @@ app.get("", (req, res) => {
 
 
 forwardToArduino = (direction) => {
-    //POST request to the arduino server sending the direction
-}
+    if (isValidDirection(direction)) {
+        if (direction !== lastDirection) {
+            lastDirection = direction;
+
+            const jsonData = {
+                direction: direction
+            };
+
+            const options = {
+                hostname: arduinoHost,
+                port: arduinoPort,
+                path: '', 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            };
+
+            const req = http.request(options, (res) => {
+                console.log(`Arduino server responded with status code: ${res.statusCode}`);
+            });
+
+            req.on('error', (error) => {
+                console.error('Error sending request to Arduino:', error);
+            });
+
+            req.write(JSON.stringify(jsonData));
+            req.end();
+        } else {
+            console.log('Direction is the same as the previous one. Not forwarding to Arduino.');
+        }
+    } else {
+        console.log('Invalid direction. Not forwarding to Arduino.');
+    }
+};
+
+isValidDirection = (direction) => {
+    const validDirections = ['up', 'down', 'left', 'right'];
+    return validDirections.includes(direction);
+};
