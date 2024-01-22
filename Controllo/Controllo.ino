@@ -1,5 +1,5 @@
 int emergencyControl;
-String stringaSeriale = "";
+String serialString = "";
 int movementInt;
 int a1 = 2, a2 = 3, enA = 9;  // Motore A SX
 int b1 = 4, b2 = 5, enB = 10; // Motore B DX
@@ -72,14 +72,17 @@ void loop()
 
 void mapping()
 {
-  stringaSeriale = Serial.read();
-  if (stringaSeriale == "forward")movementInt = 1;
-  else if (stringaSeriale == "backward")movementInt = 2;
-  else if (stringaSeriale == "left")movementInt = 3;
-  else if (stringaSeriale == "right")movementInt = 4;
-  else if (stringaSeriale == "rotateSX")movementInt = 5;
-  else if (stringaSeriale == "rotateDX")movementInt = 6;
-  else if (stringaSeriale == "stop")movementInt = 7;
+  serialString = Serial.read();
+  int index = serialString.lastIndexOf(':');
+  int length = serialString.length();
+  String serialtring = serialString.substring(index+1, length);
+  if (serialString == "forward")movementInt = 1;
+  else if (serialString == "backward")movementInt = 2;
+  else if (serialString == "left")movementInt = 3;
+  else if (serialString == "right")movementInt = 4;
+  else if (serialString == "rotateSX")movementInt = 5;
+  else if (serialString == "rotateDX")movementInt = 6;
+  else if (serialString == "stop")movementInt = 7;
 }
 
 void emergencyStop()
