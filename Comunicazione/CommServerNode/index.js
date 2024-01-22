@@ -12,7 +12,7 @@ const http = require('http');
 //Consts 
 const port = 3000;
 const arduinoHost = '192.168.0.2';
-const arduinoPort = 80;
+const arduinoPort = '80'; 
 
 //Vars
 let lastDirection = null;
@@ -32,8 +32,6 @@ app.use(function(req, res, next) {
 });
 
 
-//indrizzo:porta/
-
 app.post("/control", (req, res) => {
     try {
         const direction = req.body.direction;
@@ -46,14 +44,9 @@ app.post("/control", (req, res) => {
         console.log('Headers:', req.headers);
         console.log('Body:', req.body);
         */
+        forwardToArduino(direction);
 
         res.send('OK');
-        
-        forwardToArduino(direction);
-        //TODO: Forward the request to the arduino 
-        //if the direction is not changed, do not send the request to the arduino
-
-
     } catch (error) {
         console.error("Request error:", error);
         res.status(500).json({ error: 'Server Error (500)' });
@@ -83,10 +76,11 @@ forwardToArduino = (direction) => {
             const options = {
                 hostname: arduinoHost,
                 port: arduinoPort,
-                path: '', 
+                path: '/', 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Content-Length': JSON.stringify(jsonData).length
                 },
             };
 
