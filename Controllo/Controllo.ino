@@ -1,8 +1,8 @@
 int emergencyControl;
 String serialString = "";
 int movementInt;
-int sx1 = 2, sx2 = 3, sxEn = 9;  // Motore A SX
-int dx1 = 4, dx2 = 5, dxEn = 10; // Motore B DX
+int sx1 = 2, sx2 = 3, sxEn = 9;  // Motore SX
+int dx1 = 4, dx2 = 5, dxEn = 10; // Motore DX
 int speed;
 const int maxSpeed = 150;
 
@@ -20,6 +20,7 @@ void setup()
     pinMode(dx2, OUTPUT);
     pinMode(dxEn, OUTPUT);
 }
+
 void loop()
 {
     if (Serial.available() > 0)
