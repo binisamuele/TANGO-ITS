@@ -27,8 +27,6 @@ app.use(function(req, res, next) {
 });
 
 
-//indrizzo:porta/
-
 app.post("/control", (req, res) => {
     try {
         const direction = req.body.direction;
@@ -43,12 +41,6 @@ app.post("/control", (req, res) => {
         */
 
         res.send('OK');
-        
-        forwardToArduino(direction);
-        //TODO: Forward the request to the arduino 
-        //if the direction is not changed, do not send the request to the arduino
-
-
     } catch (error) {
         console.error("Request error:", error);
         res.status(500).json({ error: 'Server Error (500)' });
@@ -64,8 +56,3 @@ app.get("", (req, res) => {
         res.status(500).json({ error: 'Server Error (500)' });
     }
 });
-
-
-forwardToArduino = (direction) => {
-    //POST request to the arduino server sending the direction
-}
