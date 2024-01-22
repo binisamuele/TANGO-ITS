@@ -1,4 +1,4 @@
-void setup() {
+/*void setup() {
   Serial.begin(9600);
 }
 
@@ -8,4 +8,4 @@ void loop() {
     Serial.print("Ricevuto: ");
     Serial.println(message);
   }
-}
+}*/
