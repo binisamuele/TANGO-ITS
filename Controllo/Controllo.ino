@@ -20,17 +20,14 @@ void setup()
 }
 void loop()
 {
-  if (Serial.available() > 0)
-  { // Se il seriale legge qualcosa
+  if (Serial.available() > 0){           // Se il seriale legge qualcosa
 
     emergencyControl = digitalRead(10);
-    if (emergencyControl == 1)
-    { // Se c'è un'emergenza
-      // codice per fermare il motore
+    if (emergencyControl == 1){         // Se c'è un'emergenza
+                                        // codice per fermare il motore
       Serial.write("");
     }
-    else
-    {
+    else{
       mapping();
       switch (movementInt)
       {
@@ -70,8 +67,7 @@ void loop()
   }
 }
 
-void mapping()
-{
+void mapping(){
   serialString = Serial.read();
   int index = serialString.lastIndexOf(':');
   int length = serialString.length();
@@ -85,8 +81,7 @@ void mapping()
   else if (serialString == "stop")movementInt = 7;
 }
 
-void emergencyStop()
-{
+void emergencyStop(){
   digitalWrite(a1, LOW);
   digitalWrite(a2, LOW);
   analogWrite(enA, 0);
@@ -96,8 +91,7 @@ void emergencyStop()
   analogWrite(enB, 0); // segnale di arresto del motore
 }
 
-void driveMotor(int en, int m1, int m2, int speed)
-{
+void driveMotor(int en, int m1, int m2, int speed){
   speed = min(speed * 1.2, maxSpeed);
   digitalWrite(m1, HIGH);
   digitalWrite(m2, HIGH);
@@ -105,15 +99,13 @@ void driveMotor(int en, int m1, int m2, int speed)
 }
 
 // Funzione per guidare un motore all'indietro
-void reverseMotor(int en, int m1, int m2)
-{
+void reverseMotor(int en, int m1, int m2){
   digitalWrite(m1, HIGH);
   digitalWrite(m2, HIGH);
   analogWrite(en, -100); // Valore del PWM tra 0 (spento) e 255 (massima velocità)
 }
 
-void leftMotor(int enA, int a1, int a2, int enB, int b1, int b2)
-{
+void leftMotor(int enA, int a1, int a2, int enB, int b1, int b2){
   digitalWrite(a1, HIGH);
   digitalWrite(a2, HIGH);
   analogWrite(enA, 100);
@@ -123,8 +115,7 @@ void leftMotor(int enA, int a1, int a2, int enB, int b1, int b2)
   analogWrite(enB, 50);
 }
 
-void rightMotor(int enA, int a1, int a2, int enB, int b1, int b2)
-{
+void rightMotor(int enA, int a1, int a2, int enB, int b1, int b2){
   digitalWrite(a1, HIGH);
   digitalWrite(a2, HIGH);
   analogWrite(enA, 50);
