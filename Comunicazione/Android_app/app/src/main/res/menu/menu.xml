@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+
+<group android:checkableBehavior="single">
+
+    <item
+        android:id="@+id/home"
+        android:icon="@drawable/icons8_casa"
+        android:title="Home" />
+
+    <item
+        android:id="@+id/controller"
+        android:icon="@drawable/controller"
+        android:title="Controller"/>
+
+    <item
+        android:id="@+id/lidar"
+        android:icon="@drawable/lidar"
+        android:title="Lidar"/>
+
+    <item
+        android:id="@+id/telecamere"
+        android:icon="@drawable/fotocamera"
+        android:title="Telecamere"/>
+
+
+
+</group>
+
+
+
+</menu>
