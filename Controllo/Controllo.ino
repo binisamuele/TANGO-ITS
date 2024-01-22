@@ -72,22 +72,24 @@ void loop()
     }
 }
 
-void mapping()
-{
+void mapping(){
     serialString = Serial.read();
-    if (stringaSeriale == "forward")
+    int index = serialString.lastIndexOf(':');
+    int length = serialString.length();
+    serialString = serialString.substring(index+1, length);
+    if (serialString == "forward")
         movementInt = 1;
-    else if (stringaSeriale == "backward")
+    else if (serialString == "backward")
         movementInt = 2;
-    else if (stringaSeriale == "left")
+    else if (serialString == "left")
         movementInt = 3;
-    else if (stringaSeriale == "right")
+    else if (serialString == "right")
         movementInt = 4;
-    else if (stringaSeriale == "rotateSX")
+    else if (serialString == "rotateSX")
         movementInt = 5;
-    else if (stringaSeriale == "rotateDX")
+    else if (serialString == "rotateDX")
         movementInt = 6;
-    else if (stringaSeriale == "stop")
+    else if (serialString == "stop")
         movementInt = 7;
 }
 
