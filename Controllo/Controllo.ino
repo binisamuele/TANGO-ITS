@@ -81,7 +81,7 @@ void mapping(){
         else if (serialVal == "rotateSX")movementInt = 5;
         else if (serialVal == "rotateDX")movementInt = 6;
         else if (serialVal == "stop")movementInt = 7;
-    }
+    }else if(topic == "emergenza");
 }
 
 void emergencyStop(){
