@@ -1,8 +1,8 @@
 int emergencyControl;
 String serialString = "";
 int movementInt;
-int sx1 = 2, sx2 = 3, sxEn = 9;  // Motore SX
-int dx1 = 4, dx2 = 5, dxEn = 10; // Motore DX
+int dxForward = 2, dxBackward = 3, dxForwardEn = 9, dxBackwardEn = 10; // Motore DX
+int sxForward = 4, sxBackward = 5, sxForwardEn = 11, sxBackwardEn = 12;  // Motore SX
 int speed;
 const int maxSpeed = 150;
 
@@ -10,18 +10,20 @@ void setup() {
     Serial.begin(9600);
     emergencyControl = 0;
 
-    pinMode(sx1, OUTPUT); // Pin motore A messi a caso, da aggiornare
-    pinMode(sx2, OUTPUT);
-    pinMode(sxEn, OUTPUT);
+    pinMode(dxForward, OUTPUT);
+    pinMode(dxBackward, OUTPUT);
+    pinMode(dxForwardEn, OUTPUT);
+    pinMode(dxBackwardEn, OUTPUT);
 
-    pinMode(dx1, OUTPUT); // Pin motore B messi a caso, da aggiornare
-    pinMode(dx2, OUTPUT);
-    pinMode(dxEn, OUTPUT);
+    pinMode(sxForward, OUTPUT);
+    pinMode(sxBackward, OUTPUT);
+    pinMode(sxForwardEn, OUTPUT);
+    pinMode(sxBackwardEn, OUTPUT);
 }
 
 void loop() {
     if (Serial.available() > 0) {           // Se il seriale legge qualcosa
-        emergencyControl = digitalRead(10);
+        emergencyControl = digitalRead(7);
         if (emergencyControl == 1) {         // Se c'è un'emergenza
             // codice per fermare il motore
             Serial.write("");
@@ -30,33 +32,33 @@ void loop() {
             mapping();
             switch (movementInt) {
                 case 1:
-                    driveMotor(sxEn, sx1, sx2);
-                    driveMotor(dxEn, dx1, dx2);
-                    delay(2000);
+                    driveMotor("dx");
+                    driveMotor("sx");
                     break;
 
                 case 2:
-                    reverseMotor(sxEn, sx1, sx2);
-                    reverseMotor(dxEn, dx1, dx2);
-                    delay(2000);
+                    reverseMotor("dx");
+                    reverseMotor("sx");
                     break;
 
                 case 3:
-                    leftMotor(sxEn, sx1, sx2, dxEn, dx1, dx2);
+                    driveMotor("dx")
+                    halfMotor("sx")
                     break;
 
                 case 4:
-                    rightMotor(sxEn, sx1, sx2, dxEn, dx1, dx2);
+                    halfMotor("dx")
+                    driveMotor("sx");
                     break;
 
                 case 5:
-                    driveMotor(sxEn, sx1, sx2);
-                    reverseMotor(dxEn, dx1, dx2);
+                    reverseMotor("dx");
+                    driveMotor("sx");
                     break;
 
                 case 6:
-                    driveMotor(dxEn, dx1, dx2);
-                    reverseMotor(sxEn, sx1, sx2);
+                    driveMotor("dx");
+                    reverseMotor("sx");
                     break;
                 case 7:
                     emergencyStop();
@@ -65,6 +67,7 @@ void loop() {
     }
 }
 
+// mapping delle 
 void mapping() {
     serialString = Serial.read();
     int index = serialString.lastIndexOf(':');
@@ -82,32 +85,36 @@ void mapping() {
     }else if(topic == "emergenza");
 }
 
+// segnale di arresto del motore
 void emergencyStop() {
-    digitalWrite(sx1, LOW);
-    digitalWrite(sx2, LOW);
-    analogWrite(sxEn, 0);
+    digitalWrite(dxForward, LOW);
+    digitalWrite(dxBackward, LOW);
+    analogWrite(dxForwardEn, 0);
+    analogWrite(dxBackwardEn, 0);
 
-    digitalWrite(dx1, LOW);
-    digitalWrite(dx2, LOW);
-    analogWrite(dxEn, 0); // segnale di arresto del motore
+    digitalWrite(sxForward, LOW);
+    digitalWrite(sxBackward, LOW);
+    analogWrite(sxForwardEn, 0);
+    analogWrite(sxBackwardEn, 0);
 }
 
-void driveMotor(int en, int m1, int m2) {
+// Funzione per andare avanti
+void driveMotor(String direction) {
     if (speed < maxSpeed){
         speed++;
     }
     digitalWrite(m1, HIGH);
-    digitalWrite(m2, HIGH);
     analogWrite(en, speed); // Valore del PWM tra 0 (spento) e 255 (massima velocità)
 }
 
-// Funzione per guidare un motore all'indietro
+// Funzione per andare indietro
 void reverseMotor(int en, int m1, int m2) {
     digitalWrite(m1, HIGH);
     digitalWrite(m2, HIGH);
     analogWrite(en, -100); // Valore del PWM tra 0 (spento) e 255 (massima velocità)
 }
 
+// Funzione per girare
 void leftMotor(int enA, int a1, int a2, int enB, int b1, int b2) {
     digitalWrite(a1, HIGH);
     digitalWrite(a2, HIGH);
@@ -118,6 +125,7 @@ void leftMotor(int enA, int a1, int a2, int enB, int b1, int b2) {
     analogWrite(enB, 50);
 }
 
+// Funzione superflua per girare
 void rightMotor(int enA, int a1, int a2, int enB, int b1, int b2) {
     digitalWrite(a1, HIGH);
     digitalWrite(a2, HIGH);
