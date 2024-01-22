@@ -75,7 +75,7 @@ void mapping()
   serialString = Serial.read();
   int index = serialString.lastIndexOf(':');
   int length = serialString.length();
-  String serialtring = serialString.substring(index+1, length);
+  serialString = serialString.substring(index+1, length);
   if (serialString == "forward")movementInt = 1;
   else if (serialString == "backward")movementInt = 2;
   else if (serialString == "left")movementInt = 3;
