@@ -17,9 +17,6 @@ IPAddress nodeServer(192, 168, 0, currIPNode); // IP address of the server you w
 EthernetClient client;
 EthernetServer server(80);
 
-EthernetClient clients[8]; //TODO: da rivedere + commentare
-int i=0;
-
 void setup() {
   Serial.begin(9600);
   
@@ -73,23 +70,25 @@ void setup() {
 void loop() {
   //do all the server functions only if the server is on
   //otherwise do nothing 
-  EthernetClient client = server.available();
-  if (client) {
-    while (client.connected()) {
-      if (client.available()) {
-        String request = client.readStringUntil('\r');
-        if (request.indexOf("POST") != -1) {
-          client.println("HTTP/1.1 200 OK");
-          client.println("Content-Type: application/json");
-          client.println("Access-Control-Allow-Origin: *");
-          client.println();
-          client.println("{\"response\":\"ok\"}");
-          String body = client.readString();
-          Serial.println(body);
-          break;
+  if (server){  //TODO: test this
+    EthernetClient client = server.available();
+    if (client) {
+      while (client.connected()) {
+        if (client.available()) {
+          String request = client.readStringUntil('\r');
+          if (request.indexOf("POST") != -1) {
+            client.println("HTTP/1.1 204 No Content");
+            client.println("Content-Type: application/json");
+            client.println("Access-Control-Allow-Origin: *");
+            client.println();
+            client.println("{\"response\":\"ok\"}");
+            String body = client.readString();
+            Serial.println(body);
+            break;
+          }
         }
       }
+      client.stop();
     }
-    client.stop();
   }
 }
