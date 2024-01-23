@@ -1,7 +1,7 @@
 /*
                                 --- NODE SERVER ---
 
->> This server recive http request from the android app and send it to the arduino
+>> This server recive http requests from the android app and send them to arduino
 
 */
 
@@ -16,8 +16,9 @@ const arduinoPort = '80';
 
 //Vars
 let lastDirection = null;
-
 var app = express();
+
+
 app.use(express.json());
 
 app.listen(port, () => {
