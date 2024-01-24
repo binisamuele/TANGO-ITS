@@ -12,5 +12,6 @@
     <color name="red">#FF0000</color>
     <color name="selected_text_color">@android:color/holo_red_light</color>
     <color name="default_text_color">@android:color/white</color>
+    <color name="your_selected_color">#800080</color>
 </resources>
 
