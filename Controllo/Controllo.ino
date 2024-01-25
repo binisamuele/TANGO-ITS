@@ -35,6 +35,7 @@ void loop() {
             emergencyStop();
         }
         else {
+    if (Serial.available() > 0) {           // Se il seriale legge qualcosa
             mapping();
             switch (movementInt) {
                 case 1:
