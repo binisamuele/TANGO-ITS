@@ -38,7 +38,7 @@ public class ControllerFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Button buttonForward = getView().findViewById(R.id.buttonForward);
+        /*Button buttonForward = getView().findViewById(R.id.btnForward);
 
         buttonForward.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -100,6 +100,8 @@ public class ControllerFragment extends Fragment {
                 }
             };
             queue.add(stringRequest);
+    }
+    */
     }
 
     @Override
