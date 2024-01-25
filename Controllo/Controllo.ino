@@ -91,6 +91,7 @@ void loop() {
         decelerate();
     }
 }
+}
 
 // mapping delle 
 void mapping() {
