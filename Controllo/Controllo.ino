@@ -7,6 +7,7 @@ int speed = 0;  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
 int speedGain = 25;
 const int maxSpeed = 150;
 const int minSpeed = -100;
+int SerialMap;
 
 void setup() {
     Serial1.begin(9600);    // collegamento all'arduino di comunicazione
@@ -22,14 +23,20 @@ void setup() {
     pinMode(sxBackward, OUTPUT);
     pinMode(sxForwardEn, OUTPUT);
     pinMode(sxBackwardEn, OUTPUT);
+
+    attachInterrupt(7,emergencyStop,FALLING);
+    attachInterrupt(9,emergencyStop,FALLING);
 }
 
 void loop() {
-    emergencyControl = digitalRead(7);
+    // emergencyControl = digitalRead(7);
+    // emergencyControl = digitalRead(9);
     
-    if (emergencyControl == 1) emergencyStop();             // Se c'è un'emergenza
+    // if (emergencyControl == 1) emergencyStop();             // Se c'è un'emergenza
 
     if (Serial1.available() > 0) {                          // Se il seriale dell'arduino di comunicazione legge qualcosa
+
+        SerialMap = 1;
 
         if (emergencyControl == 1) emergencyStop();         // Se c'è un'emergenza
             
@@ -83,6 +90,9 @@ void loop() {
             }
         }
     } else if (Serial2.available() > 0) {
+
+        SerialMap = 2;
+
         if (emergencyControl == 1) emergencyStop();         // Se c'è un'emergenza
             
         // codice nel caso in cui il lidar legge qualcosa
@@ -94,11 +104,13 @@ void loop() {
 
 // mapping delle 
 void mapping() {
-    serialString = Serial1.readStringUntil('\r\n');
-    int index = serial1String.lastIndexOf(':');
-    int length = serial1String.length();
-    String topic = serial1String.substring(0, index);
-    String serialVal = serial1String.substring(index+1, length);
+    if(SerialMap == 1)serialString = Serial1.readStringUntil('\r\n');
+    else if(SerialMap == 2)serialString = Serial2.readStringUntil('\r\n');
+    else if(SerialMap == 3)serialString = Serial3.readStringUntil('\r\n');
+    int index = serialString.lastIndexOf(':');
+    int length = serialString.length();
+    String topic = serialString.substring(0, index);
+    String serialVal = serialString.substring(index+1, length);
 
     if (topic == "movimento") {
         if (serialVal == "forward") movementInt = 1;
@@ -108,7 +120,9 @@ void mapping() {
         else if (serialVal == "rotateSX") movementInt = 5;
         else if (serialVal == "rotateDX") movementInt = 6;
         else if (serialVal == "stop") movementInt = 7;
-    } else if (topic == "emergenza");
+    } 
+    else if (topic == "emergenza");
+    else if (topic == "distanza");
 }
 
 // segnale di arresto del motore
@@ -128,12 +142,9 @@ void emergencyStop() {
 
 // Funzione per andare avanti
 void driveMotor(int motorForward) {
-    if (speed == maxSpeed){
-        return;
-    }
-    if (speed == 0){
-        digitalWrite(motorForward, HIGH);
-    }
+    if (speed == maxSpeed) return;
+    
+    if (speed == 0) digitalWrite(motorForward, HIGH);
 
     int newSpeed = speed + speedGain;
 
@@ -149,12 +160,9 @@ void driveMotor(int motorForward) {
 
 // Funzione per andare indietro
 void reverseMotor(int motorBackward) {
-    if (speed == minSpeed){
-        return;
-    }
-    if (speed == 0){
-        digitalWrite(motorBackward, HIGH);
-    }
+    if (speed == minSpeed) return;
+    
+    if (speed == 0) digitalWrite(motorBackward, HIGH);
 
     int newSpeed = speed - speedGain;
 
@@ -190,13 +198,18 @@ void rightMotor(int enA, int a1, int a2, int enB, int b1, int b2) {
     analogWrite(enB, 100);
 }
 
-void decelerate(){  // aggiungere spegnimento motori
+// Funzione per decelerare
+void decelerate(){
     if (speed > 0) {
         speed = speed - speedGain;
+        driveMotor(dxForward);
+        driveMotor(sxForward);
         return;
     }
     if (speed < 0) {
         speed = speed + speedGain;
+        reverseMotor(dxBackward);
+        reverseMotor(sxBackward);
         return;
     }
 }

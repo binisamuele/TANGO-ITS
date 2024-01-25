@@ -33,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawerLayout);
         navigationView = findViewById(R.id.nav);
 
+        setSupportActionBar(toolbar);
+
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
@@ -45,15 +47,19 @@ public class MainActivity extends AppCompatActivity {
                 if (itemId == R.id.home) {
                     drawerLayout.closeDrawer(GravityCompat.START);
                     fragmentR(new HomeFragment());
+                    setToolbarTitle("Home");
                 } else if (itemId == R.id.controller) {
                     fragmentR(new ControllerFragment());
                     drawerLayout.closeDrawer(GravityCompat.START);
+                    setToolbarTitle("Controller");
                 } else if (itemId == R.id.lidar) {
                     fragmentR(new LidarFragment());
                     drawerLayout.closeDrawer(GravityCompat.START);
+                    setToolbarTitle("Lidar");
                 } else if (itemId == R.id.telecamere) {
                     fragmentR(new FotocamereFragment());
                     drawerLayout.closeDrawer(GravityCompat.START);
+                    setToolbarTitle("Telecamere");
                 }
 
                 ColorStateList selectedTextColor = new ColorStateList(
@@ -64,16 +70,14 @@ public class MainActivity extends AppCompatActivity {
                 navigationView.setItemTextColor(selectedTextColor);
                 navigationView.setItemIconTintList(selectedTextColor);
 
-
                 return true;
             }
         });
         MenuItem homeItem = navigationView.getMenu().findItem(R.id.home);
         if (homeItem != null) {
-            homeItem.setChecked(true); // Imposta l'elemento "Home" come selezionato
-            navigationView.setCheckedItem(R.id.home); // Imposta l'elemento "Home" come selezionato visivamente
+            homeItem.setChecked(true);
+            navigationView.setCheckedItem(R.id.home);
 
-            // Cambia il colore del testo e delle icone per l'elemento "Home"
             ColorStateList initialTextColor = new ColorStateList(
                     new int[][]{{android.R.attr.state_checked}, {}},
                     new int[]{ContextCompat.getColor(MainActivity.this, R.color.selected_text_color),
@@ -85,7 +89,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             fragmentR(new HomeFragment());
-            navigationView.setCheckedItem(R.id.home); // Imposta l'elemento di menu Home come selezionato
+            navigationView.setCheckedItem(R.id.home);
+            setToolbarTitle("Tango");
         }
     }
 
@@ -94,5 +99,9 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.frameLayout, fragment);
         fragmentTransaction.commit();
+    }
+
+    private void setToolbarTitle(String title) {
+        getSupportActionBar().setTitle(title);
     }
 }
