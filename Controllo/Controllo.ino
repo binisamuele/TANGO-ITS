@@ -101,8 +101,8 @@ void loop() {
 // mapping delle 
 void mapping() {
     if(SerialMap == 1)serialString = Serial1.readStringUntil('\r\n');
-    if(SerialMap == 2)serialString = Serial2.readStringUntil('\r\n');
-    if(SerialMap == 3)serialString = Serial3.readStringUntil('\r\n');
+    else if(SerialMap == 2)serialString = Serial2.readStringUntil('\r\n');
+    else if(SerialMap == 3)serialString = Serial3.readStringUntil('\r\n');
     int index = serialString.lastIndexOf(':');
     int length = serialString.length();
     String topic = serialString.substring(0, index);
