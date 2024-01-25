@@ -44,20 +44,16 @@ public class MainActivity extends AppCompatActivity {
                 int itemId = item.getItemId();
                 if (itemId == R.id.home) {
                     drawerLayout.closeDrawer(GravityCompat.START);
-                    Toast.makeText(MainActivity.this, "Home", Toast.LENGTH_SHORT).show();
                     fragmentR(new HomeFragment());
                 } else if (itemId == R.id.controller) {
                     fragmentR(new ControllerFragment());
                     drawerLayout.closeDrawer(GravityCompat.START);
-                    Toast.makeText(MainActivity.this, "Controller", Toast.LENGTH_SHORT).show();
                 } else if (itemId == R.id.lidar) {
                     fragmentR(new LidarFragment());
                     drawerLayout.closeDrawer(GravityCompat.START);
-                    Toast.makeText(MainActivity.this, "Lidar", Toast.LENGTH_SHORT).show();
                 } else if (itemId == R.id.telecamere) {
                     fragmentR(new FotocamereFragment());
                     drawerLayout.closeDrawer(GravityCompat.START);
-                    Toast.makeText(MainActivity.this, "Telecamere", Toast.LENGTH_SHORT).show();
                 }
 
                 ColorStateList selectedTextColor = new ColorStateList(
