@@ -12,7 +12,8 @@
         android:gravity="center"
         android:textStyle="bold"
         android:textSize="22sp"
-        android:textColor="@color/black"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:background="@color/lightgray"
+        android:textColor="@color/white"/>
 
 </FrameLayout>

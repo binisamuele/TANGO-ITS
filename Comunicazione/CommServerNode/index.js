@@ -1,7 +1,7 @@
 /*
                                 --- NODE SERVER ---
 
->> This server recive http request from the android app and send it to the arduino
+>> This server recive http requests from the android app and send them to arduino
 
 */
 
@@ -12,12 +12,13 @@ const http = require('http');
 //Consts 
 const port = 3000;
 const arduinoHost = '192.168.0.2';
-const arduinoPort = 80;
+const arduinoPort = '80'; 
 
 //Vars
 let lastDirection = null;
-
 var app = express();
+
+
 app.use(express.json());
 
 app.listen(port, () => {
@@ -44,6 +45,7 @@ app.post("/control", (req, res) => {
         console.log('Headers:', req.headers);
         console.log('Body:', req.body);
         */
+        forwardToArduino(direction);
 
         res.send('OK');
     } catch (error) {
@@ -75,10 +77,11 @@ forwardToArduino = (direction) => {
             const options = {
                 hostname: arduinoHost,
                 port: arduinoPort,
-                path: '', 
+                path: '/', 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Content-Length': JSON.stringify(jsonData).length
                 },
             };
 
@@ -101,6 +104,6 @@ forwardToArduino = (direction) => {
 };
 
 isValidDirection = (direction) => {
-    const validDirections = ['up', 'down', 'left', 'right'];
+    const validDirections = ['up', 'down', 'left', 'right', "stop"];
     return validDirections.includes(direction);
 };

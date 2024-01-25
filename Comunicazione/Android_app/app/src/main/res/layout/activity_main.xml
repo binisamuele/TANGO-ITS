@@ -17,8 +17,8 @@
         <androidx.appcompat.widget.Toolbar
             android:layout_width="match_parent"
             app:title="Irobot"
-            app:titleTextColor="@color/white"
-            android:background="#00BCD4"
+            app:titleTextColor="@android:color/white"
+            android:background="@color/dark"
             android:elevation="3dp"
             android:id="@+id/toolbar"
             android:layout_height="wrap_content"/>
@@ -30,12 +30,16 @@
 
     </LinearLayout>
 
-<com.google.android.material.navigation.NavigationView
-    android:layout_width="wrap_content"
-    android:layout_gravity="start"
-    app:menu="@menu/menu"
-    android:id="@+id/nav"
-    app:headerLayout="@layout/header"
-    android:layout_height="match_parent"/>
+    <com.google.android.material.navigation.NavigationView
+        android:layout_width="wrap_content"
+        android:layout_gravity="start"
+        app:menu="@menu/menu"
+        android:id="@+id/nav"
+        app:headerLayout="@layout/header"
+        android:layout_height="match_parent"
+        style="@style/NavDefaultStyle"
+        app:itemTextColor="@color/default_text_color"
+        app:itemIconTint="@color/default_text_color"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>
+

@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- res/values/colors.xml -->
 <resources>
+    <color name="dark">#222222</color>
+    <color name="lightgray">#333333</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="purple_500">#6200EA</color>
+    <color name="purple_700">#3700B3</color>
+    <color name="teal_200">#03DAC5</color>
+    <color name="teal_700">#018786</color>
+    <color name="red">#FF0000</color>
+    <color name="selected_text_color">@android:color/holo_red_light</color>
+    <color name="default_text_color">@android:color/white</color>
+    <color name="your_selected_color">#800080</color>
 </resources>
+
