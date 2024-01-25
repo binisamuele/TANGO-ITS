@@ -87,10 +87,11 @@ void loop() {
         decelerate();
     }
 }
+}
 
 // mapping delle 
 void mapping() {
-    serialString = Serial1.read();
+    serialString = Serial1.readStringUntil('\r\n');
     int index = serial1String.lastIndexOf(':');
     int length = serial1String.length();
     String topic = serial1String.substring(0, index);
