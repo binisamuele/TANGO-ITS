@@ -22,13 +22,13 @@ void setup() {
 }
 
 void loop() {
-    if (Serial.available() > 0) {           // Se il seriale legge qualcosa
-        emergencyControl = digitalRead(7);
-        if (emergencyControl == 1) {         // Se c'è un'emergenza
-            // codice per fermare il motore
-            Serial.write("");
+    emergencyControl = digitalRead(7);   //Controllo bottoni d'emergenza
+    if (emergencyControl == 1) {         // Se c'è un'emergenza
+                                         // codice per fermare il motore
+            emergencyStop();
         }
         else {
+    if (Serial.available() > 0) {           // Se il seriale legge qualcosa
             mapping();
             switch (movementInt) {
                 case 1:
@@ -69,7 +69,7 @@ void loop() {
 
 // mapping delle 
 void mapping() {
-    serialString = Serial.read();
+    serialString = Serial.readStringUntil('\r\n');
     int index = serialString.lastIndexOf(':');
     int length = serialString.length();
     String topic = serialString.substring(0, index);
