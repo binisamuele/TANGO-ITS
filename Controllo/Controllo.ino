@@ -23,12 +23,16 @@ void setup() {
     pinMode(sxBackward, OUTPUT);
     pinMode(sxForwardEn, OUTPUT);
     pinMode(sxBackwardEn, OUTPUT);
+
+    attachInterrupt(7,emergencyStop,FALLING);
+    attachInterrupt(9,emergencyStop,FALLING);
 }
 
 void loop() {
-    emergencyControl = digitalRead(7);
+    // emergencyControl = digitalRead(7);
+    // emergencyControl = digitalRead(9);
     
-    if (emergencyControl == 1) emergencyStop();             // Se c'è un'emergenza
+    // if (emergencyControl == 1) emergencyStop();             // Se c'è un'emergenza
 
     if (Serial1.available() > 0) {                          // Se il seriale dell'arduino di comunicazione legge qualcosa
 
@@ -118,6 +122,7 @@ void mapping() {
         else if (serialVal == "stop") movementInt = 7;
     } 
     else if (topic == "emergenza");
+    else if (topic == "distanza");
 }
 
 // segnale di arresto del motore
