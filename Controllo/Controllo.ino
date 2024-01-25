@@ -26,15 +26,16 @@ void setup() {
 
 void loop() {
     emergencyControl = digitalRead(7);
-    if (emergencyControl == 1) {         // Se c'è un'emergenza
-        emergencyStop();
-    }
-    if (Serial1.available() > 0) {           // Se il seriale dell'arduino di comunicazione legge qualcosa
-        if (emergencyControl == 1) {         // Se c'è un'emergenza
-            emergencyStop();
-        }
+    
+    if (emergencyControl == 1) emergencyStop();             // Se c'è un'emergenza
+
+    if (Serial1.available() > 0) {                          // Se il seriale dell'arduino di comunicazione legge qualcosa
+
+        if (emergencyControl == 1) emergencyStop();         // Se c'è un'emergenza
+            
         else {
             mapping();
+
             switch (movementInt) {
                 case 1:
                     if (speed < 0){
@@ -79,18 +80,16 @@ void loop() {
                 case 7:
                     emergencyStop();
                     break;
-
             }
         }
     } else if (Serial2.available() > 0) {
-        if (emergencyControl == 1) {         // Se c'è un'emergenza
-            emergencyStop();
-        }
+        if (emergencyControl == 1) emergencyStop();         // Se c'è un'emergenza
+            
         // codice nel caso in cui il lidar legge qualcosa
+
     } else {
         decelerate();
     }
-}
 }
 
 // mapping delle 
@@ -100,15 +99,16 @@ void mapping() {
     int length = serial1String.length();
     String topic = serial1String.substring(0, index);
     String serialVal = serial1String.substring(index+1, length);
-    if(topic == "movimento"){
-        if (serialVal == "forward")movementInt = 1;
-        else if (serialVal == "backward")movementInt = 2;
-        else if (serialVal == "left")movementInt = 3;
-        else if (serialVal == "right")movementInt = 4;
-        else if (serialVal == "rotateSX")movementInt = 5;
-        else if (serialVal == "rotateDX")movementInt = 6;
-        else if (serialVal == "stop")movementInt = 7;
-    }else if(topic == "emergenza");
+
+    if (topic == "movimento") {
+        if (serialVal == "forward") movementInt = 1;
+        else if (serialVal == "backward") movementInt = 2;
+        else if (serialVal == "left") movementInt = 3;
+        else if (serialVal == "right") movementInt = 4;
+        else if (serialVal == "rotateSX") movementInt = 5;
+        else if (serialVal == "rotateDX") movementInt = 6;
+        else if (serialVal == "stop") movementInt = 7;
+    } else if (topic == "emergenza");
 }
 
 // segnale di arresto del motore
@@ -134,7 +134,9 @@ void driveMotor(int motorForward) {
     if (speed == 0){
         digitalWrite(motorForward, HIGH);
     }
+
     int newSpeed = speed + speedGain;
+
     if (motorForward == dxForward){
         analogWrite(dxForwardEn, newSpeed);
         return;
@@ -153,7 +155,9 @@ void reverseMotor(int motorBackward) {
     if (speed == 0){
         digitalWrite(motorBackward, HIGH);
     }
+
     int newSpeed = speed - speedGain;
+
     if (motorForward == dxBackward){
         analogWrite(dxBackwardEn, newSpeed);
         return;
@@ -187,9 +191,12 @@ void rightMotor(int enA, int a1, int a2, int enB, int b1, int b2) {
 }
 
 void decelerate(){  // aggiungere spegnimento motori
-    if (speed > 0){
-        speed = speed - 10;
-    } else (speed < 0){
-        speed = speed + 10;
+    if (speed > 0) {
+        speed = speed - speedGain;
+        return;
+    }
+    if (speed < 0) {
+        speed = speed + speedGain;
+        return;
     }
 }
