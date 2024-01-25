@@ -27,13 +27,14 @@ void setup() {
 
 void loop() {
     emergencyControl = digitalRead(7);
-    if (Serial1.available() > 0) {           // Se il seriale legge qualcosa
+    if (emergencyControl == 1) {         // Se c'è un'emergenza
+        emergencyStop();
+    }
+    if (Serial1.available() > 0) {           // Se il seriale dell'arduino di comunicazione legge qualcosa
         if (emergencyControl == 1) {         // Se c'è un'emergenza
-            // codice per fermare il motore
-            Serial1.write("");
+            emergencyStop();
         }
         else {
-    if (Serial.available() > 0) {           // Se il seriale legge qualcosa
             mapping();
             switch (movementInt) {
                 case 1:
@@ -53,6 +54,7 @@ void loop() {
                     }
                     reverseMotor(dxBackward);
                     reverseMotor(sxBackward);
+                    speed = speed - speedGain;
                     break;
 
                 case 3:
@@ -82,6 +84,9 @@ void loop() {
             }
         }
     } else if (Serial2.available() > 0) {
+        if (emergencyControl == 1) {         // Se c'è un'emergenza
+            emergencyStop();
+        }
         // codice nel caso in cui il lidar legge qualcosa
     } else {
         decelerate();
