@@ -1,18 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FAF6F6"
+    android:backgroundTint="#EADDDD"
     tools:context=".ControllerFragment">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:text="Controller Fragment"
-        android:gravity="center"
-        android:textStyle="bold"
-        android:textSize="22sp"
-        android:background="@color/lightgray"
-        android:textColor="@color/white"
-        android:layout_height="match_parent"/>
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="140dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/mybutton"
+        android:text="Stop"
+        android:textColor="#FB0606"
+        app:layout_constraintMarginStart="120dp"
+        app:layout_constraintMarginTop="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnForward" />
 
-</FrameLayout>
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnRotSx"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/mybutton"
+        android:text="RotSx"
+        android:textColor="#FB0606"
+        app:layout_constraintMarginStart="20dp"
+        app:layout_constraintMarginTop="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnForward" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnForward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="140dp"
+        android:layout_marginTop="80dp"
+        android:background="@drawable/mybutton"
+        android:text="▲"
+        android:textColor="#FB0606"
+        android:textSize="24sp"
+        app:layout_constraintMarginStart="120dp"
+        app:layout_constraintMarginTop="120dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnRotDx"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/mybutton"
+        android:textColor="#FB0606"
+        android:text="RotDx"
+        app:layout_constraintMarginStart="10dp"
+        app:layout_constraintMarginTop="10dp"
+        app:layout_constraintStart_toEndOf="@id/btnStop"
+        app:layout_constraintTop_toBottomOf="@id/btnForward" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnBackwards"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="140dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/mybutton"
+        android:text="▼"
+        android:textColor="#FB0606"
+        app:layout_constraintMarginStart="120dp"
+        app:layout_constraintMarginTop="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnStop" />
+
+    <TextView
+        android:id="@+id/tvDisplay"
+        android:layout_width="82dp"
+        android:layout_height="76dp"
+        android:layout_marginTop="168dp"
+        android:text="0 km/h\n100%"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.115"
+        app:layout_constraintMarginStart="50dp"
+        app:layout_constraintMarginTop="10dp"
+        app:layout_constraintStart_toEndOf="@id/btnRotDx"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnSx"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="164dp"
+        android:background="@drawable/mybutton"
+        android:text="◀"
+        android:textColor="#FB0606"
+        app:layout_constraintMarginStart="50dp"
+        app:layout_constraintMarginTop="10dp"
+        app:layout_constraintStart_toEndOf="@id/tvDisplay"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnDx"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="164dp"
+        android:background="@drawable/mybutton"
+        android:text="▶"
+        android:textColor="#FB0606"
+        app:layout_constraintMarginStart="10dp"
+        app:layout_constraintMarginTop="10dp"
+        app:layout_constraintStart_toEndOf="@id/btnSx"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
