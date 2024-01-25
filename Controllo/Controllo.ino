@@ -128,12 +128,9 @@ void emergencyStop() {
 
 // Funzione per andare avanti
 void driveMotor(int motorForward) {
-    if (speed == maxSpeed){
-        return;
-    }
-    if (speed == 0){
-        digitalWrite(motorForward, HIGH);
-    }
+    if (speed == maxSpeed) return;
+    
+    if (speed == 0) digitalWrite(motorForward, HIGH);
 
     int newSpeed = speed + speedGain;
 
@@ -149,12 +146,9 @@ void driveMotor(int motorForward) {
 
 // Funzione per andare indietro
 void reverseMotor(int motorBackward) {
-    if (speed == minSpeed){
-        return;
-    }
-    if (speed == 0){
-        digitalWrite(motorBackward, HIGH);
-    }
+    if (speed == minSpeed) return;
+    
+    if (speed == 0) digitalWrite(motorBackward, HIGH);
 
     int newSpeed = speed - speedGain;
 
@@ -190,13 +184,18 @@ void rightMotor(int enA, int a1, int a2, int enB, int b1, int b2) {
     analogWrite(enB, 100);
 }
 
-void decelerate(){  // aggiungere spegnimento motori
+// Funzione per decelerare
+void decelerate(){
     if (speed > 0) {
         speed = speed - speedGain;
+        driveMotor(dxForward);
+        driveMotor(sxForward);
         return;
     }
     if (speed < 0) {
         speed = speed + speedGain;
+        reverseMotor(dxBackward);
+        reverseMotor(sxBackward);
         return;
     }
 }
