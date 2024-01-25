@@ -1,4 +1,4 @@
-int emergencyControl;
+int emergencyControl = 0;
 String serialString = "";
 int movementInt;
 int dxForward = 2, dxBackward = 3, dxForwardEn = 9, dxBackwardEn = 10; // Motore DX
@@ -12,7 +12,6 @@ void setup() {
     Serial1.begin(9600);    // collegamento all'arduino di comunicazione
     Serial2.begin(9600);    // collegamento all'arduino del LIDAR
     Serial3.begin(9600);    // collegamento all'arduino dei sensori
-    emergencyControl = 0;
 
     pinMode(dxForward, OUTPUT);
     pinMode(dxBackward, OUTPUT);
@@ -95,7 +94,7 @@ void loop() {
 
 // mapping delle 
 void mapping() {
-    serialString = Serial1.read();
+    serialString = Serial1.readStringUntil('\r\n');
     int index = serial1String.lastIndexOf(':');
     int length = serial1String.length();
     String topic = serial1String.substring(0, index);
