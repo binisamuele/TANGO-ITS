@@ -104,6 +104,6 @@ forwardToArduino = (direction) => {
 };
 
 isValidDirection = (direction) => {
-    const validDirections = ['up', 'down', 'left', 'right'];
+    const validDirections = ['up', 'down', 'left', 'right', "stop"];
     return validDirections.includes(direction);
 };
