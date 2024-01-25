@@ -1,4 +1,3 @@
-int emergencyControl = 0;
 String serialString = "";
 int movementInt;
 int dxForward = 2, dxBackward = 3, dxForwardEn = 9, dxBackwardEn = 10; // Motore DX
@@ -24,23 +23,16 @@ void setup() {
     pinMode(sxForwardEn, OUTPUT);
     pinMode(sxBackwardEn, OUTPUT);
 
-    attachInterrupt(7,emergencyStop,FALLING);
-    attachInterrupt(9,emergencyStop,FALLING);
+    attachInterrupt(0,emergencyStop,RISING);
+    attachInterrupt(1,emergencyStop,FALLING);
 }
 
 void loop() {
-    // emergencyControl = digitalRead(7);
-    // emergencyControl = digitalRead(9);
-    
-    // if (emergencyControl == 1) emergencyStop();             // Se c'è un'emergenza
 
     if (Serial1.available() > 0) {                          // Se il seriale dell'arduino di comunicazione legge qualcosa
 
         SerialMap = 1;
 
-        if (emergencyControl == 1) emergencyStop();         // Se c'è un'emergenza
-            
-        else {
             mapping();
 
             switch (movementInt) {
@@ -85,24 +77,25 @@ void loop() {
                     break;
 
                 case 7:
-                    emergencyStop();
+                    decelerate();
                     break;
             }
-        }
     } else if (Serial2.available() > 0) {
 
         SerialMap = 2;
 
-        if (emergencyControl == 1) emergencyStop();         // Se c'è un'emergenza
+        mapping();
             
         // codice nel caso in cui il lidar legge qualcosa
 
-    } else {
-        decelerate();
+    } else if (Serial3.available() > 0) {
+        SerialMap = 3;
+
+        mapping();
     }
 }
 
-// mapping delle 
+// mapping dei messaggi
 void mapping() {
     if(SerialMap == 1)serialString = Serial1.readStringUntil('\r\n');
     else if(SerialMap == 2)serialString = Serial2.readStringUntil('\r\n');
@@ -113,6 +106,7 @@ void mapping() {
     String serialVal = serialString.substring(index+1, length);
 
     if (topic == "movimento") {
+
         if (serialVal == "forward") movementInt = 1;
         else if (serialVal == "backward") movementInt = 2;
         else if (serialVal == "left") movementInt = 3;
@@ -120,9 +114,12 @@ void mapping() {
         else if (serialVal == "rotateSX") movementInt = 5;
         else if (serialVal == "rotateDX") movementInt = 6;
         else if (serialVal == "stop") movementInt = 7;
-    } 
-    else if (topic == "emergenza");
-    else if (topic == "distanza");
+
+    } else if (topic == "emergenza"){
+
+        if(serialVal == 1) emergencyStop();    
+
+    }
 }
 
 // segnale di arresto del motore
