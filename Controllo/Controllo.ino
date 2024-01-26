@@ -1,56 +1,46 @@
-String serialString = "";
-int movementInt;
-int dxForward = 2, dxBackward = 3, dxForwardEn = 9, dxBackwardEn = 10; // Motore DX
-int sxForward = 4, sxBackward = 5, sxForwardEn = 11, sxBackwardEn = 12;  // Motore SX
-int speed = 0;  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
-int speedGain = 10;
-const int maxSpeed = 150;
-const int minSpeed = -100;
-int SerialMap;
+    String serial1String = "";
+    String serial2String = "";
+    String serial3String = "";
+    int movementInt;
+    int dxForward = 2, dxBackward = 3, dxForwardEn = 9, dxBackwardEn = 10; // Motore DX
+    int sxForward = 4, sxBackward = 5, sxForwardEn = 11, sxBackwardEn = 12;  // Motore SX
+    int speed = 0;  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
+    int speedGain = 10;
+    const int maxSpeed = 150;
+    const int minSpeed = -100;
+    float lidarDistance;
+    float signalStrength;
+    float batteryCharge;
+    float ultrasoundDistance;
+    float temperature;
+    float humidity;
 
-void setup() {
-    Serial1.begin(9600);    // collegamento all'arduino di comunicazione
-    Serial2.begin(9600);    // collegamento all'arduino del LIDAR
-    Serial3.begin(9600);    // collegamento all'arduino dei sensori
+    void setup() {
+        Serial1.begin(9600);    // collegamento all'arduino di comunicazione
+        Serial2.begin(9600);    // collegamento all'arduino del LIDAR
+        Serial3.begin(9600);    // collegamento all'arduino dei sensori
 
-    pinMode(dxForward, OUTPUT);
-    pinMode(dxBackward, OUTPUT);
-    pinMode(dxForwardEn, OUTPUT);
-    pinMode(dxBackwardEn, OUTPUT);
+        pinMode(dxForward, OUTPUT);
+        pinMode(dxBackward, OUTPUT);
+        pinMode(dxForwardEn, OUTPUT);
+        pinMode(dxBackwardEn, OUTPUT);
 
-    pinMode(sxForward, OUTPUT);
-    pinMode(sxBackward, OUTPUT);
-    pinMode(sxForwardEn, OUTPUT);
-    pinMode(sxBackwardEn, OUTPUT);
+        pinMode(sxForward, OUTPUT);
+        pinMode(sxBackward, OUTPUT);
+        pinMode(sxForwardEn, OUTPUT);
+        pinMode(sxBackwardEn, OUTPUT);
 
-    attachInterrupt(0,emergencyStop,RISING);
-    attachInterrupt(1,emergencyStop,FALLING);
-}
-
-void loop() {
-
-    if (Serial1.available() > 0) {                          // Se il seriale dell'arduino di comunicazione legge qualcosa
-
-        SerialMap = 1;
-
-        mapping();
+        attachInterrupt(0,emergencyStop,RISING);
+        attachInterrupt(1,emergencyStop,FALLING);
     }
 
-    if (Serial2.available() > 0) {
+    void loop() {
 
-        SerialMap = 2;
+        readSerial();
 
-        mapping();
-            
-        // codice nel caso in cui il lidar legge qualcosa
-    }
-
-    if (Serial3.available() > 0) {
-
-        SerialMap = 3;
-
-        mapping();
-    }
+        mapping(serial1String);
+        mapping(serial2String);
+        mapping(serial3String);
 
     switch (movementInt) {
         // andare avanti
@@ -104,34 +94,49 @@ void loop() {
             decelerate();
             break;
         }
-}
-
-// mapping dei messaggi
-void mapping() {
-    if(SerialMap == 1)serialString = Serial1.readStringUntil('\r\n');
-    else if(SerialMap == 2)serialString = Serial2.readStringUntil('\r\n');
-    else if(SerialMap == 3)serialString = Serial3.readStringUntil('\r\n');
-    int index = serialString.lastIndexOf(':');
-    int length = serialString.length();
-    String topic = serialString.substring(0, index);
-    String serialVal = serialString.substring(index+1, length);
-
-    if (topic == "movimento") {
-
-        if (serialVal == "forward") movementInt = 1;
-        else if (serialVal == "backward") movementInt = 2;
-        else if (serialVal == "left") movementInt = 3;
-        else if (serialVal == "right") movementInt = 4;
-        else if (serialVal == "rotateSX") movementInt = 5;
-        else if (serialVal == "rotateDX") movementInt = 6;
-        else if (serialVal == "stop") movementInt = 7;
-
-    } else if (topic == "emergenza"){
-
-        if(serialVal == 1) emergencyStop();    
-
     }
-}
+
+    void readSerial(){
+        if(Serial1.available())serial1String = Serial1.readStringUntil('\r\n');
+        if(Serial2.available())serial2String = Serial2.readStringUntil('\r\n');
+        if(Serial3.available()) serial3String = Serial3.readStringUntil('\r\n');
+    }
+
+    // mapping dei messaggi
+    void mapping(String serialString) {
+        int index = serialString.lastIndexOf(':');
+        int length = serialString.length();
+        String topic = serialString.substring(0, index);
+        String serialVal = serialString.substring(index+1, length);
+
+        if (topic == "movimento") {
+
+            if (serialVal == "forward") movementInt = 1;
+            else if (serialVal == "backward") movementInt = 2;
+            else if (serialVal == "left") movementInt = 3;
+            else if (serialVal == "right") movementInt = 4;
+            else if (serialVal == "rotateSX") movementInt = 5;
+            else if (serialVal == "rotateDX") movementInt = 6;
+            else if (serialVal == "stop") movementInt = 7;
+
+        } else if (topic == "emergenza"){
+
+            emergencyStop();    
+
+        } else if (topic == "distanzaLidar"){
+            lidarDistance = serialVal.toFloat();
+        } else if (topic == "potenzaSegnale"){
+            signalStrength = serialVal.toFloat();
+        } else if (topic == "caricaBatteria"){
+            batteryCharge = serialVal.toFloat();
+        } else if (topic == "distanzaUltraSuoni"){
+            ultrasoundDistance = serialVal.toFloat();
+        } else if (topic == "temperatura"){
+            temperature = serialVal.toFloat();
+        } else if (topic == "umidita"){
+            humidity = serialVal.toFloat();
+        }
+    }
 
 // segnale di arresto del motore
 void emergencyStop() {
@@ -145,8 +150,8 @@ void emergencyStop() {
     analogWrite(sxForward, 0);
     analogWrite(sxBackward, 0);
 
-    delay(1000);
-}
+        delay(1000);
+    }
 
 // Funzione per andare avanti
 void driveMotor(int motor1, int motor2, int spd) {
@@ -163,42 +168,52 @@ void reverseMotor(int motor1, int motor2, int spd) {
     driveMotor(motor1, motor2, reverseSpeed);
 }
 
-// Funzione per girare
-void halfMotor(int motorForward) {
-    int newSpeed = 0;
+    // Funzione per girare
+    void halfMotor(int motorForward) {
+        int newSpeed = 0;
 
-    if (speed > 0) newSpeed = speed - speedGain;
+        if (speed > 0) newSpeed = speed - speedGain;
 
-    if (motorForward == dxForward){
-        analogWrite(dxForwardEn, newSpeed);
-        return;
-    }
-    if (motorForward == sxForward){
-        analogWrite(sxForwardEn, newSpeed);
-        return;
-    }
-}
-
-// Funzione per decelerare
-void decelerate(){
-    if (speed > 0) {
-        speed = speed - speedGain;
-        if (speed == 0){
-            emergencyStop();
+        if (motorForward == dxForward){
+            analogWrite(dxForwardEn, newSpeed);
             return;
         }
-        driveMotor(dxForward);
-        driveMotor(sxForward);
-        return;
-    }
-    if (speed < 0) {
-        speed = speed + speedGain;
-        if (speed == 0){
-            emergencyStop();
+        if (motorForward == sxForward){
+            analogWrite(sxForwardEn, newSpeed);
             return;
         }
-        reverseMotor(dxBackward);
-        reverseMotor(sxBackward);
-        return;
     }
-}
+
+    // Funzione per decelerare
+    void decelerate(){
+        if (speed > 0) {
+            speed = speed - speedGain;
+            if (speed == 0){
+                emergencyStop();
+                return;
+            }
+            driveMotor(dxForward);
+            driveMotor(sxForward);
+            return;
+        }
+        if (speed < 0) {
+            speed = speed + speedGain;
+            if (speed == 0){
+                emergencyStop();
+                return;
+            }
+            reverseMotor(dxBackward);
+            reverseMotor(sxBackward);
+            return;
+        }
+    }
+
+    // Funzione per la comunicazione in seriale
+    void serialCommunications(){
+        Serial1.println("Distanza Lidar :" + String(lidarDistance));
+        Serial1.println("Potenza Segnale :" + String(signalStrength));
+        Serial1.println("Carica Batteria :" + String(batteryCharge));
+        Serial1.println("Distanza Ultrasuoni :" + String(ultrasoundDistance));
+        Serial1.println("Temperatura :" + String(temperature));
+        Serial1.println("Umidita :" + String(humidity));
+    }   
