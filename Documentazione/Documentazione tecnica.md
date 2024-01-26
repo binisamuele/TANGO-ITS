@@ -1,19 +1,22 @@
-DOCUMENTAZIONE TECNICA PROGETTO “GESTIONE SCUOLA” 
-TEAM: MISSION IMPOSSIBLE
+DOCUMENTAZIONE TECNICA PROGETTO INDUSTRIALE "TANGO" 
+
 1. Introduzione
 1.1 Scopo del Documento
-Questo è un documento di specifica dei requisiti per un nuovo programma di gestione di una scuola. Il nuovo programma dà la possibilità di visualizzare, aggiungere, modificare e cancellare sia singole classi che studenti, insegnanti, valutazioni degli studenti e materie, con la possibilità di calcolare la media delle valutazioni. Il  documento in oggetto, descrive lo scopo, gli obiettivi e le finalità del nuovo programma. Oltre a descrivere i requisiti non funzionali, il medesimo modella i requisiti funzionali con casi d'uso, diagrammi di interazione e modelli di classi. Infine, lo stesso  è destinato a guidare la progettazione e l'implementazione del programma target in un linguaggio orientato agli oggetti.
+Questo è un documento di specifica dei requisiti per il software di gestione di Tango, un robot in grado di muoversi, registrare dati dall’ambiente circostante e trasportare carichi.
+Il controllo del robot da remoto è demandato a una app per smartphone sviluppata appositamente.
+Il  documento in oggetto descrive lo scopo, gli obiettivi e le finalità del nuovo software. Oltre a descrivere i requisiti non funzionali, il medesimo modella i requisiti funzionali, analizza il codice e fornisce anche un manuale d'uso.
 
 1.2 Background
-La richiesta di sviluppare un nuovo programma per la gestione di una scuola è stata motivata dalla necessità di affrontare diverse problematiche che non erano state precedentemente gestite in modo adeguato. Prima dell'implementazione di questo nuovo software, non esisteva un sistema dedicato specificamente alla gestione scolastica, il che ha portato a inefficienze e difficoltà nella gestione di varie attività chiave. I principali problemi riscontrati erano:
+La richiesta di sviluppare questo nuovo software è riferita al progetto industriale che il corso 12.1 di ITS Genova deve portare a termine secondo curriculum.
+Dopo attenta analisi, sono stati identificati tre problemi principali per cui trovare una soluzione:
 
-•	Gestione degli studenti e degli insegnanti: Non esisteva un sistema centralizzato per registrare e mantenere le informazioni degli studenti e degli insegnanti. La gestione dei dettagli personali, delle iscrizioni alle classi e delle informazioni di contatto avveniva manualmente o attraverso strumenti non integrati, rendendo difficile l'accesso rapido e l'aggiornamento accurato delle informazioni.
+•	Controllo del robot: per poter portare a termine i propri compiti, il robot necessita di un'unità di controllo opportunamente programmata; deve essere altresì in grado di fermarsi in caso di emergenza.
 
-•	Gestione delle valutazioni degli studenti: La registrazione, l'archiviazione e il calcolo delle valutazioni degli studenti erano un processo complesso e suscettibile di errori. Non esisteva un sistema centralizzato per registrare le valutazioni per ogni studente, materia e periodo scolastico, rendendo difficile monitorare il progresso degli studenti e generare report accurati.
+•	Registrazione dei dati dall'ambiente circostante: attraverso i sensori montati a bordo macchina, il robot deve essere in grado di registrare dati dallambiente circostante e mostrarsi su schermo LCD e/o su monitor seriale
 
-•	Gestione delle valutazioni: La raccolta, l'organizzazione e l'analisi delle valutazioni degli studenti richiedevano un notevole sforzo manuale. Non era disponibile un sistema automatizzato per calcolare la media delle valutazioni e generare statistiche utili per gli insegnanti e l'amministrazione scolastica.
+•	Movimento del robot: il robot deve essere in grado di muoversi, controllato da remoto, in ogni direzione senza limiti
 
-Il nuovo programma di gestione scolastica è stato sviluppato per affrontare queste problematiche e fornire una soluzione integrata, efficiente e affidabile per la gestione di studenti, insegnanti e valutazioni.
+Il software è stato sviluppato per rispondere a queste domande e soddisfare le richieste.
 
 1.3 Stakeholder
 1.3.1 Utenti
