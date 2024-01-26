@@ -3,6 +3,9 @@
 #include <LiquidCrystal.h>
 #define DHTTYPE DHT22
 
+//array di support per invio stringhe al seriale
+char buffer[40];
+
 //configurazione pin
 const int trigPin = 9;
 const int echoPin = 10;
@@ -25,6 +28,7 @@ LiquidCrystal lcd(12, 11, 6, 5, 8, 7);
 int distanceCm;
 long duration;
 
+//funzioni per sensore a ultrasuoni
 void triggerUltrasonicSensor() {
   digitalWrite(trigPin, LOW);
   delayMicroseconds(1000);
@@ -42,12 +46,14 @@ void measureDistance() {
   duration = measurePulseDuration();
   if (duration >= 0) {
     distanceCm = duration * speedOfSound / 2;
-    Serial.print("D:");
-    Serial.print(distanceCm);
-    Serial.println(" cm");
-    if (distanceCm < 5) {
-      serialString(emergenza,1);
+    if (distanceCm < 20) {
+      Serial.print("emergenza");
+      Serial.print(distanceCm);
+    } else {
+      sprintf(buffer, "distanzaUltraSuoni: %d cm", distanceCm);
+      Serial.println(buffer);
     }
+
   } else {
     Serial.println("Errore nella misurazione della distanza");
     lcd.setCursor(0, 1);
@@ -58,7 +64,7 @@ void measureDistance() {
 
 void updateLCD() {
   lcd.setCursor(0, 1);
-  lcd.print("D:");
+  lcd.print("distanzaUltraSuoni:");
   lcd.print(distanceCm);
   lcd.print("cm T:");
   lcd.print(temp, 1);
@@ -69,28 +75,26 @@ void updateLCD() {
 
 void measureTemperatureAndHumidity() {
   hum = dht.readHumidity();
+  sprintf(buffer, "Humidity: %d %", hum);
+  Serial.println(buffer);
+
   temp = dht.readTemperature();
-  Serial.print("Humidity: ");
-  Serial.print(hum, 1);
-  Serial.print("%, T: ");
-  Serial.print(temp, 1);
-  Serial.println(" C");
+  sprintf(buffer, "Temperature: %d C", temp);
+  Serial.println(buffer);
 }
 
 void measureVoltmeters() {
-  // Misurazione dei voltimetri ogni 5 minuti
-  if (millis() % 300000 == 0) { // se
     // Misura tensione da voltmeter1Pin e voltmeter2Pin
     float voltage1 = analogRead(voltmeter1Pin) * (5.0 / 1023.0);
-    float voltage2 = analogRead(voltmeter2Pin) * (5.0 / 1023.0);
+    //float voltage2 = analogRead(voltmeter2Pin) * (5.0 / 1023.0);
 
     // Stampa tensioni sulla porta seriale
     Serial.print("V1: ");
     Serial.print(voltage1, 2);
-    Serial.print("V, V2: ");
-    Serial.print(voltage2, 2);
-    Serial.println("V");
-  }
+    Serial.print("V");
+    //Serial.print(voltage2, 2);
+    //Serial.println("V");
+
 }
 
 void setup() {
@@ -103,13 +107,10 @@ void setup() {
 
 void loop() {
 
-  
-
-    measureDistance();
-  
+  measureDistance();
 
   // funzioni da eseguire ogni 5 minuti
-  if (millis() % 300000 == 0) {
+  if (millis() % fiveMinutes == 0) {
     measureTemperatureAndHumidity();
     updateLCD();
     measureVoltmeters();
