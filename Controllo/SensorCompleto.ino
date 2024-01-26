@@ -1,23 +1,29 @@
 #include <Wire.h>
 #include <DHT.h>
 #include <LiquidCrystal.h>
+#define DHTTYPE DHT22
 
+//configurazione pin
 const int trigPin = 9;
 const int echoPin = 10;
-const float speedOfSound = 0.034;  // Velocità del suono in cm/microsecondo
+//pin sensori voltimetri
+const int voltmeter1Pin = A0;
+const int voltmeter2Pin = A1;
+
+//costante per utilizzare sensore a ultrasuoni
+const float speedOfSound = 0.034;  // cm/microsecondo
+
+//constanti gestione millis
+const int fiveMinutes = 300000;
+const int tenMinutes = 600000;
+
 
 const int DHTPIN = 3;
-#define DHTTYPE DHT22
 DHT dht(DHTPIN, DHTTYPE);
-
 LiquidCrystal lcd(12, 11, 6, 5, 8, 7);
 
 int distanceCm;
 long duration;
-
-// Aggiunta di due pin per i sensori di voltimetri
-const int voltmeter1Pin = A0;
-const int voltmeter2Pin = A1;
 
 void setup() {
   Serial.begin(9600);       // Inizializza la comunicazione seriale a 9600 bps
@@ -91,7 +97,7 @@ void measureTemperatureAndHumidity() {
 
 void measureVoltmeters() {
   // Misurazione dei voltimetri ogni 5 minuti
-  if (millis() % 300000 < 149599 || millis() % 300000 > 150400) { // se
+  if (millis() % 300000 == 0) { // se
     // Misura tensione da voltmeter1Pin e voltmeter2Pin
     float voltage1 = analogRead(voltmeter1Pin) * (5.0 / 1023.0);
     float voltage2 = analogRead(voltmeter2Pin) * (5.0 / 1023.0);
@@ -106,18 +112,16 @@ void measureVoltmeters() {
 }
 
 void loop() {
+
+  
   // Misurazione della distanza solo ogni 2 secondi
   if (millis() % 2000 == 0) {
     measureDistance();
   }
 
-  // Misurazione della temperatura e umidità ogni 5 minuti
+  // funzioni da eseguire ogni 5 minuti
   if (millis() % 300000 == 0) {
     measureTemperatureAndHumidity();
-  }
-
-  // Misurazione dei voltimetri ogni 5 minuti
-  if (millis() % 300000 == 150000 ) {
     measureVoltmeters();
   }
 }
