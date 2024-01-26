@@ -5,6 +5,8 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -47,10 +49,10 @@ public class ControllerFragment extends Fragment {
 
         requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
-        Button buttonForward = requireView().findViewById(R.id.btnForward);
-        Button buttonBackwards = requireView().findViewById(R.id.btnBackwards);
-        Button buttonRotSx = requireView().findViewById(R.id.btnRotSx);
-        Button buttonRotDx = requireView().findViewById(R.id.btnRotDx);
+        AppCompatImageButton buttonForward = requireView().findViewById(R.id.bntUp);
+        AppCompatImageButton buttonBackwards = requireView().findViewById(R.id.btnDown);
+        AppCompatImageButton buttonRotSx = requireView().findViewById(R.id.btnRotSX);
+        AppCompatImageButton buttonRotDx = requireView().findViewById(R.id.btnRotDX);
 
         AtomicBoolean anyButtonPressed = new AtomicBoolean(false);
 
