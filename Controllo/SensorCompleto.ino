@@ -25,8 +25,7 @@ const int DHTPIN = 3;
 DHT dht(DHTPIN, DHTTYPE);
 LiquidCrystal lcd(12, 11, 6, 5, 8, 7);
 
-int distanceCm;
-long duration;
+
 
 //funzioni per sensore a ultrasuoni
 void triggerUltrasonicSensor() {
@@ -42,6 +41,10 @@ long measurePulseDuration() {
 }
 
 void measureDistance() {
+
+  int distanceCm;
+  long duration;
+
   triggerUltrasonicSensor();
   duration = measurePulseDuration();
   if (duration >= 0) {
@@ -56,8 +59,8 @@ void measureDistance() {
 
   } else {
     Serial.println("Errore nella misurazione della distanza");
-    lcd.setCursor(0, 1);
-    lcd.print("Error");
+    //lcd.setCursor(0, 1);
+    //lcd.print("Error");
   }
   
 }
