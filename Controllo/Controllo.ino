@@ -1,4 +1,6 @@
-String serialString = "";
+String serial1String = "";
+String serial2String = "";
+String serial3String = "";
 int movementInt;
 int dxForward = 2, dxBackward = 3, dxForwardEn = 9, dxBackwardEn = 10; // Motore DX
 int sxForward = 4, sxBackward = 5, sxForwardEn = 11, sxBackwardEn = 12;  // Motore SX
@@ -6,7 +8,6 @@ int speed = 0;  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
 int speedGain = 25;
 const int maxSpeed = 150;
 const int minSpeed = -100;
-int SerialMap;
 
 void setup() {
     Serial1.begin(9600);    // collegamento all'arduino di comunicazione
@@ -28,10 +29,6 @@ void setup() {
 }
 
 void loop() {
-
-    if (Serial1.available() > 0) {                          // Se il seriale dell'arduino di comunicazione legge qualcosa
-
-        SerialMap = 1;
 
             mapping();
 
@@ -84,26 +81,13 @@ void loop() {
                     decelerate();
                     break;
             }
-    } else if (Serial2.available() > 0) {
-
-        SerialMap = 2;
-
-        mapping();
-            
-        // codice nel caso in cui il lidar legge qualcosa
-
-    } else if (Serial3.available() > 0) {
-        SerialMap = 3;
-
-        mapping();
-    }
-}
+    } 
 
 // mapping dei messaggi
 void mapping() {
-    if(SerialMap == 1)serialString = Serial1.readStringUntil('\r\n');
-    else if(SerialMap == 2)serialString = Serial2.readStringUntil('\r\n');
-    else if(SerialMap == 3)serialString = Serial3.readStringUntil('\r\n');
+    if(Serial1.available)serialString = Serial1.readStringUntil('\r\n');
+    else if(Serial2.available)serialString = Serial2.readStringUntil('\r\n');
+    else if(Serial3.available) serialString = Serial3.readStringUntil('\r\n');
     int index = serialString.lastIndexOf(':');
     int length = serialString.length();
     String topic = serialString.substring(0, index);
