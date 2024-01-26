@@ -229,4 +229,4 @@ void serialCommunications(){
     Serial1.println("Distanza Ultrasuoni :" + ultrasoundDistance);
     Serial1.println("Temperatura :" + temperature);
     Serial1.println("Umidita :" + humidity);
-}
+}   
