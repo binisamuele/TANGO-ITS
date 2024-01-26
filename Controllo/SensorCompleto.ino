@@ -25,14 +25,6 @@ LiquidCrystal lcd(12, 11, 6, 5, 8, 7);
 int distanceCm;
 long duration;
 
-void setup() {
-  Serial.begin(9600);       // Inizializza la comunicazione seriale a 9600 bps
-  dht.begin();              // Inizializza il sensore DHT
-  lcd.begin(16, 2);         // Inizializza il display LCD
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
-}
-
 void triggerUltrasonicSensor() {
   digitalWrite(trigPin, LOW);
   delayMicroseconds(1000);
@@ -43,6 +35,25 @@ void triggerUltrasonicSensor() {
 
 long measurePulseDuration() {
   return pulseIn(echoPin, HIGH);
+}
+
+void measureDistance() {
+  triggerUltrasonicSensor();
+  duration = measurePulseDuration();
+  if (duration >= 0) {
+    distanceCm = duration * speedOfSound / 2;
+    Serial.print("D:");
+    Serial.print(distanceCm);
+    Serial.println(" cm");
+    if (distanceCm < 5) {
+      serialString(emergenza,1);
+    }
+  } else {
+    Serial.println("Errore nella misurazione della distanza");
+    lcd.setCursor(0, 1);
+    lcd.print("Error");
+  }
+  
 }
 
 void updateLCD() {
@@ -56,43 +67,14 @@ void updateLCD() {
   lcd.print("% ");
 }
 
-void measureDistance() {
-  triggerUltrasonicSensor();
-  duration = measurePulseDuration();
-  if (duration >= 0) {
-    distanceCm = duration * speedOfSound / 2;
-    Serial.print("D:");
-    Serial.print(distanceCm);
-    Serial.println(" cm");
-    if (distanceCm < 5) {
-      // Do something when the distance is less than 5 cm
-    }
-  } else {
-    Serial.println("Errore nella misurazione della distanza");
-    lcd.setCursor(0, 1);
-    lcd.print("Error");
-  }
-  
-}
-
 void measureTemperatureAndHumidity() {
   hum = dht.readHumidity();
   temp = dht.readTemperature();
-  Serial.print("H: ");
+  Serial.print("Humidity: ");
   Serial.print(hum, 1);
   Serial.print("%, T: ");
   Serial.print(temp, 1);
   Serial.println(" C");
-  lcd.setCursor(0, 0);
-  lcd.print("H:");
-  lcd.print(hum, 1);
-  lcd.print("%");
-  lcd.setCursor(0, 1);
-  lcd.print("T:");
-  lcd.print(temp, 1);
-  lcd.print(" C");
-  updateLCD();
- 
 }
 
 void measureVoltmeters() {
@@ -111,17 +93,25 @@ void measureVoltmeters() {
   }
 }
 
+void setup() {
+  Serial.begin(9600);       // Inizializza la comunicazione seriale a 9600 bps
+  dht.begin();              // Inizializza il sensore DHT
+  lcd.begin(16, 2);         // Inizializza il display LCD
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+}
+
 void loop() {
 
   
-  // Misurazione della distanza solo ogni 2 secondi
-  if (millis() % 2000 == 0) {
+
     measureDistance();
-  }
+  
 
   // funzioni da eseguire ogni 5 minuti
   if (millis() % 300000 == 0) {
     measureTemperatureAndHumidity();
+    updateLCD();
     measureVoltmeters();
   }
 }

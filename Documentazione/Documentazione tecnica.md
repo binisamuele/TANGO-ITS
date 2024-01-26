@@ -10,11 +10,11 @@ Il  documento in oggetto descrive lo scopo, gli obiettivi e le finalità del nuo
 La richiesta di sviluppare questo nuovo software è riferita al progetto industriale che il corso 12.1 di ITS Genova deve portare a termine secondo curriculum.
 Dopo attenta analisi, sono stati identificati tre problemi principali per cui trovare una soluzione:
 
-•	Controllo del robot: per poter portare a termine i propri compiti, il robot necessita di un'unità di controllo opportunamente programmata; deve essere altresì in grado di fermarsi in caso di emergenza.
+•	Controllo del robot: per poter portare a termine i propri compiti, il robot necessita di un'unità di controllo opportunamente programmata
 
 •	Registrazione dei dati dall'ambiente circostante: attraverso i sensori montati a bordo macchina, il robot deve essere in grado di registrare dati dallambiente circostante e mostrarsi su schermo LCD e/o su monitor seriale
 
-•	Movimento del robot: il robot deve essere in grado di muoversi, controllato da remoto, in ogni direzione senza limiti
+•	Movimento del robot: il robot deve essere in grado di muoversi, controllato da remoto, in ogni direzione senza limiti e deve essere altresì in grado di fermarsi in caso di emergenza
 
 Il software è stato sviluppato per rispondere a queste domande e soddisfare le richieste.
 
