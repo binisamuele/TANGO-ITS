@@ -112,7 +112,6 @@ void loop() {
   if (millis() % 300000 == 0) {
     measureTemperatureAndHumidity();
     updateLCD();
-
     measureVoltmeters();
   }
 }
