@@ -14,7 +14,6 @@
     float ultrasoundDistance;
     float temperature;
     float humidity;
-    char buf [6];
 
 
     void setup() {
