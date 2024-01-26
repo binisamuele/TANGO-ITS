@@ -8,6 +8,13 @@ int speed = 0;  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
 int speedGain = 25;
 const int maxSpeed = 150;
 const int minSpeed = -100;
+float lidarDistance;
+float signalStrength;
+float batteryCharge;
+float ultrasoundDistance;
+float temperature;
+float humidity;
+
 
 void setup() {
     Serial1.begin(9600);    // collegamento all'arduino di comunicazione
@@ -30,24 +37,11 @@ void setup() {
 
 void loop() {
 
-        mapping();
-    }
+    readSerial();
 
-    if (Serial2.available() > 0) {
-
-        SerialMap = 2;
-
-        mapping();
-            
-        // codice nel caso in cui il lidar legge qualcosa
-    }
-
-    if (Serial3.available() > 0) {
-
-        SerialMap = 3;
-
-        mapping();
-    }
+    mapping(serial1String);
+    mapping(serial2String);
+    mapping(serial3String);
 
     switch (movementInt) {
     case 1:
@@ -100,11 +94,14 @@ void loop() {
 }
 }
 
+void readSerial(){
+    if(Serial1.available)serial1String = Serial1.readStringUntil('\r\n');
+    if(Serial2.available)serial2String = Serial2.readStringUntil('\r\n');
+    if(Serial3.available) serial3String = Serial3.readStringUntil('\r\n');
+}
+
 // mapping dei messaggi
-void mapping() {
-    if(Serial1.available)serialString = Serial1.readStringUntil('\r\n');
-    else if(Serial2.available)serialString = Serial2.readStringUntil('\r\n');
-    else if(Serial3.available) serialString = Serial3.readStringUntil('\r\n');
+void mapping(String serialString) {
     int index = serialString.lastIndexOf(':');
     int length = serialString.length();
     String topic = serialString.substring(0, index);
@@ -124,6 +121,18 @@ void mapping() {
 
         if(serialVal == 1) emergencyStop();    
 
+    } else if (topic == "distanzaLidar"){
+        lidarDistance = serialVal;
+    } else if (topic == "potenzaSegnale"){
+        signalStrength = serialVal;
+    } else if (topic == "caricaBatteria"){
+        batteryCharge = serialVal;
+    } else if (topic == "distanzaUltraSuoni"){
+        ultrasoundDistance = serialVal;
+    } else if (topic == "temperatura"){
+        temperature = serialVal;
+    } else if (topic == "umidita"){
+        humidity = serialVal;
     }
 }
 
@@ -210,4 +219,14 @@ void decelerate(){
         reverseMotor(sxBackward);
         return;
     }
+}
+
+// Funzione per comunicazione in seriale
+void serialCommunications(){
+    Serial1.println("Distanza Lidar :" + lidarDistance);
+    Serial1.println("Potenza Segnale :" + signalStrength);
+    Serial1.println("Carica Batteria :" + batteryCharge);
+    Serial1.println("Distanza Ultrasuoni :" + ultrasoundDistance);
+    Serial1.println("Temperatura :" + temperature);
+    Serial1.println("Umidita :" + humidity);
 }
