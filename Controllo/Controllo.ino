@@ -30,8 +30,8 @@ void setup() {
     pinMode(sxForwardEn, OUTPUT);
     pinMode(sxBackwardEn, OUTPUT);
 
-    attachInterrupt(0,emergencyStop,RISING);
-    attachInterrupt(1,emergencyStop,FALLING);
+    attachInterrupt(0, emergencyStop, RISING);
+    attachInterrupt(1, emergencyStop, FALLING);
 }
 
 void loop() {
@@ -47,7 +47,7 @@ void loop() {
         case 1:
             if (speed == maxSpeed) break;                       // se la velocità è al massimo, non fare niente
 
-            speed = speed + speedGain;
+            speed += speedGain;
 
             if (speed < 10) {                                   // se la velocità era negativa, rallentiamo i motori
                 reverseMotor(dxBackward, sxBackward, speed);
@@ -60,7 +60,7 @@ void loop() {
         case 2:
             if (speed == minSpeed) break;                       // se la velocità è al minimo, non fare niente
 
-            speed = speed - speedGain;
+            speed -= speedGain;
 
             if (speed > -10) {                                   // se la velocità era positiva, rallentiamo i motori
                 driveMotor(dxForward, sxForward, speed);
@@ -81,13 +81,24 @@ void loop() {
             break;
         // rotazione in senso orario
         case 5:
-            reverseMotor(dxBackward);
-            driveMotor(sxForward);
+            if (speed > 0) {
+                speed -= speedGain;
+                driveMotor(dxForward, sxForward, speed);
+                break;
+            }
+            
+            if (speed < 0) {
+                speed += speedGain;
+                driveMotor(dxBackward, sxBackward, speed);
+                break;
+            }
+
+            driveMotor(sxForward, dxBackward, 25);
+
             break;
         // rotazione in senso antiorario
         case 6:
-            driveMotor(dxForward);
-            reverseMotor(sxBackward);
+            // il caso sopra al contrario
             break;
 
         case 7:
@@ -193,20 +204,21 @@ void emergencyStop() {
     delay(1000);
 }
 
-// Funzione per andare avanti
+// Funzione per muoversi avanti o indietro
 void driveMotor(int motor1, int motor2, int spd) {
+    if (spd < 0) spd = -spd;
     analogWrite(motor1, spd);
     analogWrite(motor2, spd);
 
     delay(50);
 }
 
-// Funzione per andare indietro
+/* Funzione per andare indietro
 void reverseMotor(int motor1, int motor2, int spd) {    
     int reverseSpeed = -spd;
 
     driveMotor(motor1, motor2, reverseSpeed);
-}
+}*/
 
 // Funzione per girare
 void halfMotor(int motorForward) {
