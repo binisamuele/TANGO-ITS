@@ -222,7 +222,7 @@
         }
     }
 
-    // Funzione per comunicazione in seriale
+    // Funzione per la comunicazione in seriale
     void serialCommunications(){
         Serial1.println("Distanza Lidar :" + String(lidarDistance));
         Serial1.println("Potenza Segnale :" + String(signalStrength));
