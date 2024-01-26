@@ -2,44 +2,45 @@ DOCUMENTAZIONE TECNICA PROGETTO INDUSTRIALE "TANGO"
 
 1. Introduzione
 1.1 Scopo del Documento
-Questo è un documento di specifica dei requisiti per il software di gestione di Tango, un robot in grado di muoversi autonomamente, registrare dati dall’ambiente circostante e trasportare carichi.
+Questo è un documento di specifica dei requisiti per il software di gestione di Tango, un robot in grado di muoversi, registrare dati dall’ambiente circostante e trasportare carichi.
 Il controllo del robot da remoto è demandato a una app per smartphone sviluppata appositamente.
 Il  documento in oggetto descrive lo scopo, gli obiettivi e le finalità del nuovo software. Oltre a descrivere i requisiti non funzionali, il medesimo modella i requisiti funzionali, analizza il codice e fornisce anche un manuale d'uso.
 
 1.2 Background
 La richiesta di sviluppare questo nuovo software è riferita al progetto industriale che il corso 12.1 di ITS Genova deve portare a termine secondo curriculum.
-Dopo attenta analisi, sono state identificate tre problemi principali per cui trovare una soluzione:
+Dopo attenta analisi, sono stati identificati tre problemi principali per cui trovare una soluzione:
 
-•	Controllo del robot 
+•	Controllo del robot: per poter portare a termine i propri compiti, il robot necessita di un'unità di controllo opportunamente programmata; deve essere altresì in grado di fermarsi in caso di emergenza.
 
-•	Registrazione dei dati dall'ambiente circostante
+•	Registrazione dei dati dall'ambiente circostante: attraverso i sensori montati a bordo macchina, il robot deve essere in grado di registrare dati dallambiente circostante e mostrarsi su schermo LCD e/o su monitor seriale
 
-•	Movimento del robot 
+•	Movimento del robot: il robot deve essere in grado di muoversi, controllato da remoto, in ogni direzione senza limiti
 
-Il nuovo programma di gestione scolastica è stato sviluppato per affrontare queste problematiche e fornire una soluzione integrata, efficiente e affidabile per la gestione di studenti, insegnanti e valutazioni.
+Il software è stato sviluppato per rispondere a queste domande e soddisfare le richieste.
 
 1.3 Stakeholder
 1.3.1 Utenti
 I principali stakeholder per questo progetto includono:
-1.	Responsabile scolastico: Il responsabile scolastico è responsabile della supervisione generale del sistema di gestione della scuola. Ha interesse nel garantire che il programma soddisfi le esigenze e i requisiti della scuola.
-
-2.	Insegnanti: Gli insegnanti utilizzano il programma per registrare le valutazioni degli studenti e gestire le informazioni delle classi e delle materie. Hanno interesse che il  sistema sia facile da usare, efficiente e in grado di gestire correttamente i dati degli studenti.
-
-3.	Studenti: Gli studenti sono i principali soggetti delle valutazioni e delle informazioni registrate nel sistema. Hanno interesse che il sistema  sia accurato, sicuro e che consenta loro di visualizzare le proprie valutazioni e altre informazioni pertinenti.
+1.
+2.
+3.	
+   
 1.4 Panoramica del Documento
 Il resto del documento fornisce le specifiche dettagliate del nuovo sistema. È organizzato come segue:
 
-Sezione 2: Requisiti funzionali
+Sezione 2: Requisiti
 
-Sezione 3: Requisiti non funzionali
+Sezione 3: Analisi del codice
 
-Sezione 4: Diagrammi UML
+Sezione 4: Testing del codice
 
-Sezione 5: Analisi del codice
-Sezione 6: Testing del codice
-Sezione 7: Appendice
+Sezione 5: Appendice - Manuale di utilizzo
 
-2. Requisiti Funzionali
+2. Requisiti 
+2.1 Specifiche tecniche
+2.2 Requisiti funzionali
+2.3 Requisiti non funzionali
+   
 Sono stati identificati i seguenti requisiti funzionali per il software.
 1.	Visualizzazione delle classi:
 •	Il software deve consentire la visualizzazione delle classi presenti nella scuola, mostrando l'ID e il nome di ciascuna classe.
@@ -73,9 +74,9 @@ Sono stati identificati i seguenti requisiti funzionali per il software.
 •	Il software deve calcolare la media dei voti di ciascuno studente per ciascuna materia e visualizzarla.
 •	Il software deve calcolare la media dei voti di ciascuna materia e visualizzarla.
 •	Il software deve aggiornare automaticamente la media delle valutazioni di uno studente o di una materia quando vengono aggiunte, modificate o cancellate le valutazioni corrispondenti.
-3. Requisiti Non Funzionali
-I requisiti non funzionali identificati per il programma di gestione della scuola includono:
-1.	Usabilità: Il sistema deve essere intuitivo e facile da usare per gli utenti finali, tra cui insegnanti, studenti e amministrazione scolastica.
+2.3. Requisiti Non Funzionali
+I requisiti non funzionali identificati includono:
+1.	Usabilità: Il sistema deve essere intuitivo e facile da usare per gli utenti finali.
 
 2.	Affidabilità: Il sistema deve essere affidabile e garantire l'integrità dei dati. Deve essere in grado di gestire carichi di lavoro elevati senza compromettere le prestazioni.
 
@@ -86,15 +87,6 @@ I requisiti non funzionali identificati per il programma di gestione della scuol
 5.	Manutenibilità: Il sistema deve essere progettato in modo modulare e ben strutturato, facilitando la manutenzione, l'estensibilità e l'aggiornamento del software.
 
 6.	Documentazione: Il sistema deve essere corredato da una documentazione completa, chiara e dettagliata che descriva le funzionalità, l'utilizzo e la configurazione del sistema. Fare riferimento al manuale tecnico in appendice
-SEZIONE 4: Diagrammi
-4.1 DIAGRAMMA CASO D’USO
-
- 
-
-4.2 DIAGRAMMA DI CLASSE
- 
-4.3 DIAGRAMMA DI SEQUENZA
- 
 
 SEZIONE 5: Analisi del codice
 5.1 Scrittura del codice sorgente
