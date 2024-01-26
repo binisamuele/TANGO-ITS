@@ -2,21 +2,21 @@ DOCUMENTAZIONE TECNICA PROGETTO INDUSTRIALE "TANGO"
 
 1. Introduzione
 1.1 Scopo del Documento
-Questo è un documento di specifica dei requisiti per il software di gestione di Tango, un robot in grado di muoversi autonomamente, registrare dati dall’ambiente circostante e trasportare carichi.
+Questo è un documento di specifica dei requisiti per il software di gestione di Tango, un robot in grado di muoversi, registrare dati dall’ambiente circostante e trasportare carichi.
 Il controllo del robot da remoto è demandato a una app per smartphone sviluppata appositamente.
 Il  documento in oggetto descrive lo scopo, gli obiettivi e le finalità del nuovo software. Oltre a descrivere i requisiti non funzionali, il medesimo modella i requisiti funzionali, analizza il codice e fornisce anche un manuale d'uso.
 
 1.2 Background
 La richiesta di sviluppare questo nuovo software è riferita al progetto industriale che il corso 12.1 di ITS Genova deve portare a termine secondo curriculum.
-Dopo attenta analisi, sono state identificate tre problemi principali per cui trovare una soluzione:
+Dopo attenta analisi, sono stati identificati tre problemi principali per cui trovare una soluzione:
 
-•	Controllo del robot 
+•	Controllo del robot: per poter portare a termine i propri compiti, il robot necessita di un'unità di controllo opportunamente programmata; deve essere altresì in grado di fermarsi in caso di emergenza.
 
-•	Registrazione dei dati dall'ambiente circostante
+•	Registrazione dei dati dall'ambiente circostante: attraverso i sensori montati a bordo macchina, il robot deve essere in grado di registrare dati dallambiente circostante e mostrarsi su schermo LCD e/o su monitor seriale
 
-•	Movimento del robot 
+•	Movimento del robot: il robot deve essere in grado di muoversi, controllato da remoto, in ogni direzione senza limiti
 
-Il nuovo programma di gestione scolastica è stato sviluppato per affrontare queste problematiche e fornire una soluzione integrata, efficiente e affidabile per la gestione di studenti, insegnanti e valutazioni.
+Il software è stato sviluppato per rispondere a queste domande e soddisfare le richieste.
 
 1.3 Stakeholder
 1.3.1 Utenti
