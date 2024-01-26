@@ -49,7 +49,7 @@ void measureDistance() {
   duration = measurePulseDuration();
   if (duration >= 0) {
     distanceCm = duration * speedOfSound / 2;
-    if (distanceCm < 20) {
+    if (distanceCm != 0 && distanceCm < 20) {
       Serial.print("emergenza");
       Serial.print(distanceCm);
     } else {
