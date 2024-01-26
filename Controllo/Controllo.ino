@@ -1,4 +1,3 @@
-int emergencyControl = 0;
 String serialString = "";
 int movementInt;
 int dxForward = 2, dxBackward = 3, dxForwardEn = 9, dxBackwardEn = 10; // Motore DX
@@ -24,23 +23,16 @@ void setup() {
     pinMode(sxForwardEn, OUTPUT);
     pinMode(sxBackwardEn, OUTPUT);
 
-    attachInterrupt(7,emergencyStop,FALLING);
-    attachInterrupt(9,emergencyStop,FALLING);
+    attachInterrupt(0,emergencyStop,RISING);
+    attachInterrupt(1,emergencyStop,FALLING);
 }
 
 void loop() {
-    // emergencyControl = digitalRead(7);
-    // emergencyControl = digitalRead(9);
-    
-    // if (emergencyControl == 1) emergencyStop();             // Se c'è un'emergenza
 
     if (Serial1.available() > 0) {                          // Se il seriale dell'arduino di comunicazione legge qualcosa
 
         SerialMap = 1;
 
-        if (emergencyControl == 1) emergencyStop();         // Se c'è un'emergenza
-            
-        else {
             mapping();
 
             switch (movementInt) {
@@ -49,9 +41,11 @@ void loop() {
                         emergencyStop();
                         break;
                     }
+                    if (speed == maxSpeed) break;
+
+                    speed = speed + speedGain;
                     driveMotor(dxForward);
                     driveMotor(sxForward);
-                    speed = speed + speedGain;
                     break;
 
                 case 2:
@@ -59,19 +53,21 @@ void loop() {
                         emergencyStop();
                         break;
                     }
+                    if (speed == minSpeed) break;
+
+                    speed = speed - speedGain;
                     reverseMotor(dxBackward);
                     reverseMotor(sxBackward);
-                    speed = speed - speedGain;
                     break;
 
-                case 3:
-                    driveMotor("dx")
-                    halfMotor("sx")
+                case 3:                         // curvare destra
+                    halfMotor(sxForward);
+                    driveMotor(dxForward);
                     break;
-
-                case 4:
-                    halfMotor("dx")
-                    driveMotor("sx");
+                        
+                case 4:                         // curvare sinistra                    
+                    halfMotor(dxForward);
+                    driveMotor(sxForward);
                     break;
 
                 case 5:                         // rotazione in senso orario
@@ -85,24 +81,25 @@ void loop() {
                     break;
 
                 case 7:
-                    emergencyStop();
+                    decelerate();
                     break;
             }
-        }
     } else if (Serial2.available() > 0) {
 
         SerialMap = 2;
 
-        if (emergencyControl == 1) emergencyStop();         // Se c'è un'emergenza
+        mapping();
             
         // codice nel caso in cui il lidar legge qualcosa
 
-    } else {
-        decelerate();
+    } else if (Serial3.available() > 0) {
+        SerialMap = 3;
+
+        mapping();
     }
 }
 
-// mapping delle 
+// mapping dei messaggi
 void mapping() {
     if(SerialMap == 1)serialString = Serial1.readStringUntil('\r\n');
     else if(SerialMap == 2)serialString = Serial2.readStringUntil('\r\n');
@@ -113,6 +110,7 @@ void mapping() {
     String serialVal = serialString.substring(index+1, length);
 
     if (topic == "movimento") {
+
         if (serialVal == "forward") movementInt = 1;
         else if (serialVal == "backward") movementInt = 2;
         else if (serialVal == "left") movementInt = 3;
@@ -120,9 +118,12 @@ void mapping() {
         else if (serialVal == "rotateSX") movementInt = 5;
         else if (serialVal == "rotateDX") movementInt = 6;
         else if (serialVal == "stop") movementInt = 7;
-    } 
-    else if (topic == "emergenza");
-    else if (topic == "distanza");
+
+    } else if (topic == "emergenza"){
+
+        if(serialVal == 1) emergencyStop();    
+
+    }
 }
 
 // segnale di arresto del motore
@@ -142,11 +143,39 @@ void emergencyStop() {
 
 // Funzione per andare avanti
 void driveMotor(int motorForward) {
-    if (speed == maxSpeed) return;
-    
     if (speed == 0) digitalWrite(motorForward, HIGH);
 
-    int newSpeed = speed + speedGain;
+    if (motorForward == dxForward){
+        analogWrite(dxForwardEn, speed);
+        return;
+    }
+    if (motorForward == sxForward){
+        analogWrite(sxForwardEn, speed);
+        return;
+    }
+}
+
+// Funzione per andare indietro
+void reverseMotor(int motorBackward) {    
+    if (speed == 0) digitalWrite(motorBackward, HIGH);
+
+    int reverseSpeed = 0 - speed;
+
+    if (motorForward == dxBackward){
+        analogWrite(dxBackwardEn, reverseSpeed);
+        return;
+    }
+    if (motorForward == sxBackward){
+        analogWrite(sxBackwardEn, reverseSpeed);
+        return;
+    }
+}
+
+// Funzione per girare
+void halfMotor(int motorForward) {
+    int newSpeed = 0;
+
+    if (speed > 0) newSpeed = speed - speedGain;
 
     if (motorForward == dxForward){
         analogWrite(dxForwardEn, newSpeed);
@@ -158,56 +187,24 @@ void driveMotor(int motorForward) {
     }
 }
 
-// Funzione per andare indietro
-void reverseMotor(int motorBackward) {
-    if (speed == minSpeed) return;
-    
-    if (speed == 0) digitalWrite(motorBackward, HIGH);
-
-    int newSpeed = speed - speedGain;
-
-    if (motorForward == dxBackward){
-        analogWrite(dxBackwardEn, newSpeed);
-        return;
-    }
-    if (motorForward == sxBackward){
-        analogWrite(sxBackwardEn, newSpeed);
-        return;
-    }
-}
-
-// Funzione per girare
-void leftMotor(int enA, int a1, int a2, int enB, int b1, int b2) {
-    digitalWrite(a1, HIGH);
-    digitalWrite(a2, HIGH);
-    analogWrite(enA, 100);
-
-    digitalWrite(b1, HIGH);
-    digitalWrite(b2, HIGH);
-    analogWrite(enB, 50);
-}
-
-// Funzione superflua per girare
-void rightMotor(int enA, int a1, int a2, int enB, int b1, int b2) {
-    digitalWrite(a1, HIGH);
-    digitalWrite(a2, HIGH);
-    analogWrite(enA, 50);
-
-    digitalWrite(b1, HIGH);
-    digitalWrite(b2, HIGH);
-    analogWrite(enB, 100);
-}
-
 // Funzione per decelerare
 void decelerate(){
     if (speed > 0) {
         speed = speed - speedGain;
+        if (speed == 0){
+            emergencyStop();
+            return;
+        }
         driveMotor(dxForward);
         driveMotor(sxForward);
         return;
     }
     if (speed < 0) {
         speed = speed + speedGain;
+        if (speed == 0){
+            emergencyStop();
+            return;
+        }
         reverseMotor(dxBackward);
         reverseMotor(sxBackward);
         return;
