@@ -23,6 +23,7 @@ app.use(express.json());
 
 app.listen(port, () => {
     console.log(`Server listening on port: ${port}`);
+    console.log('---------------------------------');
 });
 
 app.use(function(req, res, next) {
@@ -37,7 +38,7 @@ app.post("/control", (req, res) => {
     try {
         const direction = req.body.direction;
         
-        console.log(`>>> Direction recieved: ${req.body.direction}`);
+        console.log(`>> Direction recieved: ${req.body.direction}`);
         
         /*
         Use this to view the request coming from the client
@@ -56,7 +57,7 @@ app.post("/control", (req, res) => {
 
 app.get("", (req, res) => {
     try {
-        console.log(`>>> GET request`);
+        console.log(`>> GET request`);
         res.send(`Server is running`);
     } catch (error) {
         console.error("Request error:", error);
