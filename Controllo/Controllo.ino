@@ -104,14 +104,15 @@ void loop() {
         case 7:
             decelerate();
             break;
+
+        default:
+            // nessun pulsante premuto
     }
 }
 
-
-
 void readSerial(){
-    if(Serial1.available())serial1String = Serial1.readStringUntil('\r\n');
-    if(Serial2.available())serial2String = Serial2.readStringUntil('\r\n');
+    if(Serial1.available()) serial1String = Serial1.readStringUntil('\r\n');
+    if(Serial2.available()) serial2String = Serial2.readStringUntil('\r\n');
     if(Serial3.available()) serial3String = Serial3.readStringUntil('\r\n');
 }
 
@@ -124,30 +125,66 @@ void mapping(String serialString) {
 
     if (topic == "movimento") {
 
-        if (serialVal == "forward") movementInt = 1;
-        else if (serialVal == "backward") movementInt = 2;
-        else if (serialVal == "left") movementInt = 3;
-        else if (serialVal == "right") movementInt = 4;
-        else if (serialVal == "rotateSX") movementInt = 5;
-        else if (serialVal == "rotateDX") movementInt = 6;
-        else if (serialVal == "stop") movementInt = 7;
+        if (serialVal == "forward"){
+            movementInt = 1;
+            return;
+        }
+        if (serialVal == "backward"){
+            movementInt = 2;
+            return;
+        }
+        if (serialVal == "right"){
+            movementInt = 3;
+            return;
+        }
+        if (serialVal == "left"){
+            movementInt = 4;
+            return;
+        }
+        if (serialVal == "rotateDX"){
+            movementInt = 5;
+            return;
+        }
+        if (serialVal == "rotateSX"){
+            movementInt = 6;
+            return;
+        }
+        if (serialVal == "stop"){
+            movementInt = 7;
+            return;
+        }
+        movementInt = 0;
+        return;
+    }
 
-    } else if (topic == "emergenza") {
-
-        emergencyStop();    
-
-    } else if (topic == "distanzaLidar") {
+    if (topic == "emergenza"){
+        emergencyStop();   
+        return;
+    }
+    
+    if (topic == "distanzaLidar"){
         lidarDistance = serialVal.toFloat();
-    } else if (topic == "potenzaSegnale") {
+        return;
+    }
+    if (topic == "potenzaSegnale"){
         signalStrength = serialVal.toFloat();
-    } else if (topic == "caricaBatteria") {
+        return;
+    }
+    if (topic == "caricaBatteria"){
         batteryCharge = serialVal.toFloat();
-    } else if (topic == "distanzaUltraSuoni") {
+        return;
+    }
+    if (topic == "distanzaUltraSuoni"){
         ultrasoundDistance = serialVal.toFloat();
-    } else if (topic == "temperatura") {
+        return;
+    }
+    if (topic == "temperatura"){
         temperature = serialVal.toFloat();
-    } else if (topic == "umidita") {
+        return;
+    }
+    if (topic == "umidita"){
         humidity = serialVal.toFloat();
+        return;
     }
 }
 
@@ -222,7 +259,7 @@ void decelerate(){
     }
 }
 
-    // Funzione per la comunicazione in seriale
+// Funzione per la comunicazione in seriale
 void serialCommunications(){
     Serial1.println("Distanza Lidar :" + String(lidarDistance));
     Serial1.println("Potenza Segnale :" + String(signalStrength));
