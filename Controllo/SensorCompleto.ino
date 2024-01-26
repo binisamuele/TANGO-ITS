@@ -46,7 +46,7 @@ void measureDistance() {
     Serial.print(distanceCm);
     Serial.println(" cm");
     if (distanceCm < 5) {
-      return alarm++;
+      serialString(emergenza,1);
     }
   } else {
     Serial.println("Errore nella misurazione della distanza");
@@ -104,10 +104,9 @@ void setup() {
 void loop() {
 
   
-  // Misurazione della distanza solo ogni 2 secondi
-  if (millis() % 2000 == 0) {
+
     measureDistance();
-  }
+  
 
   // funzioni da eseguire ogni 5 minuti
   if (millis() % 300000 == 0) {
