@@ -1,8 +1,10 @@
 package com.example.irobotapplication;
 
 import android.annotation.SuppressLint;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -14,8 +16,6 @@ import android.widget.Button;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -25,7 +25,7 @@ import org.json.JSONObject;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ControllerFragment extends Fragment {
 
@@ -42,80 +42,80 @@ public class ControllerFragment extends Fragment {
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         Button buttonForward = requireView().findViewById(R.id.btnForward);
         Button buttonBackwards = requireView().findViewById(R.id.btnBackwards);
         Button buttonRotSx = requireView().findViewById(R.id.btnRotSx);
         Button buttonRotDx = requireView().findViewById(R.id.btnRotDx);
 
-        buttonForward.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    //do something here when button is released
-                    postToServer("stop");
-                    return true;
-                } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    //do something here when button is first clicked
-                    postToServer("up");
-                    return true;
-                }
+        AtomicBoolean anyButtonPressed = new AtomicBoolean(false);
 
-                return false;
+        buttonForward.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP && !anyButtonPressed.get()) {
+                //do something here when button is released
+                anyButtonPressed.set(false);
+                postToServer("stop");
+                return true;
+            } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
+                //do something here when button is first clicked
+                anyButtonPressed.set(true);
+                postToServer("up");
+                return true;
             }
+
+            return false;
         });
 
-        buttonBackwards.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    //do something here when button is released
-                    postToServer("stop");
-                    return true;
-                } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    //do something here when button is first clicked
-                    postToServer("down");
-                    return true;
-                }
-
-                return false;
+        buttonBackwards.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP && !anyButtonPressed.get()) {
+                //do something here when button is released
+                anyButtonPressed.set(false);
+                postToServer("stop");
+                return true;
+            } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
+                //do something here when button is first clicked
+                anyButtonPressed.set(true);
+                postToServer("down");
+                return true;
             }
+
+            return false;
         });
 
-        buttonRotSx.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    //do something here when button is released
-                    postToServer("stop");
-                    return true;
-                } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    //do something here when button is first clicked
-                    postToServer("left");
-                    return true;
-                }
-
-                return false;
+        buttonRotSx.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP && !anyButtonPressed.get()) {
+                //do something here when button is released
+                anyButtonPressed.set(false);
+                postToServer("stop");
+                return true;
+            } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
+                //do something here when button is first clicked
+                anyButtonPressed.set(true);
+                postToServer("left");
+                return true;
             }
+
+            return false;
         });
 
-        buttonRotDx.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    //do something here when button is released
-                    postToServer("stop");
-                    return true;
-                } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    //do something here when button is first clicked
-                    postToServer("right");
-                    return true;
-                }
-
-                return false;
+        buttonRotDx.setOnTouchListener((v, event) -> {
+            if (event.getAction() == MotionEvent.ACTION_UP && !anyButtonPressed.get()) {
+                //do something here when button is released
+                anyButtonPressed.set(false);
+                postToServer("stop");
+                return true;
+            } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
+                //do something here when button is first clicked
+                anyButtonPressed.set(true);
+                postToServer("right");
+                return true;
             }
+
+            return false;
         });
     }
     private void postToServer(String direction) {
@@ -124,18 +124,10 @@ public class ControllerFragment extends Fragment {
         RequestQueue queue = Volley.newRequestQueue(requireActivity().getApplicationContext());  // make sure that this thing works
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, conn_string,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Log.d("HTTP-POST", "Response: " + response);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        // Handle errors here.
-                        Log.e("HTTP-POST", "Error: " + error.toString());
-                    }
+                response -> Log.d("HTTP-POST", "Response: " + response),
+                error -> {
+                    // Handle errors here.
+                    Log.e("HTTP-POST", "Error: " + error.toString());
                 })
         {
             @Override
