@@ -103,17 +103,12 @@ void setup() {
 
 void loop() {
 
-  
-  // Misurazione della distanza solo ogni 2 secondi
-  if (millis() % 2000 == 0) {
-    measureDistance();
-  }
+  measureDistance();
 
   // funzioni da eseguire ogni 5 minuti
   if (millis() % 300000 == 0) {
     measureTemperatureAndHumidity();
     updateLCD();
-
     measureVoltmeters();
   }
 }
