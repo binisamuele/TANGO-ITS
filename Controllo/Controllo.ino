@@ -3,7 +3,7 @@ int movementInt;
 int dxForward = 2, dxBackward = 3, dxForwardEn = 9, dxBackwardEn = 10; // Motore DX
 int sxForward = 4, sxBackward = 5, sxForwardEn = 11, sxBackwardEn = 12;  // Motore SX
 int speed = 0;  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
-int speedGain = 25;
+int speedGain = 10;
 const int maxSpeed = 150;
 const int minSpeed = -100;
 int SerialMap;
@@ -53,54 +53,57 @@ void loop() {
     }
 
     switch (movementInt) {
-    case 1:
-        if (speed < 0){
-            emergencyStop();
+        // andare avanti
+        case 1:
+            if (speed == maxSpeed) break;                       // se la velocità è al massimo, non fare niente
+
+            speed = speed + speedGain;
+
+            if (speed < 10) {                                   // se la velocità era negativa, rallentiamo i motori
+                reverseMotor(dxBackward, sxBackward, speed);
+                break;
+            }
+
+            driveMotor(dxForward, sxForward, speed);
+            break;
+        // andare indietro
+        case 2:
+            if (speed == minSpeed) break;                       // se la velocità è al minimo, non fare niente
+
+            speed = speed - speedGain;
+
+            if (speed > -10) {                                   // se la velocità era positiva, rallentiamo i motori
+                driveMotor(dxForward, sxForward, speed);
+                break;
+            }
+
+            reverseMotor(dxBackward, sxBackward, speed);
+            break;
+        // curvare destra
+        case 3:
+            halfMotor(sxForward);
+            driveMotor(dxForward);
+            break;
+        // curvare sinistra
+        case 4:   
+            halfMotor(dxForward);
+            driveMotor(sxForward);
+            break;
+        // rotazione in senso orario
+        case 5:
+            reverseMotor(dxBackward);
+            driveMotor(sxForward);
+            break;
+        // rotazione in senso antiorario
+        case 6:
+            driveMotor(dxForward);
+            reverseMotor(sxBackward);
+            break;
+
+        case 7:
+            decelerate();
             break;
         }
-        if (speed == maxSpeed) break;
-
-        speed = speed + speedGain;
-        driveMotor(dxForwardEn);
-        driveMotor(sxForwardEn);
-        break;
-
-    case 2:
-        if (speed > 0){
-            emergencyStop();
-            break;
-        }
-        if (speed == minSpeed) break;
-
-        speed = speed - speedGain;
-        reverseMotor(dxBackwardEn);
-        reverseMotor(sxBackwardEn);
-        break;
-
-    case 3:                         // curvare destra
-        halfMotor(sxForwardEn);
-        driveMotor(dxForwardEn);
-        break;
-            
-    case 4:                         // curvare sinistra                    
-        halfMotor(dxForwardEn);
-        driveMotor(sxForwardEn);
-        break;
-
-    case 5:                         // rotazione in senso orario
-        reverseMotor(dxBackwardEn);
-        driveMotor(sxForwardEn);
-        break;
-
-    case 6:                         // rotazione in senso antiorario
-        driveMotor(dxForwardEn);
-        reverseMotor(sxBackwardEn);
-        break;
-
-    case 7:
-        decelerate();
-        break;
-}
 }
 
 // mapping dei messaggi
@@ -132,47 +135,32 @@ void mapping() {
 
 // segnale di arresto del motore
 void emergencyStop() {
-    digitalWrite(dxForward, LOW);
-    digitalWrite(dxBackward, LOW);
-    analogWrite(dxForwardEn, 0);
-    analogWrite(dxBackwardEn, 0);
+    digitalWrite(dxForwardEn, LOW);
+    digitalWrite(dxBackwardEn, LOW);
+    analogWrite(dxForward, 0);
+    analogWrite(dxBackward, 0);
 
-    digitalWrite(sxForward, LOW);
-    digitalWrite(sxBackward, LOW);
-    analogWrite(sxForwardEn, 0);
-    analogWrite(sxBackwardEn, 0);
+    digitalWrite(sxForwardEn, LOW);
+    digitalWrite(sxBackwardEn, LOW);
+    analogWrite(sxForward, 0);
+    analogWrite(sxBackward, 0);
 
     delay(1000);
 }
 
 // Funzione per andare avanti
-void driveMotor(int motorForward) {
-    if (speed == 0) digitalWrite(motorForward, HIGH);
+void driveMotor(int motor1, int motor2, int spd) {
+    analogWrite(motor1, spd);
+    analogWrite(motor2, spd);
 
-    if (motorForward == dxForward){
-        analogWrite(dxForwardEn, speed);
-        return;
-    }
-    if (motorForward == sxForward){
-        analogWrite(sxForwardEn, speed);
-        return;
-    }
+    delay(50);
 }
 
 // Funzione per andare indietro
-void reverseMotor(int motorBackward) {    
-    if (speed == 0) digitalWrite(motorBackward, HIGH);
+void reverseMotor(int motor1, int motor2, int spd) {    
+    int reverseSpeed = -spd;
 
-    int reverseSpeed = 0 - speed;
-
-    if (motorForward == dxBackward){
-        analogWrite(dxBackwardEn, reverseSpeed);
-        return;
-    }
-    if (motorForward == sxBackward){
-        analogWrite(sxBackwardEn, reverseSpeed);
-        return;
-    }
+    driveMotor(motor1, motor2, reverseSpeed);
 }
 
 // Funzione per girare
