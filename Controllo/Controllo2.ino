@@ -3,9 +3,11 @@
 #define DX_BACK_SPEED 8
 #define DX_BACK_ENABLE 2
 
+int maxSpeed = 150;
+int speed = 0;
+
 void setup()
 {
-    Serial.begin(9600);
     pinMode(DX_FRONT_SPEED, OUTPUT);
     pinMode(DX_FRONT_ENABLE, OUTPUT);
     pinMode(DX_BACK_SPEED, OUTPUT);
@@ -15,22 +17,29 @@ void setup()
 }
 
 void loop() {
-    
+    checkMove();
 }
 
-void checkMove(int speed) {
-    if (analogRead(11) == HIGH) {
-        moveForward(speed);
-    } else {
+void checkVelocity() {
+    if (speed < maxSpeed) {
+        speed += 10;
+        delay(20);
+    }
+}
+
+void checkMove() {
+    if (digitalRead(11) == HIGH) {
+        moveForward();
+    } else if (digitalRead(12) == HIGH) {
         brake();
     }
-    
 }
 
-void moveForward(int speed) {
-
+void moveForward() {
+    checkVelocity();
+    analogWrite(DX_FRONT_SPEED, speed);
 }
 
 void brake() {
-
+    speed = 0;
 }
