@@ -1,6 +1,7 @@
 package com.example.irobotapplication;
 
 import android.annotation.SuppressLint;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -43,6 +44,8 @@ public class ControllerFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         Button buttonForward = requireView().findViewById(R.id.btnForward);
         Button buttonBackwards = requireView().findViewById(R.id.btnBackwards);
