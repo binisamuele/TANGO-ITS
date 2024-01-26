@@ -30,58 +30,75 @@ void setup() {
 
 void loop() {
 
-            mapping();
+        mapping();
+    }
 
-            switch (movementInt) {
-                case 1:
-                    if (speed < 0){
-                        emergencyStop();
-                        break;
-                    }
-                    if (speed == maxSpeed) break;
+    if (Serial2.available() > 0) {
 
-                    speed = speed + speedGain;
-                    driveMotor(dxForward);
-                    driveMotor(sxForward);
-                    break;
+        SerialMap = 2;
 
-                case 2:
-                    if (speed > 0){
-                        emergencyStop();
-                        break;
-                    }
-                    if (speed == minSpeed) break;
+        mapping();
+            
+        // codice nel caso in cui il lidar legge qualcosa
+    }
 
-                    speed = speed - speedGain;
-                    reverseMotor(dxBackward);
-                    reverseMotor(sxBackward);
-                    break;
+    if (Serial3.available() > 0) {
 
-                case 3:                         // curvare destra
-                    halfMotor(sxForward);
-                    driveMotor(dxForward);
-                    break;
-                        
-                case 4:                         // curvare sinistra                    
-                    halfMotor(dxForward);
-                    driveMotor(sxForward);
-                    break;
+        SerialMap = 3;
 
-                case 5:                         // rotazione in senso orario
-                    reverseMotor(dxBackward);
-                    driveMotor(sxForward);
-                    break;
+        mapping();
+    }
 
-                case 6:                         // rotazione in senso antiorario
-                    driveMotor(dxForward);
-                    reverseMotor(sxBackward);
-                    break;
+    switch (movementInt) {
+    case 1:
+        if (speed < 0){
+            emergencyStop();
+            break;
+        }
+        if (speed == maxSpeed) break;
 
-                case 7:
-                    decelerate();
-                    break;
-            }
-    } 
+        speed = speed + speedGain;
+        driveMotor(dxForwardEn);
+        driveMotor(sxForwardEn);
+        break;
+
+    case 2:
+        if (speed > 0){
+            emergencyStop();
+            break;
+        }
+        if (speed == minSpeed) break;
+
+        speed = speed - speedGain;
+        reverseMotor(dxBackwardEn);
+        reverseMotor(sxBackwardEn);
+        break;
+
+    case 3:                         // curvare destra
+        halfMotor(sxForwardEn);
+        driveMotor(dxForwardEn);
+        break;
+            
+    case 4:                         // curvare sinistra                    
+        halfMotor(dxForwardEn);
+        driveMotor(sxForwardEn);
+        break;
+
+    case 5:                         // rotazione in senso orario
+        reverseMotor(dxBackwardEn);
+        driveMotor(sxForwardEn);
+        break;
+
+    case 6:                         // rotazione in senso antiorario
+        driveMotor(dxForwardEn);
+        reverseMotor(sxBackwardEn);
+        break;
+
+    case 7:
+        decelerate();
+        break;
+}
+}
 
 // mapping dei messaggi
 void mapping() {
