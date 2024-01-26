@@ -96,6 +96,7 @@ void loop() {
 
         default:
             // nessun pulsante premuto
+            // controllo se la macchina stava curvando
     }
 }
 
