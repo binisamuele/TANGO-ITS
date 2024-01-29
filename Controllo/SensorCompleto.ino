@@ -128,7 +128,7 @@ void loop() {
   // funzioni da eseguire ogni 5 minuti
   if (millis() % fiveMinutes == 0) {
     measureTemperatureAndHumidity();
-    updateLCD();
+    //updateLCD();
     measureVoltmeters();
   }
   if(millis() % tenMinutes == 0) {
