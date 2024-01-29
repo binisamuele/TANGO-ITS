@@ -16,7 +16,7 @@
 
         <androidx.appcompat.widget.Toolbar
             android:layout_width="match_parent"
-            app:title="Irobot"
+            app:title="Tango"
             app:titleTextColor="@android:color/white"
             android:background="@color/dark"
             android:elevation="3dp"

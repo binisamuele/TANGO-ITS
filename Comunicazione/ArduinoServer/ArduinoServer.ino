@@ -10,9 +10,9 @@ int currIPNode = 4;
 int arduinoPort = 80;
 
 // Network Settings
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED }; // MAC address
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };  // MAC address
 IPAddress ip(192, 168, 0, 2); // IP address
-IPAddress nodeServer(192, 168, 0, currIPNode); // IP address of the server you want to connect to
+IPAddress nodeServer(192, 168, 0, currIPNode);  // IP address of the server you want to connect to
 
 EthernetClient client;
 EthernetServer server(80);
@@ -20,58 +20,56 @@ EthernetServer server(80);
 void setup() {
   Serial.begin(9600);
   
-  // Start the Ethernet connection
+  // -- Start the Ethernet connection --
   Ethernet.begin(mac);
   Ethernet.setLocalIP(ip);
 
-  // Testing connectivity
-  Serial.println(">> Testing connectivity (using Node server connection on port 3000)");
+  // -- Testing connectivity --
+  //DEBUG: Serial.println(">> Testing connectivity (using Node server connection on port 3000)");
   
   if (Ethernet.linkStatus() == LinkOFF){
     Serial.println("Ethernet cable is not connected!");
   }
 
-  //HTTP GET request to test connectivity (using retrys)
+  // -- HTTP GET request to test connectivity (using retries) --
   for (int retryCount = 0; retryCount < 3; retryCount++){
     if (client.connect(nodeServer, 3000)) {
-      Serial.println("Connected to server");
-      
-      // Make an HTTP request
+      //DEBUG: Serial.println("Connected to server");
+
       client.println("GET /");
       String connectionString = String("Host: 192.168.0." + String(currIPNode));
-      client.println(connectionString); // Replace with the actual IP address or domain of Node server
+      client.println(connectionString);   // Replace with the actual IP address or domain of Node server
       client.println("Connection: keep-alive");
       client.println();
       break;
     } else{
       if (retryCount == 2){
-        Serial.println("Connection failed!");
+        //DEBUG: Serial.println("Connection failed!");
       } else{
-        Serial.println("Connection failed. Retrying...");
+        //DEBUG: Serial.println("Connection failed. Retrying...");
         delay(3000);
       }
     }
   }
   client.stop();
 
-  // Arduino As A Server AAAS ;)
+  // -- Arduino As A Server AAAS ;) -- 
   server.begin();
 
   if (server){
-    Serial.print(">> Server is listening at ");
-    Serial.println(Ethernet.localIP());
+    //DEBUG: Serial.print(">> Server is listening at ");
+    //DEBUG: Serial.println(Ethernet.localIP());
   } else {
-    Serial.println(">> Server failed to start. Restart Arduino!");
+    //DEBUG: Serial.println(">> Server failed to start. Restart Arduino!");
   }
 }
-
-
 
 void loop() {
   //do all the server functions only if the server is on
   //otherwise do nothing 
-  if (server){  //TODO: test this
+  if (server){   //TODO: test this
     EthernetClient client = server.available();
+    // -- If there's a POST request forward it to the other Arduino -- 
     if (client) {
       while (client.connected()) {
         if (client.available()) {
@@ -83,7 +81,7 @@ void loop() {
             client.println();
             client.println("{\"response\":\"ok\"}");
             String body = client.readString();
-            Serial.println(body);
+            Serial1.println(body);
             break;
           }
         }

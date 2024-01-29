@@ -7,7 +7,7 @@ Il controllo del robot da remoto è demandato a una app per smartphone sviluppat
 Il  documento in oggetto descrive lo scopo, gli obiettivi e le finalità del nuovo software. Oltre a descrivere i requisiti non funzionali, il medesimo modella i requisiti funzionali, analizza il codice e fornisce anche un manuale d'uso.
 
 1.2 Background
-La richiesta di sviluppare questo nuovo software è riferita al progetto industriale che il corso 12.1 di ITS Genova deve portare a termine secondo curriculum.
+La richiesta di sviluppare questo nuovo software è riferita al progetto industriale che il corso 12.1 di ITS Accademia Digitale Liguria deve portare a termine secondo curriculum.
 Dopo attenta analisi, sono stati identificati tre problemi principali per cui trovare una soluzione:
 
 •	Controllo del robot: per poter portare a termine i propri compiti, il robot necessita di un'unità di controllo opportunamente programmata
@@ -42,8 +42,8 @@ Sezione 5: Appendice - Manuale di utilizzo
 2.3 Requisiti non funzionali
    
 Sono stati identificati i seguenti requisiti funzionali per il software.
-1.	Visualizzazione delle classi:
-•	Il software deve consentire la visualizzazione delle classi presenti nella scuola, mostrando l'ID e il nome di ciascuna classe.
+1.	Gestione delle funzioni:
+•	Il software deve consentire la gestione delle funzioni per  delle classi presenti nella scuola, mostrando l'ID e il nome di ciascuna classe.
 
 2.	Gestione delle classi:
 •	Il software deve consentire l'aggiunta di nuove classi, richiedendo l'inserimento di un ID univoco e del nome della classe.
