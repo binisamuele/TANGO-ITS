@@ -42,8 +42,8 @@ Sezione 5: Appendice - Manuale di utilizzo
 2.3 Requisiti non funzionali
    
 Sono stati identificati i seguenti requisiti funzionali per il software.
-1.	Visualizzazione delle classi:
-•	Il software deve consentire la visualizzazione delle classi presenti nella scuola, mostrando l'ID e il nome di ciascuna classe.
+1.	Gestione delle funzioni:
+•	Il software deve consentire la gestione delle funzioni per  delle classi presenti nella scuola, mostrando l'ID e il nome di ciascuna classe.
 
 2.	Gestione delle classi:
 •	Il software deve consentire l'aggiunta di nuove classi, richiedendo l'inserimento di un ID univoco e del nome della classe.
