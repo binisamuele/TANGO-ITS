@@ -7,7 +7,7 @@ Il controllo del robot da remoto è demandato a una app per smartphone sviluppat
 Il  documento in oggetto descrive lo scopo, gli obiettivi e le finalità del nuovo software. Oltre a descrivere i requisiti non funzionali, il medesimo modella i requisiti funzionali, analizza il codice e fornisce anche un manuale d'uso.
 
 1.2 Background
-La richiesta di sviluppare questo nuovo software è riferita al progetto industriale che il corso 12.1 di ITS Genova deve portare a termine secondo curriculum.
+La richiesta di sviluppare questo nuovo software è riferita al progetto industriale che il corso 12.1 di ITS Accademia Digitale Liguria deve portare a termine secondo curriculum.
 Dopo attenta analisi, sono stati identificati tre problemi principali per cui trovare una soluzione:
 
 •	Controllo del robot: per poter portare a termine i propri compiti, il robot necessita di un'unità di controllo opportunamente programmata
