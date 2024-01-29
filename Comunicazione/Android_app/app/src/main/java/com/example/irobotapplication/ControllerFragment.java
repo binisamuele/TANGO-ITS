@@ -45,7 +45,7 @@ public class ControllerFragment extends Fragment {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onViewCreated(view, savedInstanceState);
 
         requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
@@ -142,13 +142,13 @@ public class ControllerFragment extends Fragment {
 
     private void postToServer(String direction) {
 
-        RequestQueue queue = Volley.newRequestQueue(requireActivity().getApplicationContext());  // make sure that this thing works
+        RequestQueue queue = Volley.newRequestQueue(requireContext());  // make sure that this thing works
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, getString(R.string.conn_string) + "/control",
                 response -> Log.d("HTTP-POST", "Response: " + response),
                 error -> {
                     // Handle errors here.
-                    Toast.makeText(requireActivity().getApplicationContext(), "Connection Error", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(requireActivity().getApplicationContext(), "Connection Error", Toast.LENGTH_LONG).show();
                     Log.e("HTTP-POST", "Error: " + error.toString());
                 })
         {

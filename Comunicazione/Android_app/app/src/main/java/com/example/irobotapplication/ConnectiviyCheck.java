@@ -44,14 +44,15 @@ public class ConnectiviyCheck {
             int responseCode = connection.getResponseCode();
 
             if (responseCode != HttpURLConnection.HTTP_OK) {
-                Log.e("ConnectivityCheck", "Connection failed");
+                Log.e("ConnectivityCheck", "Connection failed. Response code: " + responseCode);
             } else {
                 Log.i("ConnectivityCheck", "Connection successful");
             }
 
             connection.disconnect();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            Log.e("ConnectivityCheck", "Error during network request");
         }
     }
+
 }
