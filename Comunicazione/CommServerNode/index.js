@@ -15,10 +15,16 @@ const arduinoHost = '192.168.0.2';
 const arduinoPort = '80'; 
 
 //Vars
-let lastDirection = null;
 var app = express();
 
+let lastDirection = null;
 
+let comExtableshed = false;
+let isStillAlive = false;
+let firstFail = true;
+
+
+// Start server
 app.use(express.json());
 
 app.listen(port, () => {
@@ -46,7 +52,21 @@ app.post("/control", (req, res) => {
         console.log('Headers:', req.headers);
         console.log('Body:', req.body);
         */
-       
+        
+        // you recieved a direction from the client. 
+        // now node server expect to recieve a periodical
+        // request from the client to keep the connection alive
+
+        if (!comExtableshed){
+            console.log(">> Controller communication started!");
+        }
+        comExtableshed = true;
+
+        if(req.body.direction === "commStop"){
+            console.log(">> Controller communication has been stopped!");
+            comExtableshed = false;
+        }
+
         forwardToArduino(direction);
 
         res.send('OK');
@@ -56,10 +76,12 @@ app.post("/control", (req, res) => {
     }
 });
 
-app.get("", (req, res) => {
+app.get("/connection-check", (req, res) => {    //change to post
     try {
         console.log(`>> GET request`);
         res.send(`Server is running`);
+
+        isStillAlive = true;
     } catch (error) {
         console.error("Request error:", error);
         res.status(500).json({ error: 'Server Error (500)' });
@@ -108,7 +130,25 @@ forwardToArduino = (direction) => {
 };
 
 isValidDirection = (direction) => {
-    const validDirections = ['up', 'down', 'left', 'right', "btnReleased"];
+    const validDirections = ['up', 'down', 'left', 'right', "released", "emergencyStop"];
     return validDirections.includes(direction);
 };
 
+ì
+setInterval(() => {
+    if (isStillAlive){
+        isStillAlive = false;  //connection check passed! 
+    } else if (comExtableshed){
+        //give client a second chance
+        if (firstFail){
+            firstFail = false;
+            console.log("E: First fail. Trying again in 3 seconds...");
+        } else {
+            console.log("Second fail. Stopping communication...");
+            comExtableshed = false;
+            firstFail = true;
+            //send emergency stop to arduino
+            forwardToArduino("emergencyStop");
+        }
+    } 
+}, 3000);

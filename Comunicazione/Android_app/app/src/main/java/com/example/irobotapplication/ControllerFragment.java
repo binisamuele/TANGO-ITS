@@ -5,7 +5,6 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.Fragment;
 
@@ -14,7 +13,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -32,8 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ControllerFragment extends Fragment {
 
-    String conn_string = "http://192.168.0.4:3000/control";
-
+    private ConnectiviyCheck check;
     public ControllerFragment() {
         // Required empty public constructor
     }
@@ -57,19 +54,24 @@ public class ControllerFragment extends Fragment {
         AppCompatImageButton buttonRotSx = requireView().findViewById(R.id.btnRotSX);
         AppCompatImageButton buttonRotDx = requireView().findViewById(R.id.btnRotDX);
 
+        check = new ConnectiviyCheck(requireActivity().getApplicationContext());
+        check.startPeriodicRequests();
+
         //using this boolean to prevent multiple buttons from being pressed at the same time
         AtomicBoolean anyButtonPressed = new AtomicBoolean(false);
 
         buttonForward.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP && !anyButtonPressed.get()) {
+            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get()) {
                 // when button is released
                 anyButtonPressed.set(false);
                 postToServer("btnReleased");
+                buttonForward.setImageResource(R.drawable.vettoreup_bianco__removebg_preview);
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
                 postToServer("up");
+                buttonForward.setImageResource((R.drawable.vettoreup_rosso__removebg_preview));
                 return true;
             }
 
@@ -77,15 +79,17 @@ public class ControllerFragment extends Fragment {
         });
 
         buttonBackwards.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP && !anyButtonPressed.get()) {
+            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get()) {
                 // when button is released
                 anyButtonPressed.set(false);
                 postToServer("btnReleased");
+                buttonBackwards.setImageResource(R.drawable.vettoredown_bianco__removebg_preview);
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
                 postToServer("down");
+                buttonBackwards.setImageResource((R.drawable.vettoredown_rosso__removebg_preview));
                 return true;
             }
 
@@ -93,15 +97,17 @@ public class ControllerFragment extends Fragment {
         });
 
         buttonRotSx.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP && !anyButtonPressed.get()) {
+            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get()) {
                 // when button is released
                 anyButtonPressed.set(false);
                 postToServer("btnReleased");
+                buttonRotSx.setImageResource(R.drawable.rotsx_bianco_2);
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
                 postToServer("left");
+                buttonRotSx.setImageResource(R.drawable.rotsx_rosso__removebg_preview);
                 return true;
             }
 
@@ -109,26 +115,36 @@ public class ControllerFragment extends Fragment {
         });
 
         buttonRotDx.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP && !anyButtonPressed.get()) {
+            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get()) {
                 // when button is released
                 anyButtonPressed.set(false);
                 postToServer("btnReleased");
+                buttonRotDx.setImageResource(R.drawable.rotdx_bianco);
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
                 postToServer("right");
+                buttonRotDx.setImageResource(R.drawable.rotdx_rosso__removebg_preview);
                 return true;
             }
 
             return false;
         });
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        check.stopPeriodicRequests();
+        postToServer("commStop");
+    }
+
     private void postToServer(String direction) {
 
         RequestQueue queue = Volley.newRequestQueue(requireActivity().getApplicationContext());  // make sure that this thing works
 
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, conn_string,
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, getString(R.string.conn_string) + "/control",
                 response -> Log.d("HTTP-POST", "Response: " + response),
                 error -> {
                     // Handle errors here.

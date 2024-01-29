@@ -2,6 +2,6 @@
     <string name="app_name">IRobotApplication</string>
     <string name="open">open</string>
     <string name="close">close</string>
-    <!-- TODO: Remove or change this placeholder text -->
+    <string name="conn_string">http://192.168.0.4:3000/</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
