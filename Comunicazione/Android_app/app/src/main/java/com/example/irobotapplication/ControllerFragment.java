@@ -15,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -139,6 +140,7 @@ public class ControllerFragment extends Fragment {
                 response -> Log.d("HTTP-POST", "Response: " + response),
                 error -> {
                     // Handle errors here.
+                    Toast.makeText(requireActivity().getApplicationContext(), "Connection Error", Toast.LENGTH_LONG).show();
                     Log.e("HTTP-POST", "Error: " + error.toString());
                 })
         {
