@@ -1,10 +1,8 @@
 #include <Wire.h>
-#include <DHT.h>
+#include <DHT11.h>
 #include <LiquidCrystal.h>
-#define DHTTYPE DHT22
-
-//array di support per invio stringhe al seriale
-char buffer[40];
+#include <math.h>
+#define DHTTYPE DHT11
 
 //configurazione pin
 const int trigPin = 9;
@@ -20,12 +18,11 @@ const float speedOfSound = 0.034;  // cm/microsecondo
 const int fiveMinutes = 300000;
 const int tenMinutes = 600000;
 
-
+// pin per sensore DHT
 const int DHTPIN = 3;
 DHT dht(DHTPIN, DHTTYPE);
+
 LiquidCrystal lcd(12, 11, 6, 5, 8, 7);
-
-
 
 //funzioni per sensore a ultrasuoni
 void triggerUltrasonicSensor() {
@@ -40,15 +37,13 @@ long measurePulseDuration() {
   return pulseIn(echoPin, HIGH);
 }
 
-void measureDistance() {
+int  measureDistance() {
 
   int distanceCm;
-  long duration;
 
   triggerUltrasonicSensor();
-  duration = measurePulseDuration();
-  if (duration >= 0) {
-    distanceCm = duration * speedOfSound / 2;
+  if (measurePulseDuration() >= 0) {
+    distanceCm = measurePulseDuration() * speedOfSound / 2;
     if (distanceCm != 0 && distanceCm < 20) {
       Serial.print("emergenza");
       Serial.print(distanceCm);
@@ -65,25 +60,32 @@ void measureDistance() {
   
 }
 
-void updateLCD() {
-  lcd.setCursor(0, 1);
-  lcd.print("distanzaUltraSuoni:");
-  lcd.print(distanceCm);
-  lcd.print("cm T:");
-  lcd.print(temp, 1);
-  lcd.print(" C H:");
-  lcd.print(hum, 1);
-  lcd.print("% ");
-}
-
+/*
 void measureTemperatureAndHumidity() {
-  hum = dht.readHumidity();
-  sprintf(buffer, "Humidity: %d %", hum);
-  Serial.println(buffer);
-
-  temp = dht.readTemperature();
+  float Temperature = dht.readTemperature();
   sprintf(buffer, "Temperature: %d C", temp);
   Serial.println(buffer);
+}
+*/
+
+//funzione gestione Temperatura
+float measureTemperature() {
+  return round(dht.readTemperature());
+}
+String printTemperature() {
+  char buffer[40];
+  sprintf(buffer, "Temperatura: %d °C", measureTemperature());
+  return buffer;
+}
+
+//funzione gestione Umidità
+float measureHumidity() {
+  return round(dht.readHumidity());
+}
+String printHumidity() {
+  char buffer[40];
+  sprintf(buffer, "Umidità: %d %", measureHumidity());
+  return buffer;
 }
 
 void measureVoltmeters() {
@@ -100,6 +102,17 @@ void measureVoltmeters() {
 
 }
 
+void updateLCD() {
+  lcd.setCursor(0, 1);
+  lcd.print("distanzaUltraSuoni:");
+  lcd.print(distanceCm);
+  lcd.print("cm Temperatura:");
+  lcd.print(measureTemperature(), 1);
+  lcd.print(" C Umidità:");
+  lcd.print(hum, 1);
+  lcd.print("% ");
+}
+
 void setup() {
   Serial.begin(9600);       // Inizializza la comunicazione seriale a 9600 bps
   dht.begin();              // Inizializza il sensore DHT
@@ -110,12 +123,17 @@ void setup() {
 
 void loop() {
 
-  measureDistance();
+  //measureDistance();
+  printHumidity();
+  printTemperature();
 
   // funzioni da eseguire ogni 5 minuti
   if (millis() % fiveMinutes == 0) {
     measureTemperatureAndHumidity();
     updateLCD();
     measureVoltmeters();
+  }
+  if(millis() % tenMinutes == 0) {
+
   }
 }
