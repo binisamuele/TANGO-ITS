@@ -5,7 +5,7 @@ int movementInt;
 int dxForward = 2, dxBackward = 3, dxForwardEn = 9, dxBackwardEn = 10; // Motore DX
 int sxForward = 4, sxBackward = 5, sxForwardEn = 11, sxBackwardEn = 12;  // Motore SX
 int speed = 0;  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
-int speedGain = 10;
+const int speedGain = 10;
 const int maxSpeed = 150;
 const int minSpeed = -100;
 float lidarDistance;
@@ -30,14 +30,16 @@ void setup() {
     pinMode(sxForwardEn, OUTPUT);
     pinMode(sxBackwardEn, OUTPUT);
 
-    attachInterrupt(0, emergencyStop, RISING); // Pin 2 per emergenza pulsanti
-    attachInterrupt(1, emergencyStop, FALLING); // Pin 3 per emergenza bumper
+    attachInterrupt(0, emergencyStop, FALLING); // Pin 2 per emergenza pulsanti
+    attachInterrupt(1, emergencyStop, RISING); // Pin 3 per emergenza bumper
     attachInterrupt(2, emergencyStop, RISING); // Pin 20 per emergenze arduino (hardware deve utilizzare un diodo)
 }
 
 void loop() {
 
-    // controllo della comunicazione seriale
+    // controllo della comunicazione seriale (anche gli altri arduino devono fare il controllo del seriale)
+    if (!Serial1 && !Serial2 && !Serial3) emergencyStop();
+    
     readSerial();
 
     mapping(serial1String);
@@ -73,12 +75,12 @@ void loop() {
 
             driveMotor(dxBackward, sxBackward, speed);
             break;
-        // curvare destra da fare
+        // curvare destra DA FARE
         case 3:
             halfMotor(sxForward);
             driveMotor(dxForward);
             break;
-        // curvare sinistra da fare
+        // curvare sinistra DA FARE
         case 4:   
             halfMotor(dxForward);
             driveMotor(sxForward);
@@ -100,12 +102,15 @@ void loop() {
             driveMotor(dxForward, sxBackward, 20);
             break;
 
+        // frenata
         case 7:
+            decelerate();
             decelerate();
             break;
 
         default:
-            // nessun pulsante premuto
+            decelerate();
+            break;
             // controllo se la macchina stava curvando
     }
 }
@@ -122,11 +127,6 @@ void mapping(String serialString) {
     int length = serialString.length();
     String topic = serialString.substring(0, index);
     String serialVal = serialString.substring(index+1, length);
-
-    if (topic == "emergenza"){
-        emergencyStop();   
-        return;
-    }
 
     if (topic == "movimento") {
 
@@ -162,6 +162,7 @@ void mapping(String serialString) {
         return;
     }
     
+    // trovare motivazione per queste variabili
     if (topic == "distanzaLidar"){
         lidarDistance = serialVal.toFloat();
         return;
@@ -188,7 +189,7 @@ void mapping(String serialString) {
     }
 }
 
-// segnale di arresto del motore
+// segnale di arresto del motore DA MODIFICARE
 void emergencyStop() {
     digitalWrite(dxForwardEn, LOW);
     digitalWrite(dxBackwardEn, LOW);
@@ -200,7 +201,17 @@ void emergencyStop() {
     analogWrite(sxForward, 0);
     analogWrite(sxBackward, 0);
 
+    reset();
+
     delay(1000);
+}
+
+// implementare stato di emergenza (con chiave?)
+
+// reset delle variabili
+void reset() {
+    speed = 0;
+    movementInt = 0;
 }
 
 // funzione di emergenza gestita
@@ -218,8 +229,10 @@ void driveMotor(int motor1, int motor2, int spd) {
     delay(50);
 }
 
+// controllo della velocità vicino a zero
 void speedControl(){
     if (speed < 10 && speed > -10) speed = 0;
+
     delay (1000);
 }
 
