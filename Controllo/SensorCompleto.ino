@@ -1,8 +1,7 @@
 #include <Wire.h>
 #include <DHT11.h>
 #include <LiquidCrystal.h>
-#include <math.h>
-#define DHTTYPE DHT11
+
 
 //configurazione pin
 const int trigPin = 9;
@@ -18,9 +17,11 @@ const float speedOfSound = 0.034;  // cm/microsecondo
 const int fiveMinutes = 300000;
 const int tenMinutes = 600000;
 
+
 // pin per sensore DHT
-const int DHTPIN = 3;
-DHT dht(DHTPIN, DHTTYPE);
+//const int DHTPIN = 3;
+//DHT dht(DHTPIN, DHTTYPE);
+DHT11 dht11(3);
 
 LiquidCrystal lcd(12, 11, 6, 5, 8, 7);
 
@@ -69,22 +70,22 @@ void measureTemperatureAndHumidity() {
 */
 
 //funzione gestione Temperatura
-float measureTemperature() {
-  return round(dht.readTemperature());
+int measureTemperature() {
+  return dht11.readTemperature();
 }
 String printTemperature() {
   char buffer[40];
-  sprintf(buffer, "Temperatura: %d °C", measureTemperature());
+  sprintf(buffer, "Temperatura: %d °C \n", measureTemperature());
   return buffer;
 }
 
 //funzione gestione Umidità
-float measureHumidity() {
-  return round(dht.readHumidity());
+int measureHumidity() {
+  return dht11.readHumidity();
 }
 String printHumidity() {
   char buffer[40];
-  sprintf(buffer, "Umidità: %d %", measureHumidity());
+  sprintf(buffer, "Umidità: %d %% \n", measureHumidity());
   return buffer;
 }
 
@@ -102,20 +103,18 @@ void measureVoltmeters() {
 
 }
 
+/* WIP da sistemare
 void updateLCD() {
   lcd.setCursor(0, 1);
   lcd.print("distanzaUltraSuoni:");
   lcd.print(distanceCm);
-  lcd.print("cm Temperatura:");
-  lcd.print(measureTemperature(), 1);
-  lcd.print(" C Umidità:");
-  lcd.print(hum, 1);
-  lcd.print("% ");
+  lcd.print(printTemperature());
+  lcd.print(printHumidity());
 }
+*/
 
 void setup() {
   Serial.begin(9600);       // Inizializza la comunicazione seriale a 9600 bps
-  dht.begin();              // Inizializza il sensore DHT
   lcd.begin(16, 2);         // Inizializza il display LCD
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
@@ -124,9 +123,8 @@ void setup() {
 void loop() {
 
   //measureDistance();
-  printHumidity();
-  printTemperature();
 
+  delay(2000);
   // funzioni da eseguire ogni 5 minuti
   if (millis() % fiveMinutes == 0) {
     measureTemperatureAndHumidity();
@@ -134,6 +132,7 @@ void loop() {
     measureVoltmeters();
   }
   if(millis() % tenMinutes == 0) {
-
+  Serial.print(printTemperature);
+  Serial.print(printHumidity());
   }
 }
