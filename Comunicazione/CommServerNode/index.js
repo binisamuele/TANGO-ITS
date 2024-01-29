@@ -76,7 +76,7 @@ app.post("/control", (req, res) => {
     }
 });
 
-app.get("/connection-check", (req, res) => {
+app.get("/connection-check", (req, res) => {    //change to post
     try {
         console.log(`>> GET request`);
         res.send(`Server is running`);
