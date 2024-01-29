@@ -41,18 +41,18 @@
 
             <ImageButton
                 android:id="@+id/btnDown"
-                android:contentDescription="down"
-                android:src="@drawable/vettoreup_bianco__removebg_preview"
                 android:layout_width="95dp"
                 android:layout_height="104dp"
                 android:layout_marginBottom="20dp"
                 android:background="#00FFFFFF"
-                android:rotation="180"
+                android:contentDescription="down"
+                android:rotation="0"
                 android:scaleType="fitCenter"
+                android:src="@drawable/vettoredown_bianco__removebg_preview"
                 app:layout_constraintBottom_toBottomOf="@+id/imageView2"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/bntUp"/>
+                app:layout_constraintTop_toBottomOf="@+id/bntUp" />
 
             <ImageButton
                 android:id="@+id/bntUp"

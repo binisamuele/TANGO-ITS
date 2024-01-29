@@ -60,15 +60,17 @@ public class ControllerFragment extends Fragment {
         AtomicBoolean anyButtonPressed = new AtomicBoolean(false);
 
         buttonForward.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP && !anyButtonPressed.get()) {
+            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get()) {
                 // when button is released
                 anyButtonPressed.set(false);
                 postToServer("btnReleased");
+                buttonForward.setImageResource(R.drawable.vettoreup_bianco__removebg_preview);
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
                 postToServer("up");
+                buttonForward.setImageResource((R.drawable.vettoreup_rosso__removebg_preview));
                 return true;
             }
 
@@ -76,15 +78,17 @@ public class ControllerFragment extends Fragment {
         });
 
         buttonBackwards.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP && !anyButtonPressed.get()) {
+            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get()) {
                 // when button is released
                 anyButtonPressed.set(false);
                 postToServer("btnReleased");
+                buttonBackwards.setImageResource(R.drawable.vettoredown_bianco__removebg_preview);
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
                 postToServer("down");
+                buttonBackwards.setImageResource((R.drawable.vettoredown_rosso__removebg_preview));
                 return true;
             }
 
@@ -92,15 +96,17 @@ public class ControllerFragment extends Fragment {
         });
 
         buttonRotSx.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP && !anyButtonPressed.get()) {
+            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get()) {
                 // when button is released
                 anyButtonPressed.set(false);
                 postToServer("btnReleased");
+                buttonRotSx.setImageResource(R.drawable.rotsx_bianco_2);
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
                 postToServer("left");
+                buttonRotSx.setImageResource(R.drawable.rotsx_rosso__removebg_preview);
                 return true;
             }
 
@@ -108,15 +114,17 @@ public class ControllerFragment extends Fragment {
         });
 
         buttonRotDx.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP && !anyButtonPressed.get()) {
+            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get()) {
                 // when button is released
                 anyButtonPressed.set(false);
                 postToServer("btnReleased");
+                buttonRotDx.setImageResource(R.drawable.rotdx_bianco);
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
                 postToServer("right");
+                buttonRotDx.setImageResource(R.drawable.rotdx_rosso__removebg_preview);
                 return true;
             }
 
