@@ -31,6 +31,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ControllerFragment extends Fragment {
 
+    String conn_string = "http://192.168.0.4:3000/control";
+
     public ControllerFragment() {
         // Required empty public constructor
     }
@@ -54,16 +56,17 @@ public class ControllerFragment extends Fragment {
         AppCompatImageButton buttonRotSx = requireView().findViewById(R.id.btnRotSX);
         AppCompatImageButton buttonRotDx = requireView().findViewById(R.id.btnRotDX);
 
+        //using this boolean to prevent multiple buttons from being pressed at the same time
         AtomicBoolean anyButtonPressed = new AtomicBoolean(false);
 
         buttonForward.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_UP && !anyButtonPressed.get()) {
-                //do something here when button is released
+                // when button is released
                 anyButtonPressed.set(false);
-                postToServer("stop");
+                postToServer("btnReleased");
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
-                //do something here when button is first clicked
+                // when button is pressed
                 anyButtonPressed.set(true);
                 postToServer("up");
                 return true;
@@ -74,12 +77,12 @@ public class ControllerFragment extends Fragment {
 
         buttonBackwards.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_UP && !anyButtonPressed.get()) {
-                //do something here when button is released
+                // when button is released
                 anyButtonPressed.set(false);
-                postToServer("stop");
+                postToServer("btnReleased");
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
-                //do something here when button is first clicked
+                // when button is pressed
                 anyButtonPressed.set(true);
                 postToServer("down");
                 return true;
@@ -90,12 +93,12 @@ public class ControllerFragment extends Fragment {
 
         buttonRotSx.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_UP && !anyButtonPressed.get()) {
-                //do something here when button is released
+                // when button is released
                 anyButtonPressed.set(false);
-                postToServer("stop");
+                postToServer("btnReleased");
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
-                //do something here when button is first clicked
+                // when button is pressed
                 anyButtonPressed.set(true);
                 postToServer("left");
                 return true;
@@ -106,12 +109,12 @@ public class ControllerFragment extends Fragment {
 
         buttonRotDx.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_UP && !anyButtonPressed.get()) {
-                //do something here when button is released
+                // when button is released
                 anyButtonPressed.set(false);
-                postToServer("stop");
+                postToServer("btnReleased");
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
-                //do something here when button is first clicked
+                // when button is pressed
                 anyButtonPressed.set(true);
                 postToServer("right");
                 return true;
@@ -121,7 +124,6 @@ public class ControllerFragment extends Fragment {
         });
     }
     private void postToServer(String direction) {
-        String conn_string = "http://192.168.0.4:3000/control";
 
         RequestQueue queue = Volley.newRequestQueue(requireActivity().getApplicationContext());  // make sure that this thing works
 
@@ -134,10 +136,10 @@ public class ControllerFragment extends Fragment {
         {
             @Override
             public byte[] getBody() {
-                // Define the POST parameters as JSON.
+                // define the POST parameters as JSON.
                 JSONObject jsonBody = new JSONObject();
                 try {
-                    jsonBody.put(direction, "up");
+                    jsonBody.put("direction", direction);
                 } catch (JSONException e) {
                     Log.e("JSON in POST", "JSON Error: " + e.getMessage());
                 }
@@ -145,7 +147,7 @@ public class ControllerFragment extends Fragment {
             }
             @Override
             public Map<String, String> getHeaders() {
-                // Set headers, including Content-Type.
+                // set headers, including Content-Type.
                 Map<String, String> headers = new HashMap<>();
                 headers.put("Content-Type", "application/json");
                 return headers;
