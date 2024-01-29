@@ -5,7 +5,7 @@ int movementInt;
 int dxForward = 2, dxBackward = 3, dxForwardEn = 9, dxBackwardEn = 10; // Motore DX
 int sxForward = 4, sxBackward = 5, sxForwardEn = 11, sxBackwardEn = 12;  // Motore SX
 int speed = 0;  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
-int speedGain = 10;
+const int speedGain = 10;
 const int maxSpeed = 150;
 const int minSpeed = -100;
 float lidarDistance;
@@ -75,12 +75,12 @@ void loop() {
 
             driveMotor(dxBackward, sxBackward, speed);
             break;
-        // curvare destra da fare
+        // curvare destra DA FARE
         case 3:
             halfMotor(sxForward);
             driveMotor(dxForward);
             break;
-        // curvare sinistra da fare
+        // curvare sinistra DA FARE
         case 4:   
             halfMotor(dxForward);
             driveMotor(sxForward);
@@ -104,7 +104,8 @@ void loop() {
 
         // frenata
         case 7:
-            // funzione per frenare
+            decelerate();
+            decelerate();
             break;
 
         default:
@@ -188,7 +189,7 @@ void mapping(String serialString) {
     }
 }
 
-// segnale di arresto del motore
+// segnale di arresto del motore DA MODIFICARE
 void emergencyStop() {
     digitalWrite(dxForwardEn, LOW);
     digitalWrite(dxBackwardEn, LOW);
@@ -204,6 +205,8 @@ void emergencyStop() {
 
     delay(1000);
 }
+
+// implementare stato di emergenza (con chiave?)
 
 // reset delle variabili
 void reset() {
