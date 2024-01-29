@@ -64,8 +64,6 @@ void setup() {
   }
 }
 
-
-
 void loop() {
   //do all the server functions only if the server is on
   //otherwise do nothing 
