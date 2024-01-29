@@ -1,8 +1,7 @@
 #include <Wire.h>
-// #include <DHT.h>
+#include <DHT11.h>
 #include <LiquidCrystal.h>
-// #define DHTTYPE DHT22
-#include <NewPing.h>
+#define DHTTYPE DHT22
 
 //array di support per invio stringhe al seriale
 char buffer[40];
@@ -27,7 +26,13 @@ const int fiveMinutes = 300000;
 const int tenMinutes = 600000;
 
 
-void measureDistance() {
+const int DHTPIN = 3;
+DHT dht(DHTPIN, DHTTYPE);
+LiquidCrystal lcd(12, 11, 6, 5, 8, 7);
+
+
+
+int  measureDistance() {
 
   long duration;
   int distance;
@@ -63,26 +68,33 @@ void measureDistance() {
   }
 }
 
-// void updateLCD() {
-//   lcd.setCursor(0, 1);
-//   lcd.print("distanzaUltraSuoni:");
-//   lcd.print(distanceCm);
-//   lcd.print("cm T:");
-//   lcd.print(temp, 1);
-//   lcd.print(" C H:");
-//   lcd.print(hum, 1);
-//   lcd.print("% ");
-// }
+/*
+void measureTemperatureAndHumidity() {
+  float Temperature = dht.readTemperature();
+  sprintf(buffer, "Temperature: %d C", temp);
+  Serial.println(buffer);
+}
+*/
 
-// void measureTemperatureAndHumidity() {
-//   hum = dht.readHumidity();
-//   sprintf(buffer, "Humidity: %d %", hum);
-//   Serial.println(buffer);
+//funzione gestione Temperatura
+int measureTemperature() {
+  return dht11.readTemperature();
+}
+String printTemperature() {
+  char buffer[40];
+  sprintf(buffer, "Temperatura: %d °C \n", measureTemperature());
+  return buffer;
+}
 
-//   temp = dht.readTemperature();
-//   sprintf(buffer, "Temperature: %d C", temp);
-//   Serial.println(buffer);
-// }
+//funzione gestione Umidità
+int measureHumidity() {
+  return dht11.readHumidity();
+}
+String printHumidity() {
+  char buffer[40];
+  sprintf(buffer, "Umidità: %d %% \n", measureHumidity());
+  return buffer;
+}
 
 void measureVoltmeters() {
     // Misura tensione da voltmeter1Pin e voltmeter2Pin
@@ -96,7 +108,17 @@ void measureVoltmeters() {
     //Serial.print(voltage2, 2);
     //Serial.println("V");
 
-} 
+}
+
+/* WIP da sistemare
+void updateLCD() {
+  lcd.setCursor(0, 1);
+  lcd.print("distanzaUltraSuoni:");
+  lcd.print(distanceCm);
+  lcd.print(printTemperature());
+  lcd.print(printHumidity());
+}
+*/
 
 void setup() {
   Serial.begin(9600);       // Inizializza la comunicazione seriale a 9600 bps
@@ -115,10 +137,16 @@ void setup() {
 void loop() {
 
   measureDistance();
-  delay(1000);
+  
+  
   // funzioni da eseguire ogni 5 minuti
-  //if (millis() % fiveMinutes == 0) {
-    // measureTemperatureAndHumidity();
-    // updateLCD();
-    // measureVoltmeters();
+  if (millis() % fiveMinutes == 0) {
+    measureTemperatureAndHumidity();
+    //updateLCD();
+    measureVoltmeters();
   }
+  if(millis() % tenMinutes == 0) {
+  Serial.print(printTemperature);
+  Serial.print(printHumidity());
+  }
+}

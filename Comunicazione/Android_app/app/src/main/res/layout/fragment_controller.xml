@@ -1,107 +1,219 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
-    android:backgroundTint="#FFFFFF"
+    android:backgroundTint="#333333"
+    android:orientation="horizontal"
     tools:context=".ControllerFragment">
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnStop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="140dp"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/mybutton"
-        android:text="Stop"
-        android:textColor="#FB0606"
+    <FrameLayout
+        android:id="@+id/ContainerSx"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:background="#222222"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/ContainerCenter"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnForward" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnRotSx"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/mybutton"
-        android:text="RotSx"
-        android:textColor="#FB0606"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnForward" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context=".ControllerFragment">
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnForward"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="140dp"
-        android:layout_marginTop="80dp"
-        android:background="@drawable/mybutton"
-        android:text="▲"
-        android:textColor="#FB0606"
-        android:textSize="24sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/contenitorebottoni_grigio__removebg_preview"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.496" />
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnRotDx"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/mybutton"
-        android:text="RotDx"
-        android:textColor="#FB0606"
-        app:layout_constraintStart_toEndOf="@id/btnStop"
-        app:layout_constraintTop_toBottomOf="@id/btnForward" />
+            <ImageButton
+                android:id="@+id/btnDown"
+                android:layout_width="95dp"
+                android:layout_height="104dp"
+                android:layout_marginBottom="20dp"
+                android:background="#00FFFFFF"
+                android:contentDescription="down"
+                android:rotation="0"
+                android:scaleType="fitCenter"
+                android:src="@drawable/vettoredown_bianco__removebg_preview"
+                app:layout_constraintBottom_toBottomOf="@+id/imageView2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/bntUp" />
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnBackwards"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="140dp"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/mybutton"
-        android:text="▼"
-        android:textColor="#FB0606"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnStop" />
+            <ImageButton
+                android:id="@+id/bntUp"
+                android:contentDescription="up"
+                android:src="@drawable/vettoreup_bianco__removebg_preview"
+                android:layout_width="95dp"
+                android:layout_height="104dp"
+                android:layout_marginTop="20dp"
+                android:background="#00FFFFFF"
+                android:scaleType="fitCenter"
+                app:layout_constraintBottom_toTopOf="@+id/btnDown"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/imageView2"/>
 
-    <TextView
-        android:id="@+id/tvDisplay"
-        android:layout_width="82dp"
-        android:layout_height="76dp"
-        android:layout_marginTop="168dp"
-        android:text="0 km/h\n100%"
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/ContainerCenter"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:backgroundTint="#333333"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/ContainerDx"
+        app:layout_constraintStart_toEndOf="@+id/ContainerSx"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context=".ControllerFragment">
+
+            <ImageView
+                android:id="@+id/Display"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:layout_marginBottom="50dp"
+                android:contentDescription="display"
+                android:src="@drawable/display_111111"
+                app:layout_constraintBottom_toTopOf="@+id/btnStop"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageButton
+                android:id="@+id/btnStop"
+                android:layout_width="142dp"
+                android:layout_height="129dp"
+                android:layout_marginBottom="100dp"
+                android:background="#00FFFFFF"
+                android:contentDescription="stop"
+                android:scaleType="fitCenter"
+                android:src="@drawable/stopbutton"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/Display" />
+
+            <TextView
+                android:id="@+id/Velocita"
+                android:layout_width="213dp"
+                android:layout_height="21dp"
+                android:text="Velocità:    30    Km/h"
+                android:textColor="#F4F4F4"
+                app:layout_constraintBottom_toTopOf="@+id/Batteria"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/Display" />
+
+            <TextView
+                android:id="@+id/Batteria"
+                android:layout_width="213dp"
+                android:layout_height="21dp"
+                android:text="Batteria: 100%"
+                android:textColor="#F4F4F4"
+                app:layout_constraintBottom_toBottomOf="@+id/Display"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/Velocita" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/ContainerDx"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:background="#222222"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.115"
-        app:layout_constraintStart_toEndOf="@id/btnRotDx"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/ContainerCenter"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnSx"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="48dp"
-        android:layout_marginTop="164dp"
-        android:background="@drawable/mybutton"
-        android:text="◀"
-        android:textColor="#FB0606"
-        app:layout_constraintStart_toEndOf="@id/tvDisplay"
-        app:layout_constraintTop_toTopOf="parent" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context=".ControllerFragment">
 
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnDx"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="164dp"
-        android:background="@drawable/mybutton"
-        android:text="▶"
-        android:textColor="#FB0606"
-        app:layout_constraintStart_toEndOf="@id/btnSx"
-        app:layout_constraintTop_toTopOf="parent" />
+            <ImageButton
+                android:id="@+id/btnSX"
+                android:contentDescription="sx"
+                android:src="@drawable/vettoredown_bianco__removebg_preview"
+                android:layout_width="104dp"
+                android:layout_height="95dp"
+                android:layout_marginBottom="50dp"
+                android:background="#00FFFFFF"
+                android:rotation="90"
+                android:scaleType="fitCenter"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/btnDX"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+            <ImageButton
+                android:id="@+id/btnRotDX"
+                android:contentDescription="rotDx"
+                android:src="@drawable/rotdx_bianco"
+                android:layout_width="104dp"
+                android:layout_height="95dp"
+                android:layout_marginTop="50dp"
+                android:background="#00FFFFFF"
+                android:scaleType="fitCenter"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/btnRotSX"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <ImageButton
+                android:id="@+id/btnRotSX"
+                android:contentDescription="rotSx"
+                android:src="@drawable/rotsx_bianco_2"
+                android:layout_width="104dp"
+                android:layout_height="95dp"
+                android:layout_marginTop="50dp"
+                android:background="#00FFFFFF"
+                android:scaleType="fitCenter"
+                app:layout_constraintEnd_toStartOf="@+id/btnRotDX"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <ImageButton
+                android:id="@+id/btnDX"
+                android:contentDescription="dx"
+                android:src="@drawable/vettoredown_bianco__removebg_preview"
+                android:layout_width="104dp"
+                android:layout_height="95dp"
+                android:layout_marginBottom="50dp"
+                android:background="#00FFFFFF"
+                android:rotation="-90"
+                android:scaleType="fitCenter"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/btnSX"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

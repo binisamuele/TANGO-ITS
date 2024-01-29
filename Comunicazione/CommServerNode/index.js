@@ -46,6 +46,7 @@ app.post("/control", (req, res) => {
         console.log('Headers:', req.headers);
         console.log('Body:', req.body);
         */
+       
         forwardToArduino(direction);
 
         res.send('OK');
@@ -107,6 +108,7 @@ forwardToArduino = (direction) => {
 };
 
 isValidDirection = (direction) => {
-    const validDirections = ['up', 'down', 'left', 'right', "stop"];
+    const validDirections = ['up', 'down', 'left', 'right', "btnReleased"];
     return validDirections.includes(direction);
 };
+
