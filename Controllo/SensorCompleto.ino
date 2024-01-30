@@ -7,7 +7,7 @@
 char buffer[40];
 
 //numero sensori di distanza
-const int NUMERO_SENSORI=4;
+const int NUMBER_SENSORS=4;
 
 //configurazione pin sensore distanza (vanno messi su pin in maniera crescente per esigenze del codice 
 //                                      altrimenti sostituire i for del programma)
@@ -44,24 +44,23 @@ LiquidCrystal lcd(12, 11, 6, 5, 8, 7);
 void emergencyManagement(){
   ///////////////////////////////loop di attesa //////////////////////////////////////////////////////
   int emergency; 
-  int tolleranzaDistanza=35;
+  int distanceTolerance=35;
 
-  while(emergency<NUMERO_SENSORI){
+  while(emergency<NUMBER_SENSORS){
     int trigPin=trigPinUp;
     int echoPin=echoPinUp;
-    int resettaCiclo=0;
-    int incrementoAlPinSuccessivo = 2;
+    int incrementToNextPin = 2;
     
     emergency=0;
-    for(int i=0;i<NUMERO_SENSORI;i++){
+    for(int i=0;i<NUMBER_SENSORS;i++){
       
-      if( measureDistance( trigPin, echoPin, tolleranzaDistanza); ){
+      if( measureDistance( trigPin, echoPin, distanceTolerance) ){
         emergency++;
       } else{
         continue;
       }
-      trigPin += incrementoAlPinSuccessivo;
-      echoPin +=incrementoAlPinSuccessivo;
+      trigPin += incrementToNextPin;
+      echoPin +=incrementToNextPin;
     }
     delay(500);
   }
@@ -71,12 +70,12 @@ int distanceManagement(){
   int trigPin=trigPinUp;
   int echoPin=echoPinUp;
   int distance;
-  int resettaCiclo=0;
-  int incrementoAlPinSuccessivo = 2;
-  int tolleranzaDistanza=30;
+  int reset=0;
+  int incrementToNextPin = 2;
+  int distanceTolerance=30;
 
-  for(int i=0;i<NUMERO_SENSORI;i++){
-    distance=measureDistance( trigPin, echoPin, tolleranzaDistanza);
+  for(int i=0;i<NUMBER_SENSORS;i++){
+    distance=measureDistance( trigPin, echoPin, distanceTolerance);
     if( distance ){
       sprintf(buffer, "distanzaUltraSuoni: %d cm", distance);
       Serial.println(buffer);
@@ -84,21 +83,21 @@ int distanceManagement(){
       Serial.print("emergenza:");
       Serial.print(distance); //poi va messo a 1 per mandarlo all' altro arduino
       emergencyManagement();
-      //i=resettaCiclo;
+      //i=reset;
     }
-    trigPin += incrementoAlPinSuccessivo;
-    echoPin +=incrementoAlPinSuccessivo;
+    trigPin += incrementToNextPin;
+    echoPin +=incrementToNextPin;
 
   }
 
 }
 
 
-int  measureDistance(int trigPin, int echoPin, int tolleranzaDistanza) {
+int  measureDistance(int trigPin, int echoPin, int distanceTolerance) {
 
   int distance;
   const int MAX_DISTANCE =700;
-  int errore =-1;
+  int error =-1;
 
   NewPing sonar(trigPin, echoPin, MAX_DISTANCE);
   
@@ -106,13 +105,13 @@ int  measureDistance(int trigPin, int echoPin, int tolleranzaDistanza) {
   distance = (sonar.ping() / 2) * 0.0343;
 
   if (distance >= 0) {
-    if (distance < tolleranzaDistanza) {
-      return errore;
+    if (distance < distanceTolerance) {
+      return error;
     } else {
         return distance;
     }
   } else {
-      return errore;
+      return error;
   }
 
 }
