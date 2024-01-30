@@ -1,29 +1,35 @@
 package com.example.irobotapplication;
 
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.view.Menu;
+import android.view.MenuItem;
+
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.os.Bundle;
-import android.view.MenuItem;
-import android.widget.Toast;
-
 import com.google.android.material.navigation.NavigationView;
-import android.content.res.ColorStateList;
-
 
 public class MainActivity extends AppCompatActivity {
 
     DrawerLayout drawerLayout;
     Toolbar toolbar;
     NavigationView navigationView;
+
+    // Variabile di stato per tracciare la visibilità della toolbar
+    private boolean isToolbarHidden = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,52 +50,44 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int itemId = item.getItemId();
+
                 if (itemId == R.id.home) {
                     drawerLayout.closeDrawer(GravityCompat.START);
                     fragmentR(new HomeFragment());
                     setToolbarTitle("Home");
+                    handleMenuItemSelection(item);
                 } else if (itemId == R.id.controller) {
                     fragmentR(new ControllerFragment());
                     drawerLayout.closeDrawer(GravityCompat.START);
-                    setToolbarTitle("Controller");
-                } else if (itemId == R.id.lidar) {
-                    fragmentR(new LidarFragment());
+                    handleMenuItemSelection(item);
+                } else if (itemId == R.id.lidar || itemId == R.id.telecamere) {
+                    Fragment fragment;
+                    String title;
+
+                    if (itemId == R.id.lidar) {
+                        fragment = new LidarFragment();
+                        title = "Lidar";
+                    } else {
+                        fragment = new FotocamereFragment();
+                        title = "Telecamere";
+                    }
+
+                    fragmentR(fragment);
                     drawerLayout.closeDrawer(GravityCompat.START);
-                    setToolbarTitle("Lidar");
-                } else if (itemId == R.id.telecamere) {
-                    fragmentR(new FotocamereFragment());
-                    drawerLayout.closeDrawer(GravityCompat.START);
-                    setToolbarTitle("Telecamere");
+                    setToolbarTitle(title);
+                    handleMenuItemSelection(item);
                 }
-
-                ColorStateList selectedTextColor = new ColorStateList(
-                        new int[][]{{android.R.attr.state_checked}, {}},
-                        new int[]{ContextCompat.getColor(MainActivity.this, R.color.selected_text_color),
-                                ContextCompat.getColor(MainActivity.this, R.color.default_text_color)});
-
-                navigationView.setItemTextColor(selectedTextColor);
-                navigationView.setItemIconTintList(selectedTextColor);
 
                 return true;
             }
         });
-        MenuItem homeItem = navigationView.getMenu().findItem(R.id.home);
-        if (homeItem != null) {
-            homeItem.setChecked(true);
-            navigationView.setCheckedItem(R.id.home);
 
-            ColorStateList initialTextColor = new ColorStateList(
-                    new int[][]{{android.R.attr.state_checked}, {}},
-                    new int[]{ContextCompat.getColor(MainActivity.this, R.color.selected_text_color),
-                            ContextCompat.getColor(MainActivity.this, R.color.default_text_color)});
+        // Imposta il menu selezionato inizialmente
+        setInitialMenuItem();
 
-            navigationView.setItemTextColor(initialTextColor);
-            navigationView.setItemIconTintList(initialTextColor);
-        }
-
+        // Carica il fragment iniziale solo se savedInstanceState è nullo
         if (savedInstanceState == null) {
             fragmentR(new HomeFragment());
-            navigationView.setCheckedItem(R.id.home);
             setToolbarTitle("Tango");
         }
     }
@@ -102,6 +100,73 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setToolbarTitle(String title) {
-        getSupportActionBar().setTitle(title);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(title);
+        }
     }
+
+    private void setInitialMenuItem() {
+        Menu menu = navigationView.getMenu();
+
+        // Deseleziona manualmente tutti gli elementi del menu
+        for (int i = 0; i < menu.size(); i++) {
+            menu.getItem(i).setChecked(false);
+        }
+
+        // Imposta l'elemento del menu inizialmente selezionato
+        MenuItem homeItem = menu.findItem(R.id.home);
+        if (homeItem != null) {
+            homeItem.setChecked(true);
+            navigationView.setCheckedItem(R.id.home);
+
+            // Carica la ColorStateList dal file di risorse
+            int selectedTextColor = ContextCompat.getColor(this, R.color.selected_text_color);
+
+            // Imposta la ColorStateList per l'elemento del menu
+            tintMenuItemIcon(homeItem, selectedTextColor);
+            setMenuItemTextColor(homeItem, selectedTextColor);
+
+            // Imposta il colore di default per gli altri elementi del menu
+            for (int i = 0; i < menu.size(); i++) {
+                if (menu.getItem(i) != homeItem) {
+                    tintMenuItemIcon(menu.getItem(i), ContextCompat.getColor(this, R.color.default_text_color));
+                    setMenuItemTextColor(menu.getItem(i), ContextCompat.getColor(this, R.color.default_text_color));
+                }
+            }
+        }
+    }
+
+    private void handleMenuItemSelection(MenuItem selectedItem) {
+        Menu menu = navigationView.getMenu();
+
+        // Deseleziona manualmente tutti gli elementi del menu
+        for (int i = 0; i < menu.size(); i++) {
+            menu.getItem(i).setChecked(false);
+            tintMenuItemIcon(menu.getItem(i), ContextCompat.getColor(this, R.color.default_text_color));
+            setMenuItemTextColor(menu.getItem(i), ContextCompat.getColor(this, R.color.default_text_color));
+        }
+
+        // Imposta la ColorStateList per l'elemento selezionato
+        int selectedTextColor = ContextCompat.getColor(this, R.color.selected_text_color);
+        tintMenuItemIcon(selectedItem, selectedTextColor);
+        setMenuItemTextColor(selectedItem, selectedTextColor);
+    }
+
+    private void tintMenuItemIcon(MenuItem menuItem, int color) {
+        Drawable icon = menuItem.getIcon();
+        if (icon != null) {
+            icon = DrawableCompat.wrap(icon);
+            DrawableCompat.setTint(icon, color);
+            menuItem.setIcon(icon);
+        }
+    }
+
+    private void setMenuItemTextColor(MenuItem menuItem, int color) {
+        SpannableString spanString = new SpannableString(menuItem.getTitle().toString());
+        spanString.setSpan(new ForegroundColorSpan(color), 0, spanString.length(), 0);
+        menuItem.setTitle(spanString);
+    }
+
+
 }

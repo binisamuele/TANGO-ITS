@@ -5,6 +5,8 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.Fragment;
 
@@ -31,6 +33,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ControllerFragment extends Fragment {
 
     private ConnectiviyCheck check;
+    private ActionBar actionBar;
+
     public ControllerFragment() {
         // Required empty public constructor
     }
@@ -46,6 +50,15 @@ public class ControllerFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Nasconde la toolbar nell'activity associata al fragment
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (activity != null) {
+            actionBar = activity.getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.hide();
+            }
+        }
 
         requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
@@ -74,7 +87,6 @@ public class ControllerFragment extends Fragment {
                 buttonForward.setImageResource((R.drawable.vettoreup_rosso__removebg_preview));
                 return true;
             }
-
             return false;
         });
 
@@ -92,7 +104,6 @@ public class ControllerFragment extends Fragment {
                 buttonBackwards.setImageResource((R.drawable.vettoredown_rosso__removebg_preview));
                 return true;
             }
-
             return false;
         });
 
@@ -110,7 +121,6 @@ public class ControllerFragment extends Fragment {
                 buttonRotSx.setImageResource(R.drawable.rotsx_rosso__removebg_preview);
                 return true;
             }
-
             return false;
         });
 
@@ -128,7 +138,6 @@ public class ControllerFragment extends Fragment {
                 buttonRotDx.setImageResource(R.drawable.rotdx_rosso__removebg_preview);
                 return true;
             }
-
             return false;
         });
     }
@@ -136,19 +145,24 @@ public class ControllerFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+
+        // Ripristina la toolbar quando il fragment viene distrutto
+        if (actionBar != null) {
+            actionBar.show();
+        }
+
         check.stopPeriodicRequests();
         postToServer("commStop");
     }
 
     private void postToServer(String direction) {
 
-        RequestQueue queue = Volley.newRequestQueue(requireContext());  // make sure that this thing works
+        RequestQueue queue = Volley.newRequestQueue(requireContext());
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, getString(R.string.conn_string) + "/control",
                 response -> Log.d("HTTP-POST", "Response: " + response),
                 error -> {
                     // Handle errors here.
-                    //Toast.makeText(requireActivity().getApplicationContext(), "Connection Error", Toast.LENGTH_LONG).show();
                     Log.e("HTTP-POST", "Error: " + error.toString());
                 })
         {
@@ -163,6 +177,7 @@ public class ControllerFragment extends Fragment {
                 }
                 return jsonBody.toString().getBytes(StandardCharsets.UTF_8);
             }
+
             @Override
             public Map<String, String> getHeaders() {
                 // set headers, including Content-Type.
