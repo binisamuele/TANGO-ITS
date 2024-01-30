@@ -37,8 +37,12 @@ const int fiveMinutes = 300000;
 const int tenMinutes = 600000;
 
 
-const int DHTPIN = 3;
-DHT dht(DHTPIN, DHTTYPE);
+// pin per sensore DHT 
+//const int DHTPIN = 3;
+//DHT dht(DHTPIN, DHTTYPE);
+DHT11 dht11(3);
+
+
 LiquidCrystal lcd(12, 11, 6, 5, 8, 7);
 
 void emergencyManagement(){
@@ -116,14 +120,6 @@ int  measureDistance(int trigPin, int echoPin, int distanceTolerance) {
 
 }
 
-/*
-void measureTemperatureAndHumidity() {
-  float Temperature = dht.readTemperature();
-  sprintf(buffer, "Temperature: %d C", temp);
-  Serial.println(buffer);
-}
-*/
-
 //funzione gestione Temperatura
 int measureTemperature() {
   return dht11.readTemperature();
@@ -171,8 +167,8 @@ void updateLCD() {
 void setup() {
   Serial.begin(9600);       // Inizializza la comunicazione seriale a 9600 bps
   
-  //dht.begin();              // Inizializza il sensore DHT
-  //lcd.begin(16, 2);         // Inizializza il display LCD
+
+  lcd.begin(16, 2);         // Inizializza il display LCD
   pinMode(trigPinUp, OUTPUT);
   pinMode(echoPinUp, INPUT);
   pinMode(trigPinDown, OUTPUT);
