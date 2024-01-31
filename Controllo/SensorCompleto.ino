@@ -1,18 +1,25 @@
 #include <Wire.h>
 #include <DHT11.h>
 #include <LiquidCrystal.h>
-#define DHTTYPE DHT22
+
 
 //array di support per invio stringhe al seriale
 char buffer[40];
 
+//constanti gestione millis
+const int fiveMinutes = 300000;
+const int tenMinutes = 600000;
+
+//
+DHT11 dht11(2);
+
+
 //configurazione pin sensore distanza
-  const int trigPin1 = 9;
-  const int echoPin1 = 10; 
+const int triggerPinUp = 4;
+const int echoPinUp = 5; 
 
-  const int trigPin2 = 4;
-  const int echoPin2 = 5; 
-
+const int triggerPinDown = 6;
+const int echoPinDown = 7; 
 
 
 //pin sensori voltimetri
@@ -20,40 +27,32 @@ const int voltmeter1Pin = A0;
 const int voltmeter2Pin = A1;
 
 
-
-//constanti gestione millis
-const int fiveMinutes = 300000;
-const int tenMinutes = 600000;
-
-
-const int DHTPIN = 3;
-DHT dht(DHTPIN, DHTTYPE);
+//LiquidCrystal
 LiquidCrystal lcd(12, 11, 6, 5, 8, 7);
 
 
+//constanti sesore a ultrasuoni
+const int SONAR_NUM = 2;
+const int MAX_DISTANCE =700;
+const double SPEED_OF_SOUND = 0.0343;
 
-int  measureDistance() {
 
-  long duration;
+int measureDistance(int triggerPin, int echoPin) {
+
+  NewPing ping = NewPing(triggerPin, echoPin, MAX_DISTANCE);
   int distance;
-  int SONAR_NUM = 2;
-  int MAX_DISTANCE =700;
-  //NewPing sonar(trigPin, echoPin, MAX_DISTANCE);
 
-
-
-  NewPing sonar[2] = {   // Sensor object array.
-    NewPing(trigPin1, echoPin1, MAX_DISTANCE),// Each sensor's trigger pin, echo pin, and max distance to ping. 
-    NewPing(trigPin2, echoPin2, MAX_DISTANCE) 
+  NewPing sonar[SONAR_NUM] = {   // Sensor object array.
+    NewPing(triggerPinUp, echoPinUp, MAX_DISTANCE),// Each sensor's trigger pin, echo pin, and max distance to ping. 
+    NewPing(triggerPinDown, echoPinDown, MAX_DISTANCE) 
   };
 
-  for(int i=0;i<SONAR_NUM;i++){
+  for(int i=0; i<SONAR_NUM; i++){
 
-    duration = sonar[i].ping();
     distance = sonar[i].ping_cm();
 
     if (distance >= 0) {
-      distance = (duration / 2) * 0.0343;
+      distance = (sonar[i].ping() / 2) * SPEED_OF_SOUND;
       if (distance < 30) {
         Serial.print("emergenza");
         Serial.print(distance);
@@ -67,14 +66,6 @@ int  measureDistance() {
     }
   }
 }
-
-/*
-void measureTemperatureAndHumidity() {
-  float Temperature = dht.readTemperature();
-  sprintf(buffer, "Temperature: %d C", temp);
-  Serial.println(buffer);
-}
-*/
 
 //funzione gestione Temperatura
 int measureTemperature() {
@@ -125,10 +116,10 @@ void setup() {
   
   //dht.begin();              // Inizializza il sensore DHT
   //lcd.begin(16, 2);         // Inizializza il display LCD
-  pinMode(trigPin1, OUTPUT);
-  pinMode(echoPin1, INPUT);
-  pinMode(trigPin2, OUTPUT);
-  pinMode(echoPin2, INPUT);
+  pinMode(triggerPinUp, OUTPUT);
+  pinMode(echoPinUp, INPUT);
+  pinMode(triggerPinDown, OUTPUT);
+  pinMode(echoPinDown, INPUT);
 
 
 
