@@ -14,12 +14,24 @@ const int tenMinutes = 600000;
 DHT11 dht11(2);
 
 
-//configurazione pin sensore distanza
-const int triggerPinUp = 4;
-const int echoPinUp = 5; 
+//numero sensori di distanza
+const int NUMBER_SENSORS=4;
 
-const int triggerPinDown = 6;
-const int echoPinDown = 7; 
+//configurazione pin sensore distanza (vanno messi su pin in maniera crescente per esigenze del codice 
+//                                      altrimenti sostituire i for del programma)
+  const int trigPinUp = 2;
+  const int echoPinUp = 3; 
+
+  const int trigPinDown = 4;
+  const int echoPinDown = 5; 
+
+  const int trigPinRh = 6;
+  const int echoPinRh = 7; 
+
+  const int trigPinLh = 8;
+  const int echoPinLh = 9; 
+
+
 
 
 //pin sensori voltimetri
@@ -27,44 +39,93 @@ const int voltmeter1Pin = A0;
 const int voltmeter2Pin = A1;
 
 
-//LiquidCrystal
+
+//constanti gestione millis
+const int fiveMinutes = 300000;
+const int tenMinutes = 600000;
+
+
+// pin per sensore DHT 
+//const int DHTPIN = 3;
+//DHT dht(DHTPIN, DHTTYPE);
+DHT11 dht11(3);
+
+
 LiquidCrystal lcd(12, 11, 6, 5, 8, 7);
 
+void emergencyManagement(){
+  ///////////////////////////////loop di attesa //////////////////////////////////////////////////////
+  int emergency; 
+  int distanceTolerance=35;
 
-//constanti sesore a ultrasuoni
-const int SONAR_NUM = 2;
-const int MAX_DISTANCE =700;
-const double SPEED_OF_SOUND = 0.0343;
-
-
-int measureDistance(int triggerPin, int echoPin) {
-
-  NewPing ping = NewPing(triggerPin, echoPin, MAX_DISTANCE);
-  int distance;
-
-  NewPing sonar[SONAR_NUM] = {   // Sensor object array.
-    NewPing(triggerPinUp, echoPinUp, MAX_DISTANCE),// Each sensor's trigger pin, echo pin, and max distance to ping. 
-    NewPing(triggerPinDown, echoPinDown, MAX_DISTANCE) 
-  };
-
-  for(int i=0; i<SONAR_NUM; i++){
-
-    distance = sonar[i].ping_cm();
-
-    if (distance >= 0) {
-      distance = (sonar[i].ping() / 2) * SPEED_OF_SOUND;
-      if (distance < 30) {
-        Serial.print("emergenza");
-        Serial.print(distance);
-      } else {
-        sprintf(buffer, "distanzaUltraSuoni n%d: %d cm",(i+1), distance);
-        Serial.println(buffer);
+  while(emergency<NUMBER_SENSORS){
+    int trigPin=trigPinUp;
+    int echoPin=echoPinUp;
+    int incrementToNextPin = 2;
+    
+    emergency=0;
+    for(int i=0;i<NUMBER_SENSORS;i++){
+      
+      if( measureDistance( trigPin, echoPin, distanceTolerance) ){
+        emergency++;
+      } else{
+        continue;
       }
-
-    } else {
-      Serial.println("Errore nella misurazione della distanza");
+      trigPin += incrementToNextPin;
+      echoPin +=incrementToNextPin;
     }
+    delay(500);
   }
+}
+
+int distanceManagement(){
+  int trigPin=trigPinUp;
+  int echoPin=echoPinUp;
+  int distance;
+  int reset=0;
+  int incrementToNextPin = 2;
+  int distanceTolerance=30;
+
+  for(int i=0;i<NUMBER_SENSORS;i++){
+    distance=measureDistance( trigPin, echoPin, distanceTolerance);
+    if( distance ){
+      sprintf(buffer, "distanzaUltraSuoni: %d cm", distance);
+      Serial.println(buffer);
+    } else{
+      Serial.print("emergenza:");
+      Serial.print(distance); //poi va messo a 1 per mandarlo all' altro arduino
+      emergencyManagement();
+      //i=reset;
+    }
+    trigPin += incrementToNextPin;
+    echoPin +=incrementToNextPin;
+
+  }
+
+}
+
+
+int  measureDistance(int trigPin, int echoPin, int distanceTolerance) {
+
+  int distance;
+  const int MAX_DISTANCE =700;
+  int error =-1;
+
+  NewPing sonar(trigPin, echoPin, MAX_DISTANCE);
+  
+  //distance = sonar.ping_cm();
+  distance = (sonar.ping() / 2) * 0.0343;
+
+  if (distance >= 0) {
+    if (distance < distanceTolerance) {
+      return error;
+    } else {
+        return distance;
+    }
+  } else {
+      return error;
+  }
+
 }
 
 //funzione gestione Temperatura
@@ -114,20 +175,23 @@ void updateLCD() {
 void setup() {
   Serial.begin(9600);       // Inizializza la comunicazione seriale a 9600 bps
   
-  //dht.begin();              // Inizializza il sensore DHT
-  //lcd.begin(16, 2);         // Inizializza il display LCD
-  pinMode(triggerPinUp, OUTPUT);
+
+  lcd.begin(16, 2);         // Inizializza il display LCD
+  pinMode(trigPinUp, OUTPUT);
   pinMode(echoPinUp, INPUT);
-  pinMode(triggerPinDown, OUTPUT);
+  pinMode(trigPinDown, OUTPUT);
   pinMode(echoPinDown, INPUT);
 
-
+  pinMode(trigPinRh, OUTPUT);
+  pinMode(echoPinRh, INPUT);
+  pinMode(trigPinLh, OUTPUT);
+  pinMode(echoPinLh, INPUT);
 
 }
 
 void loop() {
 
-  measureDistance();
+  distanceManagement();
   
   
   // funzioni da eseguire ogni 5 minuti
