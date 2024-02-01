@@ -14,6 +14,7 @@ const int minSpeed = -100;
 // float ultrasoundDistance;
 // float temperature;
 // float humidity;
+bool emergency = false;
 
 void setup() {
     Serial1.begin(9600);    // collegamento all'arduino di comunicazione
@@ -33,13 +34,16 @@ void setup() {
     attachInterrupt(0, emergencyStop, FALLING); // Pin 2 per emergenza pulsanti
     attachInterrupt(1, emergencyStop, RISING); // Pin 3 per emergenza bumper
     attachInterrupt(2, emergencyStop, RISING); // Pin 21 per emergenze arduino (hardware deve utilizzare un diodo)
+    attachInterrupt(3, emergencyState, RISING); // Pin 20 per stato emergenza
 }
 
 void loop() {
 
     // controllo della comunicazione seriale (anche gli altri arduino devono fare il controllo del seriale)
-    if (!Serial1 || !Serial2 || !Serial3) emergencyStop();
-    
+    if (!Serial1 || !Serial2 || !Serial3 || emergency) {
+        emergencyState();
+        return;
+    }
     readSerial();
 
     mapping(serial1String);
@@ -136,11 +140,11 @@ void mapping(String serialString) {
             movementInt = 2;
             return;
         }
-        if (serialVal == "right"){ // curvare a destra
+        if (serialVal == "right"){ // ruotare a destra
             movementInt = 3;
             return;
         }
-        if (serialVal == "left"){ // curvare a sinistra
+        if (serialVal == "left"){ // ruotare a sinistra
             movementInt = 4;
             return;
         }
@@ -201,6 +205,14 @@ void emergencyStop() {
 
     delay(1000);
 }
+
+// implementare stato di emergenza (con chiave?)
+void emergencyState() {
+    emergencyStop();
+    emergency = true;
+    serialCommunications;
+}
+
 
 // reset delle variabili
 void resetVariables() {
@@ -263,10 +275,19 @@ void decelerate(){
 
 // funzione per la comunicazione in seriale
 void serialCommunications(){
-    Serial1.println("Distanza Lidar :" + String(lidarDistance));
-    Serial1.println("Potenza Segnale :" + String(signalStrength));
-    Serial1.println("Carica Batteria :" + String(batteryCharge));
-    Serial1.println("Distanza Ultrasuoni :" + String(ultrasoundDistance));
-    Serial1.println("Temperatura :" + String(temperature));
-    Serial1.println("Umidita :" + String(humidity));
+    // Serial1.println("Distanza Lidar :" + String(lidarDistance));
+    // Serial1.println("Potenza Segnale :" + String(signalStrength));
+    // Serial1.println("Carica Batteria :" + String(batteryCharge));
+    // Serial1.println("Distanza Ultrasuoni :" + String(ultrasoundDistance));
+    // Serial1.println("Temperatura :" + String(temperature));
+    // Serial1.println("Umidita :" + String(humidity));
+    if (emergency) {
+        Serial1.println("emergenza");
+        Serial2.println("emergenza");
+        Serial3.println("emergenza");
+    } else{
+        Serial1.println("emergenza risolta");
+        Serial2.println("emergenza risolta");
+        Serial3.println("emergenza risolta");
+    }
 }   
