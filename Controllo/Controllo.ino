@@ -120,9 +120,18 @@ void loop() {
 }
 
 void readSerial(){
-    if(Serial1.available()) serial1String = Serial1.readStringUntil('\r\n');
-    if(Serial2.available()) serial2String = Serial2.readStringUntil('\r\n');
-    if(Serial3.available()) serial3String = Serial3.readStringUntil('\r\n');
+    if(Serial1.available()) {
+        serial1String = Serial1.readStringUntil('\r\n');
+        Serial1.write("Messaggio ricevuto");
+    }
+    if(Serial2.available()) {
+        serial2String = Serial2.readStringUntil('\r\n');
+        Serial2.write("Messaggio ricevuto");
+    }
+    if(Serial3.available()) {
+        serial3String = Serial3.readStringUntil('\r\n');
+        Serial3.write("Messaggio ricevuto");
+    }
 }
 
 // mapping dei messaggi
