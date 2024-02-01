@@ -200,8 +200,6 @@ void mapping(String serialString) {
     }
 }
 
-// implementare stato di emergenza (con chiave?)
-
 // segnale di arresto del motore
 void emergencyStop() {
     analogWrite(dxForward, 0);
@@ -219,7 +217,7 @@ void emergencyStop() {
 void emergencyState() {
     emergencyStop();
     emergency = true;
-    serialCommunications;
+    serialCommunications();
 }
 
 
