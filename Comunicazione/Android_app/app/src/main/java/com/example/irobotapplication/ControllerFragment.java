@@ -1,7 +1,10 @@
 package com.example.irobotapplication;
 
+import static android.view.View.MeasureSpec.getMode;
+
 import android.annotation.SuppressLint;
 import android.content.pm.ActivityInfo;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -15,6 +18,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -56,6 +60,7 @@ public class ControllerFragment extends Fragment {
         AppCompatImageButton buttonBackwards = requireView().findViewById(R.id.btnDown);
         AppCompatImageButton buttonRotSx = requireView().findViewById(R.id.btnRotSX);
         AppCompatImageButton buttonRotDx = requireView().findViewById(R.id.btnRotDX);
+        Switch switchOnOff = requireView().findViewById(R.id.switch_OnOff);
 
         //using this boolean to prevent multiple buttons from being pressed at the same time
         AtomicBoolean anyButtonPressed = new AtomicBoolean(false);
@@ -130,6 +135,11 @@ public class ControllerFragment extends Fragment {
             }
 
             return false;
+        });
+
+        //CONTROLLO SWITCH
+        switchOnOff.setOnCheckedChangeListener((v, event) -> {
+
         });
     }
     private void postToServer(String direction) {
