@@ -8,12 +8,12 @@ int speed = 0;  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
 const int speedGain = 10;
 const int maxSpeed = 150;
 const int minSpeed = -100;
-float lidarDistance;
-float signalStrength;
-float batteryCharge;
-float ultrasoundDistance;
-float temperature;
-float humidity;
+// float lidarDistance;
+// float signalStrength;
+// float batteryCharge;
+// float ultrasoundDistance;
+// float temperature;
+// float humidity;
 
 void setup() {
     Serial1.begin(9600);    // collegamento all'arduino di comunicazione
@@ -32,13 +32,13 @@ void setup() {
 
     attachInterrupt(0, emergencyStop, FALLING); // Pin 2 per emergenza pulsanti
     attachInterrupt(1, emergencyStop, RISING); // Pin 3 per emergenza bumper
-    attachInterrupt(2, emergencyStop, RISING); // Pin 20 per emergenze arduino (hardware deve utilizzare un diodo)
+    attachInterrupt(2, emergencyStop, RISING); // Pin 21 per emergenze arduino (hardware deve utilizzare un diodo)
 }
 
 void loop() {
 
     // controllo della comunicazione seriale (anche gli altri arduino devono fare il controllo del seriale)
-    if (!Serial1 && !Serial2 && !Serial3) emergencyStop();
+    if (!Serial1 || !Serial2 || !Serial3) emergencyStop();
     
     readSerial();
 
@@ -75,18 +75,8 @@ void loop() {
 
             driveMotor(dxBackward, sxBackward, speed);
             break;
-        // curvare destra DA FARE
-        case 3:
-            halfMotor(sxForward);
-            driveMotor(dxForward);
-            break;
-        // curvare sinistra DA FARE
-        case 4:   
-            halfMotor(dxForward);
-            driveMotor(sxForward);
-            break;
         // rotazione in senso orario
-        case 5:
+        case 3:
             if (speed != 0){
                 decelerate();
                 break;
@@ -94,27 +84,35 @@ void loop() {
             driveMotor(sxForward, dxBackward, 20);
             break;
         // rotazione in senso antiorario
-        case 6:
+        case 4:
             if (speed != 0){
                 decelerate();
                 break;
             }
             driveMotor(dxForward, sxBackward, 20);
             break;
-
         // frenata
-        case 7:
+        case 5:
             decelerate();
             decelerate();
             break;
-
+        // // curvare destra DA FARE
+        // case 6:
+        //     halfMotor(sxForward);
+        //     driveMotor(dxForward);
+        //     break;
+        // // curvare sinistra DA FARE
+        // case 7:   
+        //     halfMotor(dxForward);
+        //     driveMotor(sxForward);
+        //     break;
         default:
             decelerate();
             break;
-            // controllo se la macchina stava curvando
     }
 }
 
+// lettura dei 3 arduino
 void readSerial(){
     if(Serial1.available()) serial1String = Serial1.readStringUntil('\r\n');
     if(Serial2.available()) serial2String = Serial2.readStringUntil('\r\n');
@@ -138,26 +136,26 @@ void mapping(String serialString) {
             movementInt = 2;
             return;
         }
-        if (serialVal == ""){ // curvare a destra
+        if (serialVal == "right"){ // curvare a destra
             movementInt = 3;
             return;
         }
-        if (serialVal == ""){ // curvare a sinistra
+        if (serialVal == "left"){ // curvare a sinistra
             movementInt = 4;
             return;
         }
-        if (serialVal == "right"){
+        if (serialVal == "stop"){
             movementInt = 5;
             return;
         }
-        if (serialVal == "left"){
-            movementInt = 6;
-            return;
-        }
-        if (serialVal == "stop"){
-            movementInt = 7;
-            return;
-        }
+        // if (serialVal == ""){
+        //     movementInt = 6;
+        //     return;
+        // }
+        // if (serialVal == ""){
+        //     movementInt = 7;
+        //     return;
+        // }
         movementInt = 0;
         return;
     }
@@ -189,27 +187,23 @@ void mapping(String serialString) {
     }
 }
 
-// segnale di arresto del motore DA MODIFICARE
+// implementare stato di emergenza (con chiave?)
+
+// segnale di arresto del motore
 void emergencyStop() {
-    digitalWrite(dxForwardEn, LOW);
-    digitalWrite(dxBackwardEn, LOW);
     analogWrite(dxForward, 0);
     analogWrite(dxBackward, 0);
 
-    digitalWrite(sxForwardEn, LOW);
-    digitalWrite(sxBackwardEn, LOW);
     analogWrite(sxForward, 0);
     analogWrite(sxBackward, 0);
 
-    reset();
+    resetVariables();
 
     delay(1000);
 }
 
-// implementare stato di emergenza (con chiave?)
-
 // reset delle variabili
-void reset() {
+void resetVariables() {
     speed = 0;
     movementInt = 0;
 }
@@ -218,41 +212,39 @@ void reset() {
     // mandare messaggi agli altri arduino di risolta emergenza
     // controllo della comunicazione seriale 
 
-// funzione di spegnimento
+// funzione di spegnimento ipotetica
 
-// Funzione per muoversi avanti o indietro
+// funzione per muoversi avanti o indietro
 void driveMotor(int motor1, int motor2, int spd) {
     if (spd < 0) spd = -spd;
     analogWrite(motor1, spd);
     analogWrite(motor2, spd);
 
-    delay(50);
+    delay(50); // da testare
 }
 
 // controllo della velocità vicino a zero
 void speedControl(){
-    if (speed < 10 && speed > -10) speed = 0;
-
-    delay (1000);
+    if (speed < speedGain && speed > -speedGain) speed = 0;
 }
 
-// Funzione per girare DA FARE
-void halfMotor(int motorForward) {
-    int newSpeed = 0;
+// funzione per girare DA FARE
+// void halfMotor(int motorForward) {
+//     int newSpeed = 0;
 
-    if (speed > 0) newSpeed = speed - speedGain;
+//     if (speed > 0) newSpeed = speed - speedGain;
 
-    if (motorForward == dxForward){
-        analogWrite(dxForwardEn, newSpeed);
-        return;
-    }
-    if (motorForward == sxForward){
-        analogWrite(sxForwardEn, newSpeed);
-        return;
-    }
-}
+//     if (motorForward == dxForward){
+//         analogWrite(dxForwardEn, newSpeed);
+//         return;
+//     }
+//     if (motorForward == sxForward){
+//         analogWrite(sxForwardEn, newSpeed);
+//         return;
+//     }
+// }
 
-// Funzione per decelerare
+// funzione per decelerare e lentamente fermarsi
 void decelerate(){
     if (speed < 0) {
         speed += speedGain;
@@ -269,7 +261,7 @@ void decelerate(){
     }
 }
 
-// Funzione per la comunicazione in seriale
+// funzione per la comunicazione in seriale
 void serialCommunications(){
     Serial1.println("Distanza Lidar :" + String(lidarDistance));
     Serial1.println("Potenza Segnale :" + String(signalStrength));
