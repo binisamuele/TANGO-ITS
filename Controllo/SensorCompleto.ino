@@ -1,13 +1,18 @@
 #include <Wire.h>
 #include <DHT11.h>
 #include <LiquidCrystal.h>
-#define DHTTYPE DHT22
+#include <NewPing.h>
+
 
 //array di support per invio stringhe al seriale
 char buffer[40];
 
 //numero sensori di distanza
-const int NUMBER_SENSORS=4;
+#define DISTANZA_SICUREZZA 30
+#define DISTANZA_EMMERGENZA 35
+#define NUMBER_SENSORS 4
+#define MAX_DISTANCE 400
+#define SPEED_OF_SOUND 0.0343
 
 //configurazione pin sensore distanza (vanno messi su pin in maniera crescente per esigenze del codice 
 //                                      altrimenti sostituire i for del programma)
@@ -45,42 +50,34 @@ DHT11 dht11(3);
 
 LiquidCrystal lcd(12, 11, 6, 5, 8, 7);
 
-void emergencyManagement(){
+void emergencyManagement(int trigPin,int echoPin){
   ///////////////////////////////loop di attesa //////////////////////////////////////////////////////
-  int emergency; 
-  int distanceTolerance=35;
+  bool emergency= false; 
 
-  while(emergency<NUMBER_SENSORS){
-    int trigPin=trigPinUp;
-    int echoPin=echoPinUp;
-    int incrementToNextPin = 2;
-    
-    emergency=0;
-    for(int i=0;i<NUMBER_SENSORS;i++){
-      
-      if( measureDistance( trigPin, echoPin, distanceTolerance) ){
-        emergency++;
+  while(emergency){
+    if(Serial.read() == "emmergenza risolta"){  //// da controllare
+      if( measureDistance( trigPin, echoPin)> DISTANZA_EMMERGENZA){
+        emergency= true;
       } else{
-        continue;
+        delay(500);
       }
-      trigPin += incrementToNextPin;
-      echoPin +=incrementToNextPin;
-    }
-    delay(500);
+    }else
+        delay(500);
+
   }
 }
 
-int distanceManagement(){
+void distanceManagement(){
   int trigPin=trigPinUp;
   int echoPin=echoPinUp;
   int distance;
   int reset=0;
   int incrementToNextPin = 2;
-  int distanceTolerance=30;
+
 
   for(int i=0;i<NUMBER_SENSORS;i++){
-    distance=measureDistance( trigPin, echoPin, distanceTolerance);
-    if( distance ){
+    distance=measureDistance( trigPin, echoPin);
+    if( distance > DISTANZA_SICUREZZA){
       sprintf(buffer, "distanzaUltraSuoni: %d cm", distance);
       Serial.println(buffer);
     } else{
@@ -97,27 +94,13 @@ int distanceManagement(){
 }
 
 
-int  measureDistance(int trigPin, int echoPin, int distanceTolerance) {
-
-  int distance;
-  const int MAX_DISTANCE =700;
-  int error =-1;
+int  measureDistance(int trigPin, int echoPin) {
 
   NewPing sonar(trigPin, echoPin, MAX_DISTANCE);
   
-  //distance = sonar.ping_cm();
-  distance = (sonar.ping() / 2) * 0.0343;
+  // altro modo: distance = sonar.ping_cm();
 
-  if (distance >= 0) {
-    if (distance < distanceTolerance) {
-      return error;
-    } else {
-        return distance;
-    }
-  } else {
-      return error;
-  }
-
+  return (sonar.ping() / 2) * SPEED_OF_SOUND;
 }
 
 //funzione gestione Temperatura
@@ -167,6 +150,7 @@ void updateLCD() {
 void setup() {
   Serial.begin(9600);       // Inizializza la comunicazione seriale a 9600 bps
   
+  Serial1.begin(9600);  // da sovrascrivere a serial 
 
   lcd.begin(16, 2);         // Inizializza il display LCD
   pinMode(trigPinUp, OUTPUT);
