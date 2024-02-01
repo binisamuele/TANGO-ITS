@@ -5,6 +5,7 @@ int movementInt;
 int dxForward = 2, dxBackward = 3, dxForwardEn = 9, dxBackwardEn = 10; // Motore DX
 int sxForward = 4, sxBackward = 5, sxForwardEn = 11, sxBackwardEn = 12;  // Motore SX
 int speed = 0;  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
+int key = 20; 
 const int speedGain = 10;
 const int maxSpeed = 150;
 const int minSpeed = -100;
@@ -31,10 +32,12 @@ void setup() {
     pinMode(sxForwardEn, OUTPUT);
     pinMode(sxBackwardEn, OUTPUT);
 
-    attachInterrupt(0, emergencyStop, FALLING); // Pin 2 per emergenza pulsanti
-    attachInterrupt(1, emergencyStop, RISING); // Pin 3 per emergenza bumper
-    attachInterrupt(2, emergencyStop, RISING); // Pin 21 per emergenze arduino (hardware deve utilizzare un diodo)
-    attachInterrupt(3, emergencyState, RISING); // Pin 20 per stato emergenza
+    pinMode(key, INPUT);
+
+    attachInterrupt(0, emergencyState, FALLING); // Pin 2 per emergenza pulsanti
+    attachInterrupt(1, emergencyState, RISING); // Pin 3 per emergenza bumper
+    attachInterrupt(2, emergencyState, RISING); // Pin 21 per emergenze arduino (hardware deve utilizzare un diodo)
+    attachInterrupt(3, emergencyResolve, RISING); // Pin 20 per stato emergenza
 }
 
 void loop() {
@@ -200,7 +203,6 @@ void mapping(String serialString) {
     }
 }
 
-// implementare stato di emergenza (con chiave?)
 
 // segnale di arresto del motore
 void emergencyStop() {
@@ -215,13 +217,20 @@ void emergencyStop() {
     delay(1000);
 }
 
-// implementare stato di emergenza (con chiave?)
+
+// funzione stato emergenza
 void emergencyState() {
     emergencyStop();
     emergency = true;
-    serialCommunications;
+    serialCommunications();
 }
 
+// funzione per risolvere l'emergenza
+void emergencyResolve() {
+    if(digitalRead(key) == 1){
+        emergency = false;
+    }
+}
 
 // reset delle variabili
 void resetVariables() {
