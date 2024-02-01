@@ -15,7 +15,7 @@ const int minSpeed = -100;
 // float ultrasoundDistance;
 // float temperature;
 // float humidity;
-bool emergency = false;
+bool emergency = true;
 
 void setup() {
     Serial1.begin(9600);    // collegamento all'arduino di comunicazione
@@ -221,7 +221,7 @@ void emergencyStop() {
 // funzione stato emergenza
 void emergencyState() {
     emergencyStop();
-    emergency = true;
+    emergencyResolve();
     serialCommunications();
 }
 
