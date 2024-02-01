@@ -79,18 +79,8 @@ void loop() {
 
             driveMotor(dxBackward, sxBackward, speed);
             break;
-        // curvare destra DA FARE
-        case 3:
-            halfMotor(sxForward);
-            driveMotor(dxForward);
-            break;
-        // curvare sinistra DA FARE
-        case 4:   
-            halfMotor(dxForward);
-            driveMotor(sxForward);
-            break;
         // rotazione in senso orario
-        case 5:
+        case 3:
             if (speed != 0){
                 decelerate();
                 break;
@@ -98,27 +88,35 @@ void loop() {
             driveMotor(sxForward, dxBackward, 20);
             break;
         // rotazione in senso antiorario
-        case 6:
+        case 4:
             if (speed != 0){
                 decelerate();
                 break;
             }
             driveMotor(dxForward, sxBackward, 20);
             break;
-
         // frenata
-        case 7:
+        case 5:
             decelerate();
             decelerate();
             break;
-
+        // // curvare destra DA FARE
+        // case 6:
+        //     halfMotor(sxForward);
+        //     driveMotor(dxForward);
+        //     break;
+        // // curvare sinistra DA FARE
+        // case 7:   
+        //     halfMotor(dxForward);
+        //     driveMotor(sxForward);
+        //     break;
         default:
             decelerate();
             break;
-            // controllo se la macchina stava curvando
     }
 }
 
+// lettura dei 3 arduino
 void readSerial(){
     if(Serial1.available()) {
         serial1String = Serial1.readStringUntil('\r\n');
@@ -151,26 +149,26 @@ void mapping(String serialString) {
             movementInt = 2;
             return;
         }
-        if (serialVal == ""){ // curvare a destra
+        if (serialVal == "right"){ // ruotare a destra
             movementInt = 3;
             return;
         }
-        if (serialVal == ""){ // curvare a sinistra
+        if (serialVal == "left"){ // ruotare a sinistra
             movementInt = 4;
             return;
         }
-        if (serialVal == "right"){
+        if (serialVal == "stop"){
             movementInt = 5;
             return;
         }
-        if (serialVal == "left"){
-            movementInt = 6;
-            return;
-        }
-        if (serialVal == "stop"){
-            movementInt = 7;
-            return;
-        }
+        // if (serialVal == ""){
+        //     movementInt = 6;
+        //     return;
+        // }
+        // if (serialVal == ""){
+        //     movementInt = 7;
+        //     return;
+        // }
         movementInt = 0;
         return;
     }
@@ -202,19 +200,17 @@ void mapping(String serialString) {
     }
 }
 
-// segnale di arresto del motore DA MODIFICARE
+// implementare stato di emergenza (con chiave?)
+
+// segnale di arresto del motore
 void emergencyStop() {
-    digitalWrite(dxForwardEn, LOW);
-    digitalWrite(dxBackwardEn, LOW);
     analogWrite(dxForward, 0);
     analogWrite(dxBackward, 0);
 
-    digitalWrite(sxForwardEn, LOW);
-    digitalWrite(sxBackwardEn, LOW);
     analogWrite(sxForward, 0);
     analogWrite(sxBackward, 0);
 
-    reset();
+    resetVariables();
 
     delay(1000);
 }
@@ -228,7 +224,7 @@ void emergencyState() {
 
 
 // reset delle variabili
-void reset() {
+void resetVariables() {
     speed = 0;
     movementInt = 0;
 }
@@ -237,41 +233,39 @@ void reset() {
     // mandare messaggi agli altri arduino di risolta emergenza
     // controllo della comunicazione seriale 
 
-// funzione di spegnimento
+// funzione di spegnimento ipotetica
 
-// Funzione per muoversi avanti o indietro
+// funzione per muoversi avanti o indietro
 void driveMotor(int motor1, int motor2, int spd) {
     if (spd < 0) spd = -spd;
     analogWrite(motor1, spd);
     analogWrite(motor2, spd);
 
-    delay(50);
+    delay(50); // da testare
 }
 
 // controllo della velocità vicino a zero
 void speedControl(){
-    if (speed < 10 && speed > -10) speed = 0;
-
-    delay (1000);
+    if (speed < speedGain && speed > -speedGain) speed = 0;
 }
 
-// Funzione per girare DA FARE
-void halfMotor(int motorForward) {
-    int newSpeed = 0;
+// funzione per girare DA FARE
+// void halfMotor(int motorForward) {
+//     int newSpeed = 0;
 
-    if (speed > 0) newSpeed = speed - speedGain;
+//     if (speed > 0) newSpeed = speed - speedGain;
 
-    if (motorForward == dxForward){
-        analogWrite(dxForwardEn, newSpeed);
-        return;
-    }
-    if (motorForward == sxForward){
-        analogWrite(sxForwardEn, newSpeed);
-        return;
-    }
-}
+//     if (motorForward == dxForward){
+//         analogWrite(dxForwardEn, newSpeed);
+//         return;
+//     }
+//     if (motorForward == sxForward){
+//         analogWrite(sxForwardEn, newSpeed);
+//         return;
+//     }
+// }
 
-// Funzione per decelerare
+// funzione per decelerare e lentamente fermarsi
 void decelerate(){
     if (speed < 0) {
         speed += speedGain;
@@ -288,7 +282,7 @@ void decelerate(){
     }
 }
 
-// Funzione per la comunicazione in seriale
+// funzione per la comunicazione in seriale
 void serialCommunications(){
     // Serial1.println("Distanza Lidar :" + String(lidarDistance));
     // Serial1.println("Potenza Segnale :" + String(signalStrength));
@@ -296,11 +290,11 @@ void serialCommunications(){
     // Serial1.println("Distanza Ultrasuoni :" + String(ultrasoundDistance));
     // Serial1.println("Temperatura :" + String(temperature));
     // Serial1.println("Umidita :" + String(humidity));
-    if(emergency) {
+    if (emergency) {
         Serial1.println("emergenza");
         Serial2.println("emergenza");
         Serial3.println("emergenza");
-    }else{
+    } else{
         Serial1.println("emergenza risolta");
         Serial2.println("emergenza risolta");
         Serial3.println("emergenza risolta");
