@@ -1,8 +1,11 @@
 package com.example.irobotapplication;
 
+import static android.view.View.MeasureSpec.getMode;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -16,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -83,6 +87,7 @@ public class ControllerFragment extends Fragment {
         AppCompatImageButton buttonBackwards = requireView().findViewById(R.id.btnDown);
         AppCompatImageButton buttonRotSx = requireView().findViewById(R.id.btnRotSX);
         AppCompatImageButton buttonRotDx = requireView().findViewById(R.id.btnRotDX);
+        Switch switchOnOff = requireView().findViewById(R.id.switch_OnOff);
 
         check = new ConnectivityCheck(requireActivity().getApplicationContext());
         check.startSending();
@@ -156,6 +161,11 @@ public class ControllerFragment extends Fragment {
                 return true;
             }
             return false;
+        });
+
+        //CONTROLLO SWITCH
+        switchOnOff.setOnCheckedChangeListener((v, event) -> {
+
         });
     }
 
