@@ -203,7 +203,6 @@ void mapping(String serialString) {
     }
 }
 
-
 // segnale di arresto del motore
 void emergencyStop() {
     analogWrite(dxForward, 0);
