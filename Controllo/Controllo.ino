@@ -203,7 +203,7 @@ void mapping(String serialString) {
     }
 }
 
-// segnale di arresto del motore
+// segnale di arresto del motore (potrebbe essere non necessaria)
 void emergencyStop() {
     analogWrite(dxForward, 0);
     analogWrite(dxBackward, 0);
@@ -219,16 +219,20 @@ void emergencyStop() {
 
 // funzione stato emergenza
 void emergencyState() {
-    emergencyStop();
+    if (!emergency){
+        emergencyStop();
+        serialCommunications();
+    }
     emergency = true;
-    serialCommunications();
+    while (emergency || digitalRead(key) == 0)
+    {
+        /* codice per rimanere nel loop */
+    }
 }
 
-// funzione per risolvere l'emergenza
+// funzione per risolvere l'emergenza tramite app
 void emergencyResolve() {
-    if(digitalRead(key) == 1){
-        emergency = false;
-    }
+    emergency = false;
 }
 
 // reset delle variabili
