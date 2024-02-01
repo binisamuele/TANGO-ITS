@@ -35,8 +35,6 @@ const int trigPinLh = 8;
 const int echoPinLh = 9; 
 
 
-
-
 //pin sensori voltimetri
 const int voltmeter1Pin = A0;
 const int voltmeter2Pin = A1;
@@ -60,13 +58,13 @@ void emergencyManagement(){
   int emergency; 
   int distanceTolerance=35;
 
-  while(emergency<SENSORS_NOMBER){
+  while(emergency < SENSORS_NOMBER){
     int trigPin=trigPinUp;
     int echoPin=echoPinUp;
     int incrementToNextPin = 2;
     
     emergency=0;
-    for(int i=0;i<SENSORS_NOMBER;i++){
+    for(int i=0; i<SENSORS_NOMBER; i++){
       
       if( measureDistance( trigPin, echoPin, distanceTolerance) ){
         emergency++;
@@ -76,41 +74,34 @@ void emergencyManagement(){
       trigPin += incrementToNextPin;
       echoPin +=incrementToNextPin;
     }
-    delay(500);
+    delay(500); //non deve esistere
   }
 }
 
-/* Verisione di Davide
-int distanceManagement(){
-  int trigPin=trigPinUp;
-  int echoPin=echoPinUp;
+int distanceManagement(){     //meglio void, non ritorna nulla
+  int trigPin = trigPinUp;
+  int echoPin = echoPinUp;
   int distance;
-  int reset=0;
-  int incrementToNextPin = 2;
-  int distanceTolerance=30;
+  int reset = 0;
 
-  for(int i=0;i<SENSORS_NOMBER;i++){
-    distance=measureDistance( trigPin, echoPin, distanceTolerance);
+  for(int i=0; i<SENSORS_NOMBER; i++){
+    distance=measureDistance( trigPin, echoPin, 30);
     if( distance ){
       sprintf(buffer, "distanzaUltraSuoni: %d cm", distance);
       Serial.println(buffer);
     } else{
       Serial.print("emergenza:");
       Serial.print(distance); //poi va messo a 1 per mandarlo all' altro arduino
+      
       emergencyManagement();
       //i=reset;
     }
-    trigPin += incrementToNextPin;
-    echoPin +=incrementToNextPin;
+    trigPin += 2;
+    echoPin += 2;
 
   }
 
-} */
-
-void distanceManagement(){
-
 }
-
 
 int  measureDistance(int trigPin, int echoPin, int distanceTolerance) {
 
@@ -119,11 +110,11 @@ int  measureDistance(int trigPin, int echoPin, int distanceTolerance) {
   NewPing sonar(trigPin, echoPin, MAX_DISTANCE);
   
   //distance = sonar.ping_cm();
-  distance = (sonar.ping() / 2) * ;
+  distance = (sonar.ping() / 2) * SPEED_OF_SOUND;
 
   if (distance >= 0) {
     if (distance < distanceTolerance) {
-      return error;
+      return -1;
     } else {
         return distance;
     }
@@ -133,7 +124,7 @@ int  measureDistance(int trigPin, int echoPin, int distanceTolerance) {
 
 }
 
-//funzione gestione Temperatura
+//funzioni gestione Temperatura
 int measureTemperature() {
   return dht11.readTemperature();
 }
@@ -143,7 +134,7 @@ String printTemperature() {
   return buffer;
 }
 
-//funzione gestione Umidità
+//funzioni gestione Umidità
 int measureHumidity() {
   return dht11.readHumidity();
 }
@@ -153,6 +144,17 @@ String printHumidity() {
   return buffer;
 }
 
+//funzioni per la gestione della distanza
+/*
+void measureDistance(int trigPin) {
+
+  NewPing sonar(trigPin, trigPin+1, MAX_DISTANCE);
+  return (sonar.ping() / 2) * SPEED_OF_SOUND;
+
+}
+*/
+
+//funzioni monitoraggio stato della batteria
 void measureVoltmeters() {
     // Misura tensione da voltmeter1Pin e voltmeter2Pin
     float voltage1 = analogRead(voltmeter1Pin) * (5.0 / 1023.0);
@@ -202,7 +204,6 @@ void loop() {
   
   // funzioni da eseguire ogni 5 minuti
   if (millis() % fiveMinutes == 0) {
-    measureTemperatureAndHumidity();
     //updateLCD();
     measureVoltmeters();
   }
