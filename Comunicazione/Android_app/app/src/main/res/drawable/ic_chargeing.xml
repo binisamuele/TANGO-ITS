@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <vector
+        android:width="8dp"
+        android:height="8dp"
+        android:viewportWidth="368.492"
+        android:viewportHeight="368.492">
+
+       </vector>
+</selector>

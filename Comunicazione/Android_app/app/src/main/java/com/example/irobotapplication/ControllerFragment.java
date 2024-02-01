@@ -1,7 +1,11 @@
 package com.example.irobotapplication;
 
+import static android.view.View.MeasureSpec.getMode;
+
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -15,10 +19,13 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Switch;
 import android.widget.Toast;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.RetryPolicy;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -37,6 +44,14 @@ public class ControllerFragment extends Fragment {
 
     public ControllerFragment() {
         // Required empty public constructor
+    }
+
+    private Context fragmentContext;
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        fragmentContext = context;
     }
 
     @Override
@@ -72,6 +87,7 @@ public class ControllerFragment extends Fragment {
         AppCompatImageButton buttonBackwards = requireView().findViewById(R.id.btnDown);
         AppCompatImageButton buttonRotSx = requireView().findViewById(R.id.btnRotSX);
         AppCompatImageButton buttonRotDx = requireView().findViewById(R.id.btnRotDX);
+        Switch switchOnOff = requireView().findViewById(R.id.switch_OnOff);
 
         check = new ConnectivityCheck(requireActivity().getApplicationContext());
         check.startSending();
@@ -146,6 +162,11 @@ public class ControllerFragment extends Fragment {
             }
             return false;
         });
+
+        //CONTROLLO SWITCH
+        switchOnOff.setOnCheckedChangeListener((v, event) -> {
+
+        });
     }
 
     @Override
@@ -168,7 +189,8 @@ public class ControllerFragment extends Fragment {
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 response -> Log.d("HTTP-POST", "Response: " + response),
                 error -> {
-                    // Handle errors here.
+                    // Handle errors
+                    Toast.makeText(fragmentContext, "Errore di connessione", Toast.LENGTH_SHORT).show();
                     Log.e("HTTP-POST", "Error: " + error.toString());
                 })
         {
@@ -195,6 +217,15 @@ public class ControllerFragment extends Fragment {
             @Override
             public String getBodyContentType() {
                 return "application/json";
+            }
+
+            @Override
+            public RetryPolicy getRetryPolicy() {
+                return new DefaultRetryPolicy(
+                        1000,
+                        0,
+                        1
+                );
             }
         };
         queue.add(stringRequest);

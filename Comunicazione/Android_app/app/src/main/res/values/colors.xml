@@ -13,5 +13,6 @@
     <color name="selected_text_color">@android:color/holo_red_light</color>
     <color name="default_text_color">@android:color/white</color>
     <color name="your_selected_color">#800080</color>
+    <color name="Grigio_chiaro">#444444 </color>
 </resources>
 

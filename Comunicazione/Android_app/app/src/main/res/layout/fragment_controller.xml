@@ -92,7 +92,8 @@
                 android:id="@+id/Display"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="70dp"
+                android:layout_marginTop="95dp"
+                android:layout_marginBottom="50dp"
                 android:contentDescription="display"
                 android:src="@drawable/display_111111"
                 app:layout_constraintBottom_toTopOf="@+id/btnStop"
@@ -105,7 +106,6 @@
                 android:id="@+id/btnStop"
                 android:layout_width="142dp"
                 android:layout_height="129dp"
-                android:layout_marginTop="20dp"
                 android:layout_marginBottom="100dp"
                 android:background="#00FFFFFF"
                 android:contentDescription="stop"
@@ -187,16 +187,16 @@
 
             <ImageButton
                 android:id="@+id/btnRotSX"
-                android:contentDescription="rotSx"
-                android:src="@drawable/rotsx_bianco_2"
                 android:layout_width="104dp"
                 android:layout_height="95dp"
                 android:layout_marginTop="50dp"
                 android:background="#00FFFFFF"
+                android:contentDescription="rotSx"
                 android:scaleType="fitCenter"
+                android:src="@drawable/rotsx_bianco_2"
                 app:layout_constraintEnd_toStartOf="@+id/btnRotDX"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
                 android:id="@+id/btnDX"
@@ -211,6 +211,21 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/btnSX"/>
+
+            <Switch
+                android:id="@+id/switch_OnOff"
+                android:track="@drawable/bg_track"
+                android:thumb="@drawable/ic_thumb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleX="2"
+                android:scaleY="2"
+                android:checked="false"
+                android:enabled="true"
+                app:layout_constraintBottom_toTopOf="@+id/btnDX"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/btnRotSX" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
