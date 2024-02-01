@@ -8,7 +8,8 @@ import android.content.res.ColorStateList;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatButton;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.Fragment;
 
@@ -17,7 +18,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -36,10 +36,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ControllerFragment extends Fragment {
 
-    String conn_string = "http://192.168.0.4:3000/control";
+    private ConnectivityCheck check;
+    private ActionBar actionBar;
 
     public ControllerFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d("FragmentController", "onCreate");
     }
 
     @Override
@@ -52,7 +59,16 @@ public class ControllerFragment extends Fragment {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onViewCreated(view, savedInstanceState);
+
+        // Nasconde la toolbar nell'activity associata al fragment
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (activity != null) {
+            actionBar = activity.getSupportActionBar();
+            if (actionBar != null) {
+                actionBar.hide();
+            }
+        }
 
         requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
@@ -62,6 +78,9 @@ public class ControllerFragment extends Fragment {
         AppCompatImageButton buttonRotDx = requireView().findViewById(R.id.btnRotDX);
         Switch switchOnOff = requireView().findViewById(R.id.switch_OnOff);
 
+        check = new ConnectivityCheck(requireActivity().getApplicationContext());
+        check.startSending();
+
         //using this boolean to prevent multiple buttons from being pressed at the same time
         AtomicBoolean anyButtonPressed = new AtomicBoolean(false);
 
@@ -69,17 +88,16 @@ public class ControllerFragment extends Fragment {
             if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get()) {
                 // when button is released
                 anyButtonPressed.set(false);
-                postToServer("btnReleased");
+                postToServer(getString(R.string.conn_string) + "control", "released");
                 buttonForward.setImageResource(R.drawable.vettoreup_bianco__removebg_preview);
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
-                postToServer("up");
+                postToServer(getString(R.string.conn_string) + "control", "up");
                 buttonForward.setImageResource((R.drawable.vettoreup_rosso__removebg_preview));
                 return true;
             }
-
             return false;
         });
 
@@ -87,17 +105,16 @@ public class ControllerFragment extends Fragment {
             if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get()) {
                 // when button is released
                 anyButtonPressed.set(false);
-                postToServer("btnReleased");
+                postToServer(getString(R.string.conn_string) + "control", "released");
                 buttonBackwards.setImageResource(R.drawable.vettoredown_bianco__removebg_preview);
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
-                postToServer("down");
+                postToServer(getString(R.string.conn_string) + "control", "down");
                 buttonBackwards.setImageResource((R.drawable.vettoredown_rosso__removebg_preview));
                 return true;
             }
-
             return false;
         });
 
@@ -105,17 +122,16 @@ public class ControllerFragment extends Fragment {
             if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get()) {
                 // when button is released
                 anyButtonPressed.set(false);
-                postToServer("btnReleased");
+                postToServer(getString(R.string.conn_string) + "control", "released");
                 buttonRotSx.setImageResource(R.drawable.rotsx_bianco_2);
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
-                postToServer("left");
+                postToServer(getString(R.string.conn_string) + "control", "left");
                 buttonRotSx.setImageResource(R.drawable.rotsx_rosso__removebg_preview);
                 return true;
             }
-
             return false;
         });
 
@@ -123,17 +139,16 @@ public class ControllerFragment extends Fragment {
             if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get()) {
                 // when button is released
                 anyButtonPressed.set(false);
-                postToServer("btnReleased");
+                postToServer(getString(R.string.conn_string) + "control", "released");
                 buttonRotDx.setImageResource(R.drawable.rotdx_bianco);
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
-                postToServer("right");
+                postToServer(getString(R.string.conn_string) + "control", "right");
                 buttonRotDx.setImageResource(R.drawable.rotdx_rosso__removebg_preview);
                 return true;
             }
-
             return false;
         });
 
@@ -142,15 +157,28 @@ public class ControllerFragment extends Fragment {
 
         });
     }
-    private void postToServer(String direction) {
 
-        RequestQueue queue = Volley.newRequestQueue(requireActivity().getApplicationContext());  // make sure that this thing works
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
 
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, conn_string,
+        // Ripristina la toolbar quando il fragment viene distrutto
+        if (actionBar != null) {
+            actionBar.show();
+        }
+
+        check.stopSending();
+        postToServer(getString(R.string.conn_string) + "control", "commStop");
+    }
+
+    private void postToServer(String url, String direction) {
+
+        RequestQueue queue = Volley.newRequestQueue(requireContext());
+
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 response -> Log.d("HTTP-POST", "Response: " + response),
                 error -> {
                     // Handle errors here.
-                    Toast.makeText(requireActivity().getApplicationContext(), "Connection Error", Toast.LENGTH_LONG).show();
                     Log.e("HTTP-POST", "Error: " + error.toString());
                 })
         {
@@ -165,6 +193,7 @@ public class ControllerFragment extends Fragment {
                 }
                 return jsonBody.toString().getBytes(StandardCharsets.UTF_8);
             }
+
             @Override
             public Map<String, String> getHeaders() {
                 // set headers, including Content-Type.

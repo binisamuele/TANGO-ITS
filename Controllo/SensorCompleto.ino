@@ -1,90 +1,155 @@
 #include <Wire.h>
 #include <DHT11.h>
 #include <LiquidCrystal.h>
-#include <math.h>
-#define DHTTYPE DHT11
 
-//configurazione pin
-const int trigPin = 9;
-const int echoPin = 10;
-//pin sensori voltimetri
-const int voltmeter1Pin = A0;
-const int voltmeter2Pin = A1;
 
-//costante per utilizzare sensore a ultrasuoni
-const float speedOfSound = 0.034;  // cm/microsecondo
+//costanti globali (più efficente con define)
+#define SENSORS_NOMBER 4;
+#define MAX_DISTANCE 700;
+#define SPEED_OF_SOUND 0.0343;
+
+
+//array di support per invio stringhe al seriale
+char buffer[40];
 
 //constanti gestione millis
 const int fiveMinutes = 300000;
 const int tenMinutes = 600000;
 
-// pin per sensore DHT
-const int DHTPIN = 3;
-DHT dht(DHTPIN, DHTTYPE);
+//!!da definire il funzionamento!!
+DHT11 dht11(2);
+
+
+//configurazione pin sensori distanza (vanno messi su pin in maniera crescente per esigenze del codice 
+//                                      altrimenti sostituire i for del programma)
+const int trigPinUp = 2;
+const int echoPinUp = 3; 
+
+const int trigPinDown = 4;
+const int echoPinDown = 5; 
+
+const int trigPinRh = 6;
+const int echoPinRh = 7; 
+
+const int trigPinLh = 8;
+const int echoPinLh = 9; 
+
+
+
+
+//pin sensori voltimetri
+const int voltmeter1Pin = A0;
+const int voltmeter2Pin = A1;
+
+
+//constanti gestione millis
+const int fiveMinutes = 300000;
+const int tenMinutes = 600000;
+
+
+// pin per sensore DHT 
+//const int DHTPIN = 3;
+//DHT dht(DHTPIN, DHTTYPE);
+DHT11 dht11(3);
+
 
 LiquidCrystal lcd(12, 11, 6, 5, 8, 7);
 
-//funzioni per sensore a ultrasuoni
-void triggerUltrasonicSensor() {
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(1000);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(2000);
-  digitalWrite(trigPin, LOW);
-}
+void emergencyManagement(){
+  ///////////////////////////////loop di attesa //////////////////////////////////////////////////////
+  int emergency; 
+  int distanceTolerance=35;
 
-long measurePulseDuration() {
-  return pulseIn(echoPin, HIGH);
-}
-
-int  measureDistance() {
-
-  int distanceCm;
-
-  triggerUltrasonicSensor();
-  if (measurePulseDuration() >= 0) {
-    distanceCm = measurePulseDuration() * speedOfSound / 2;
-    if (distanceCm != 0 && distanceCm < 20) {
-      Serial.print("emergenza");
-      Serial.print(distanceCm);
-    } else {
-      sprintf(buffer, "distanzaUltraSuoni: %d cm", distanceCm);
-      Serial.println(buffer);
+  while(emergency<SENSORS_NOMBER){
+    int trigPin=trigPinUp;
+    int echoPin=echoPinUp;
+    int incrementToNextPin = 2;
+    
+    emergency=0;
+    for(int i=0;i<SENSORS_NOMBER;i++){
+      
+      if( measureDistance( trigPin, echoPin, distanceTolerance) ){
+        emergency++;
+      } else{
+        continue;
+      }
+      trigPin += incrementToNextPin;
+      echoPin +=incrementToNextPin;
     }
-
-  } else {
-    Serial.println("Errore nella misurazione della distanza");
-    //lcd.setCursor(0, 1);
-    //lcd.print("Error");
+    delay(500);
   }
-  
 }
 
-/*
-void measureTemperatureAndHumidity() {
-  float Temperature = dht.readTemperature();
-  sprintf(buffer, "Temperature: %d C", temp);
-  Serial.println(buffer);
+/* Verisione di Davide
+int distanceManagement(){
+  int trigPin=trigPinUp;
+  int echoPin=echoPinUp;
+  int distance;
+  int reset=0;
+  int incrementToNextPin = 2;
+  int distanceTolerance=30;
+
+  for(int i=0;i<SENSORS_NOMBER;i++){
+    distance=measureDistance( trigPin, echoPin, distanceTolerance);
+    if( distance ){
+      sprintf(buffer, "distanzaUltraSuoni: %d cm", distance);
+      Serial.println(buffer);
+    } else{
+      Serial.print("emergenza:");
+      Serial.print(distance); //poi va messo a 1 per mandarlo all' altro arduino
+      emergencyManagement();
+      //i=reset;
+    }
+    trigPin += incrementToNextPin;
+    echoPin +=incrementToNextPin;
+
+  }
+
+} */
+
+void distanceManagement(){
+
 }
-*/
+
+
+int  measureDistance(int trigPin, int echoPin, int distanceTolerance) {
+
+  int distance;
+
+  NewPing sonar(trigPin, echoPin, MAX_DISTANCE);
+  
+  //distance = sonar.ping_cm();
+  distance = (sonar.ping() / 2) * ;
+
+  if (distance >= 0) {
+    if (distance < distanceTolerance) {
+      return error;
+    } else {
+        return distance;
+    }
+  } else {
+      return -1;
+  }
+
+}
 
 //funzione gestione Temperatura
-float measureTemperature() {
-  return round(dht.readTemperature());
+int measureTemperature() {
+  return dht11.readTemperature();
 }
 String printTemperature() {
   char buffer[40];
-  sprintf(buffer, "Temperatura: %d °C", measureTemperature());
+  sprintf(buffer, "Temperatura: %d °C \n", measureTemperature());
   return buffer;
 }
 
 //funzione gestione Umidità
-float measureHumidity() {
-  return round(dht.readHumidity());
+int measureHumidity() {
+  return dht11.readHumidity();
 }
 String printHumidity() {
   char buffer[40];
-  sprintf(buffer, "Umidità: %d %", measureHumidity());
+  sprintf(buffer, "Umidità: %d %% \n", measureHumidity());
   return buffer;
 }
 
@@ -102,38 +167,47 @@ void measureVoltmeters() {
 
 }
 
+/* WIP da sistemare
 void updateLCD() {
   lcd.setCursor(0, 1);
   lcd.print("distanzaUltraSuoni:");
   lcd.print(distanceCm);
-  lcd.print("cm Temperatura:");
-  lcd.print(measureTemperature(), 1);
-  lcd.print(" C Umidità:");
-  lcd.print(hum, 1);
-  lcd.print("% ");
+  lcd.print(printTemperature());
+  lcd.print(printHumidity());
 }
+*/
 
 void setup() {
   Serial.begin(9600);       // Inizializza la comunicazione seriale a 9600 bps
-  dht.begin();              // Inizializza il sensore DHT
+  
+
   lcd.begin(16, 2);         // Inizializza il display LCD
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
+
+  pinMode(trigPinUp, OUTPUT);
+  pinMode(echoPinUp, INPUT);
+  pinMode(trigPinDown, OUTPUT);
+  pinMode(echoPinDown, INPUT);
+
+  pinMode(trigPinRh, OUTPUT);
+  pinMode(echoPinRh, INPUT);
+  pinMode(trigPinLh, OUTPUT);
+  pinMode(echoPinLh, INPUT);
+
 }
 
 void loop() {
 
-  //measureDistance();
-  printHumidity();
-  printTemperature();
-
+  distanceManagement();
+  
+  
   // funzioni da eseguire ogni 5 minuti
   if (millis() % fiveMinutes == 0) {
     measureTemperatureAndHumidity();
-    updateLCD();
+    //updateLCD();
     measureVoltmeters();
   }
   if(millis() % tenMinutes == 0) {
-
+  Serial.print(printTemperature);
+  Serial.print(printHumidity());
   }
 }

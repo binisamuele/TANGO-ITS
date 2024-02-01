@@ -106,6 +106,7 @@
                 android:id="@+id/btnStop"
                 android:layout_width="142dp"
                 android:layout_height="129dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginBottom="100dp"
                 android:background="#00FFFFFF"
                 android:contentDescription="stop"
