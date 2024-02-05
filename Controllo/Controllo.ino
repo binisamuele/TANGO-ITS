@@ -42,7 +42,6 @@ void setup() {
 }
 
 void loop() {
-
     // controllo della comunicazione seriale (anche gli altri arduino devono fare il controllo del seriale)
     if (!Serial1 || !Serial2 || !Serial3 || emergency) {
         emergencyState();
@@ -54,70 +53,59 @@ void loop() {
     mapping(serial2String);
     mapping(serial3String);
 
-    switch (movementInt) {
-        // andare avanti
-        case 1:
-            if (speed == maxSpeed) break;                       // se la velocità è al massimo, non fare niente
+    movement(); // switch del movimento
+}
 
-            speed += speedGain;
-            speedControl();
-
-            if (speed < 10) {                                   // se la velocità era negativa, rallentiamo i motori
-                driveMotor(dxBackward, sxBackward, speed);
-                break;
-            }
-
-            driveMotor(dxForward, sxForward, speed);
-            break;
-        // andare indietro
-        case 2:
-            if (speed == minSpeed) break;                       // se la velocità è al minimo, non fare niente
-
-            speed -= speedGain;
-            speedControl();
-
-            if (speed > -10) {                                   // se la velocità era positiva, rallentiamo i motori
-                driveMotor(dxForward, sxForward, speed);
-                break;
-            }
-
-            driveMotor(dxBackward, sxBackward, speed);
-            break;
-        // rotazione in senso orario
-        case 3:
-            if (speed != 0){
-                decelerate();
-                break;
-            }
-            driveMotor(sxForward, dxBackward, 20);
-            break;
-        // rotazione in senso antiorario
-        case 4:
-            if (speed != 0){
-                decelerate();
-                break;
-            }
-            driveMotor(dxForward, sxBackward, 20);
-            break;
-        // frenata
-        case 5:
-            decelerate();
-            decelerate();
-            break;
-        // // curvare destra DA FARE
-        // case 6:
-        //     halfMotor(sxForward);
-        //     driveMotor(dxForward);
-        //     break;
-        // // curvare sinistra DA FARE
-        // case 7:   
-        //     halfMotor(dxForward);
-        //     driveMotor(sxForward);
-        //     break;
-        default:
-            decelerate();
-            break;
+// funzione stato emergenza
+void emergencyState() {
+    if (!emergency){            // ferma la macchina e manda un messaggio di emergenza agli altri arduino
+        emergency = true;
+        serialCommunications();     // manda segnale di emergenza agli altri arduino
+        emergencyStop();
     }
+    while (emergency || !digitalRead(key))      // rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
+    {
+        if (!digitalRead(key) || digitalRead(startFromApp)) emergency = false;
+    }
+    serialCommunications();     // manda segnale di fine emergenza agli altri arduino
+}
+
+// funzione per la comunicazione in seriale
+void serialCommunications(){
+    // Serial1.println("Distanza Lidar :" + String(lidarDistance));
+    // Serial1.println("Potenza Segnale :" + String(signalStrength));
+    // Serial1.println("Carica Batteria :" + String(batteryCharge));
+    // Serial1.println("Distanza Ultrasuoni :" + String(ultrasoundDistance));
+    // Serial1.println("Temperatura :" + String(temperature));
+    // Serial1.println("Umidita :" + String(humidity));
+    if (emergency) {
+        Serial1.println("emergenza");
+        Serial2.println("emergenza");
+        Serial3.println("emergenza");
+    } else{
+        Serial1.println("emergenza risolta");
+        Serial2.println("emergenza risolta");
+        Serial3.println("emergenza risolta");
+    }
+}   
+
+// segnale di arresto del motore (potrebbe essere non necessaria)
+void emergencyStop() {
+    analogWrite(dxForward, 0);
+    analogWrite(dxBackward, 0);
+
+    analogWrite(sxForward, 0);
+    analogWrite(sxBackward, 0);
+
+    resetVariables();
+
+    delay(1000);
+}
+
+// reset delle variabili
+void resetVariables() {
+    speed = 0;
+    movementInt = 0;
 }
 
 // lettura dei 3 arduino
@@ -204,50 +192,78 @@ void mapping(String serialString) {
     // }
 }
 
-// segnale di arresto del motore (potrebbe essere non necessaria)
-void emergencyStop() {
-    analogWrite(dxForward, 0);
-    analogWrite(dxBackward, 0);
+// funzione con le opzioni di movimento
+void movement(){
+    switch (movementInt) {
+        // andare avanti
+        case 1:
+            if (speed == maxSpeed) break;                       // se la velocità è al massimo, non fare niente
 
-    analogWrite(sxForward, 0);
-    analogWrite(sxBackward, 0);
+            speed += speedGain;
+            speedControl();
 
-    resetVariables();
+            if (speed < 10) {                                   // se la velocità era negativa, rallentiamo i motori
+                driveMotor(dxBackward, sxBackward, speed);
+                break;
+            }
 
-    delay(1000);
-}
+            driveMotor(dxForward, sxForward, speed);
+            break;
+        // andare indietro
+        case 2:
+            if (speed == minSpeed) break;                       // se la velocità è al minimo, non fare niente
 
+            speed -= speedGain;
+            speedControl();
 
-// funzione stato emergenza
-void emergencyState() {
-    if (!emergency){            // ferma la macchina e manda un messaggio di emergenza agli altri arduino
-        emergency = true;
-        serialCommunications();
-        emergencyStop();
+            if (speed > -10) {                                   // se la velocità era positiva, rallentiamo i motori
+                driveMotor(dxForward, sxForward, speed);
+                break;
+            }
+
+            driveMotor(dxBackward, sxBackward, speed);
+            break;
+        // rotazione in senso orario
+        case 3:
+            if (speed != 0){
+                decelerate();
+                break;
+            }
+            driveMotor(sxForward, dxBackward, 20);
+            break;
+        // rotazione in senso antiorario
+        case 4:
+            if (speed != 0){
+                decelerate();
+                break;
+            }
+            driveMotor(dxForward, sxBackward, 20);
+            break;
+        // frenata
+        case 5:
+            decelerate();
+            decelerate();
+            break;
+        // // curvare destra DA FARE
+        // case 6:
+        //     halfMotor(sxForward);
+        //     driveMotor(dxForward);
+        //     break;
+        // // curvare sinistra DA FARE
+        // case 7:   
+        //     halfMotor(dxForward);
+        //     driveMotor(sxForward);
+        //     break;
+        default:
+            decelerate();
+            break;
     }
-    while (emergency || !digitalRead(key))      // rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
-    {
-        if (!digitalRead(key) || digitalRead(startFromApp)) emergency = false;
-    }
-    serialCommunications();
 }
 
-// funzione per risolvere l'emergenza tramite app
-// void emergencyResolve() {
-//     emergency = false;
-// }
-
-// reset delle variabili
-void resetVariables() {
-    speed = 0;
-    movementInt = 0;
+// controllo della velocità vicino a zero
+void speedControl(){
+    if (speed < speedGain && speed > -speedGain) speed = 0;
 }
-
-// funzione di emergenza gestita
-    // mandare messaggi agli altri arduino di risolta emergenza
-    // controllo della comunicazione seriale 
-
-// funzione di spegnimento ipotetica
 
 // funzione per muoversi avanti o indietro
 void driveMotor(int motor1, int motor2, int spd) {
@@ -256,11 +272,6 @@ void driveMotor(int motor1, int motor2, int spd) {
     analogWrite(motor2, spd);
 
     // delay(50); // da testare
-}
-
-// controllo della velocità vicino a zero
-void speedControl(){
-    if (speed < speedGain && speed > -speedGain) speed = 0;
 }
 
 // funzione per girare DA FARE
@@ -295,22 +306,3 @@ void decelerate(){
         return;
     }
 }
-
-// funzione per la comunicazione in seriale
-void serialCommunications(){
-    // Serial1.println("Distanza Lidar :" + String(lidarDistance));
-    // Serial1.println("Potenza Segnale :" + String(signalStrength));
-    // Serial1.println("Carica Batteria :" + String(batteryCharge));
-    // Serial1.println("Distanza Ultrasuoni :" + String(ultrasoundDistance));
-    // Serial1.println("Temperatura :" + String(temperature));
-    // Serial1.println("Umidita :" + String(humidity));
-    if (emergency) {
-        Serial1.println("emergenza");
-        Serial2.println("emergenza");
-        Serial3.println("emergenza");
-    } else{
-        Serial1.println("emergenza risolta");
-        Serial2.println("emergenza risolta");
-        Serial3.println("emergenza risolta");
-    }
-}   
