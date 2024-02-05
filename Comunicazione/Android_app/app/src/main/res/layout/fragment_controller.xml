@@ -37,7 +37,8 @@
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.496" />
+                app:layout_constraintVertical_bias="0.496"
+                android:contentDescription="TODO" />
 
             <ImageButton
                 android:id="@+id/btnDown"
@@ -56,17 +57,17 @@
 
             <ImageButton
                 android:id="@+id/bntUp"
-                android:contentDescription="up"
-                android:src="@drawable/vettoreup_bianco__removebg_preview"
                 android:layout_width="95dp"
                 android:layout_height="104dp"
                 android:layout_marginTop="20dp"
                 android:background="#00FFFFFF"
+                android:contentDescription="up"
                 android:scaleType="fitCenter"
+                android:src="@drawable/vettoreup_bianco__removebg_preview"
                 app:layout_constraintBottom_toTopOf="@+id/btnDown"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/imageView2"/>
+                app:layout_constraintTop_toTopOf="@+id/imageView2" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -74,7 +75,7 @@
 
     <FrameLayout
         android:id="@+id/ContainerCenter"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:backgroundTint="#333333"
         android:orientation="horizontal"
@@ -92,10 +93,10 @@
                 android:id="@+id/Display"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="95dp"
-                android:layout_marginBottom="50dp"
+                android:layout_marginTop="90dp"
+                android:layout_marginBottom="30dp"
                 android:contentDescription="display"
-                android:src="@drawable/display_111111"
+                android:src="@drawable/display"
                 app:layout_constraintBottom_toTopOf="@+id/btnStop"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -106,7 +107,7 @@
                 android:id="@+id/btnStop"
                 android:layout_width="142dp"
                 android:layout_height="129dp"
-                android:layout_marginBottom="100dp"
+                android:layout_marginBottom="120dp"
                 android:background="#00FFFFFF"
                 android:contentDescription="stop"
                 android:scaleType="fitCenter"
