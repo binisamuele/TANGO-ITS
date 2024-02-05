@@ -38,10 +38,10 @@ const int echoPinLh = 9;
 
 
 NewPing sonar[SENSORS_NOMBER] = {   // Sensor object array.
-  NewPing(trigPinUp, echoPinUp, MAX_DISTANCE)
-  //NewPing(trigPinDown, echoPinDown, MAX_DISTANCE),
-  //NewPing(trigPinRh, echoPinRh, MAX_DISTANCE),
-  //NewPing(trigPinLh, echoPinLh, MAX_DISTANCE)
+  NewPing(trigPinUp, echoPinUp, MAX_DISTANCE),
+  NewPing(trigPinDown, echoPinDown, MAX_DISTANCE),
+  NewPing(trigPinRh, echoPinRh, MAX_DISTANCE),
+  NewPing(trigPinLh, echoPinLh, MAX_DISTANCE)
 };
 
 
