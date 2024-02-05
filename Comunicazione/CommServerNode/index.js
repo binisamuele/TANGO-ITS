@@ -11,7 +11,7 @@ const http = require('http');
 
 //Consts 
 const port = 3000;
-const arduinoHost = '192.168.0.2';
+const arduinoHost = '192.168.1.4';
 const arduinoPort = '80'; 
 
 //Misc variables
@@ -23,6 +23,7 @@ let lastDirection = null;
 let comExtableshed = false; // control if the communication has been extableshed
                             // emergency stop will be sent only if the communication has been extableshed
 let isAndroidAlive = false;
+let firstFail = true;
 
 // Start server
 app.use(express.json());
@@ -39,6 +40,16 @@ app.use(function(req, res, next) {
     next();
 });
 
+app.get("/", (req, res) => {
+    res.send('OK');
+
+    console.log('Incoming GET request at /');
+
+    comExtableshed = true; //for testing purposes
+    forwardToArduino('up');
+    forwardToArduino('down');
+    forwardToArduino('left');
+})
 
 app.post("/control", (req, res) => {
     try {
@@ -67,11 +78,7 @@ app.post("/control", (req, res) => {
             console.log(">> Controller communication has been stopped!");
             isAndroidAlive = false;
             comExtableshed = false;
-        } 
-        
-        // the same goes for arduino. Node server sends
-        // periodical http request to arduino
-        // TODO
+        }
 
         forwardToArduino(direction);
         
@@ -122,12 +129,12 @@ forwardToArduino = (direction) => {
     const options = {
         hostname: arduinoHost,
         port: arduinoPort,
-        path: '/', 
+        path: '', 
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Content-Length': JSON.stringify(jsonData).length
-        },
+        }
     };
 
     const req = http.request(options, (res) => {
@@ -149,14 +156,50 @@ isValidDirection = (direction) => {
 
 
 setInterval(() => {
+    if (comExtableshed){
+        const jsonData = {
+            arduinoCheck: "ok"
+        };
+
+        const options = {
+            hostname: arduinoHost,
+            port: arduinoPort,
+            path: '', 
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': JSON.stringify(jsonData).length
+            }
+        };
+
+        const req = http.request(options, (res) => {
+            console.log(`Arduino server responded with status code: ${res.statusCode}`);
+        });
+
+        req.on('error', (error) => {
+            console.error('Error sending request to Arduino:', error);
+        });
+
+        req.write(JSON.stringify(jsonData));
+        req.end();
+    }
+
     if (isAndroidAlive){  //connection check passed! 
         isAndroidAlive = false;
+        firstFail = true;
     } else if (comExtableshed){
-        console.log(">>Error: stopping communication...");
-        comExtableshed = false;
-        isAndroidAlive = false;
-        //send emergency stop to arduino
-        forwardToArduino("emergencyStop");
+        if (firstFail){
+            console.log(">>Error: Android not responding...");
+            firstFail = false;
+        }
+        else{
+            console.log(">>Error: stopping communication...");
+            comExtableshed = false;
+            isAndroidAlive = false;
+            firstFail = true;
+            //send emergency stop to arduino
+            forwardToArduino("emergencyStop");
+        }
     } 
-}, 11000);
+}, 6000);
  

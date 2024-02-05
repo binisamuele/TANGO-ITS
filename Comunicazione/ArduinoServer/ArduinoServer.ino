@@ -3,21 +3,32 @@
 #include <string.h>
 #include <ArduinoJson.h>
 
+//Check if connected to server
+unsigned long startTime = millis();
+unsigned long currentTime;
+unsigned long duration = 5000;
+bool checked = false;
+bool firstFail = true;
+bool comExtableshed = false;
+
 //Connectivity Test IP
-int currIPNode = 4;
+int currIPNode = 3;
 
 //Arduino Server
+int arduinoIP = 4;
 int arduinoPort = 80;
 
 // Network Settings
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };  // MAC address
-IPAddress ip(192, 168, 0, 2); // IP address
-IPAddress nodeServer(192, 168, 0, currIPNode);  // IP address of the server you want to connect to
+IPAddress ip(192, 168, 1, arduinoIP); // IP address
+IPAddress nodeServer(192, 168, 1, currIPNode);  // IP address of the server you want to connect to
 
 EthernetClient client;
 EthernetServer server(80);
 
 void setup() {
+  unsigned long startTime = millis();
+
   Serial.begin(9600);
   
   // -- Start the Ethernet connection --
@@ -25,7 +36,7 @@ void setup() {
   Ethernet.setLocalIP(ip);
 
   // -- Testing connectivity --
-  /*DEBUG: */Serial.println(">> Testing connectivity (using Node server connection on port 3000)");
+  Serial.println(">> Testing connectivity (using Node server connection on port 3000)");
   
   if (Ethernet.linkStatus() == LinkOFF){
     Serial.println("Ethernet cable is not connected!");
@@ -65,30 +76,79 @@ void setup() {
 }
 
 void loop() {
-  //do all the server functions only if the server is on
-  //otherwise do nothing 
-  if (server){   //TODO: test this
-    EthernetClient client = server.available();
-    // -- If there's a POST request forward it to the other Arduino -- 
-    if (client) {
-      while (client.connected()) {
-        if (client.available()) {
-          String request = client.readStringUntil('\r');
-          if (request.indexOf("POST") != -1) {
-            client.println("HTTP/1.1 204 No Content");
-            client.println("Content-Type: application/json");
-            client.println("Access-Control-Allow-Origin: *");
-            client.println();
-            client.println("{\"response\":\"ok\"}");
-            String body = client.readString();
-            Serial.println(body);  //TODO: parse this to check if it's a periodical request
-            break;
+  currentTime = millis();
+
+  EthernetClient client = server.available();
+  // -- If there's a POST request forward it to the other Arduino -- 
+  if (client) {
+    // an http request ends with a blank line
+    boolean currentLineIsBlank = true;
+    while (client.connected()) {
+      while(client.available()) {
+        char c = client.read();
+        // if you've gotten to the end of the line (received a newline
+        // character) and the line is blank, the http request has ended,
+        // so you can send a reply
+        if (c == '\n' && currentLineIsBlank) {
+
+  // Here is where the POST data is.  
+          while(client.available())
+          {
+              String body = client.readString();
+              String key = body.substring(body.indexOf("{\"")+2,body.indexOf("\":")); //get key from json
+              String value = body.substring(body.indexOf(":\"")+2,body.length()-2); // get value from json
+              if (key == "arduinoCheck"){
+                if (value == "stop"){
+                  comExtableshed = false;
+                } else if (value == "ok"){
+                  checked = true;
+                }
+              }
+              if (key == "direction"){
+                if (value != "emergencyStop"){
+                  comExtableshed = true;
+                }
+              }
+              Serial.print(key);
           }
+          Serial.println();
+
+          client.println("HTTP/1.0 200 OK");
+          client.println("Content-Type: text/html");
+          client.println();
+          client.println("ok");
+          client.stop();
         }
+        else if (c == '\n') {
+          // you're starting a new line
+          currentLineIsBlank = true;
+        } 
+        else if (c != '\r') {
+          // you've gotten a character on the current line
+          currentLineIsBlank = false;
+        } 
       }
-      client.stop();
     }
-    // TODO: periodically (millis) check if arduino recives node client requests
-    // otherwise send emergency
+  }  
+  
+  if (currentTime - startTime > duration) {
+    startTime = currentTime;
+    if (checked) {
+      checked = false; //check passed 
+      firstFail = true;
+    } else if (comExtableshed){
+      if (firstFail){
+        firstFail = false;
+      }
+      else {
+        comExtableshed = false;
+        checked = false;
+        firstFail = true;
+        // emergency STOP
+      }
+    }
   }
 }
+  // TODO: periodically (millis) check if arduino recives node client requests
+  // otherwise send emergency
+
