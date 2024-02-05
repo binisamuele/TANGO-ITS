@@ -32,9 +32,6 @@ public class MainActivity extends AppCompatActivity {
     Toolbar toolbar;
     NavigationView navigationView;
 
-    // Variabile di stato per tracciare la visibilità della toolbar
-    private boolean isToolbarHidden = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
