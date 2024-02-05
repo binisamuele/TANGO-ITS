@@ -6,7 +6,7 @@
 //Check if connected to server
 unsigned long startTime = millis();
 unsigned long currentTime;
-unsigned long duration = 5000;
+unsigned long duration = 8000;
 bool checked = false;
 bool firstFail = true;
 bool comExtableshed = false;
@@ -134,6 +134,7 @@ void loop() {
   if (currentTime - startTime > duration) {
     startTime = currentTime;
     if (checked) {
+      Serial.println("> Check passed!");
       checked = false; //check passed 
       firstFail = true;
     } else if (comExtableshed){
@@ -141,6 +142,7 @@ void loop() {
         firstFail = false;
       }
       else {
+        Serial.println("> Check failed!");
         comExtableshed = false;
         checked = false;
         firstFail = true;
@@ -149,6 +151,3 @@ void loop() {
     }
   }
 }
-  // TODO: periodically (millis) check if arduino recives node client requests
-  // otherwise send emergency
-
