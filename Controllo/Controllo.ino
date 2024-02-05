@@ -10,6 +10,7 @@ int speed = 0;  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
 const int speedGain = 10;
 const int maxSpeed = 150;
 const int minSpeed = -100;
+bool isRotating = false;
 // float lidarDistance;
 // float signalStrength;
 // float batteryCharge;
@@ -91,11 +92,7 @@ void serialCommunications(){
 
 // segnale di arresto del motore (potrebbe essere non necessaria)
 void emergencyStop() {
-    analogWrite(dxForward, 0);
-    analogWrite(dxBackward, 0);
-
-    analogWrite(sxForward, 0);
-    analogWrite(sxBackward, 0);
+    stopMotor();
 
     resetVariables();
 
@@ -197,6 +194,7 @@ void movement(){
     switch (movementInt) {
         // andare avanti
         case 1:
+            rotationCheck();
             if (speed == maxSpeed) break;                       // se la velocità è al massimo, non fare niente
 
             speed += speedGain;
@@ -211,6 +209,7 @@ void movement(){
             break;
         // andare indietro
         case 2:
+            rotationCheck();
             if (speed == minSpeed) break;                       // se la velocità è al minimo, non fare niente
 
             speed -= speedGain;
@@ -230,6 +229,7 @@ void movement(){
                 break;
             }
             driveMotor(sxForward, dxBackward, 20);
+            isRotating = true;
             break;
         // rotazione in senso antiorario
         case 4:
@@ -238,9 +238,11 @@ void movement(){
                 break;
             }
             driveMotor(dxForward, sxBackward, 20);
+            isRotating = true;
             break;
         // frenata
         case 5:
+            rotationCheck();
             decelerate();
             decelerate();
             break;
@@ -255,6 +257,7 @@ void movement(){
         //     driveMotor(sxForward);
         //     break;
         default:
+            rotationCheck();
             decelerate();
             break;
     }
@@ -263,6 +266,25 @@ void movement(){
 // controllo della velocità vicino a zero
 void speedControl(){
     if (speed < speedGain && speed > -speedGain) speed = 0;
+}
+
+// controllo della rotazione
+void rotationCheck(){
+    if (isRotating){
+        stopMotor();
+        isRotating = false;
+        
+        // delay(50); // da testare
+    }
+}
+
+// funzione per fermare i motori
+void stopMotor(){
+    analogWrite(dxForward, 0);
+    analogWrite(dxBackward, 0);
+
+    analogWrite(sxForward, 0);
+    analogWrite(sxBackward, 0);
 }
 
 // funzione per muoversi avanti o indietro
