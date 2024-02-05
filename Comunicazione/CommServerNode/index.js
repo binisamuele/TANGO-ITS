@@ -6,8 +6,9 @@
 */
 
 // Import modules
-var express = require('express');
+const express = require('express');
 const http = require('http');
+const { forwardToArduino, periodicCheck } = require ('./client-requests.js');
 
 //Consts 
 const port = 3000;
@@ -46,9 +47,9 @@ app.get("/", (req, res) => {
     console.log('Incoming GET request at /');
 
     comExtableshed = true; //for testing purposes
-    forwardToArduino('up');
-    forwardToArduino('down');
-    forwardToArduino('left');
+    lastDirection = forwardToArduino('up', lastDirection);
+    lastDirection = forwardToArduino('down', lastDirection);
+    lastDirection = forwardToArduino('left', lastDirection);
 })
 
 app.post("/control", (req, res) => {
@@ -80,7 +81,7 @@ app.post("/control", (req, res) => {
             comExtableshed = false;
         }
 
-        forwardToArduino(direction);
+        lastDirection = forwardToArduino(direction, lastDirection);
         
         res.send('OK');
     } catch (error) {
@@ -108,80 +109,9 @@ app.post("/connection-check", (req, res) => {
     }
 });
 
-
-forwardToArduino = (direction) => {
-    if (!isValidDirection(direction)){
-        console.log('Invalid direction. Not forwarding to Arduino.');
-        return;
-    }
-
-    if (direction === lastDirection) {
-        console.log('Direction is the same as the previous one. Not forwarding to Arduino.');
-        return;
-    }
-
-    lastDirection = direction;
-
-    const jsonData = {
-        direction: direction
-    };
-
-    const options = {
-        hostname: arduinoHost,
-        port: arduinoPort,
-        path: '', 
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': JSON.stringify(jsonData).length
-        }
-    };
-
-    const req = http.request(options, (res) => {
-        console.log(`Arduino server responded with status code: ${res.statusCode}`);
-    });
-
-    req.on('error', (error) => {
-        console.error('Error sending request to Arduino:', error);
-    });
-
-    req.write(JSON.stringify(jsonData));
-    req.end();
-};
-
-isValidDirection = (direction) => {
-    const validDirections = ['up', 'down', 'left', 'right', "released", "emergencyStop"];
-    return validDirections.includes(direction);
-};
-
-
 setInterval(() => {
     if (comExtableshed){
-        const jsonData = {
-            arduinoCheck: "ok"
-        };
-
-        const options = {
-            hostname: arduinoHost,
-            port: arduinoPort,
-            path: '', 
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': JSON.stringify(jsonData).length
-            }
-        };
-
-        const req = http.request(options, (res) => {
-            console.log(`Arduino server responded with status code: ${res.statusCode}`);
-        });
-
-        req.on('error', (error) => {
-            console.error('Error sending request to Arduino:', error);
-        });
-
-        req.write(JSON.stringify(jsonData));
-        req.end();
+        periodicCheck();
     }
 
     if (isAndroidAlive){  //connection check passed! 
@@ -198,7 +128,7 @@ setInterval(() => {
             isAndroidAlive = false;
             firstFail = true;
             //send emergency stop to arduino
-            forwardToArduino("emergencyStop");
+            forwardToArduino("emergencyStop", lastDirection);
         }
     } 
 }, 6000);
