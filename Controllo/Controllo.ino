@@ -161,7 +161,7 @@ void mapping(String serialString) {
             movementInt = 4;
             return;
         }
-        if (serialVal == "stop"){
+        if (serialVal == "emergencyStop"){
             movementInt = 5;
             return;
         }
