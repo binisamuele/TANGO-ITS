@@ -23,8 +23,6 @@ let lastDirection = null;
 let comExtableshed = false; // control if the communication has been extableshed
                             // emergency stop will be sent only if the communication has been extableshed
 let isAndroidAlive = false;
-let isArduinoAlive = false;
-
 
 // Start server
 app.use(express.json());
@@ -58,6 +56,7 @@ app.post("/control", (req, res) => {
         // you recieved a direction from the client. 
         // now node server expect to recieve a periodical
         // request from the client to keep the connection alive
+        // otherwise send an emergency stop to arduino
 
         if (!comExtableshed && req.body.direction !== "commStop"){
             console.log(">> Controller communication started!");
@@ -67,9 +66,12 @@ app.post("/control", (req, res) => {
         if(comExtableshed && req.body.direction === "commStop"){
             console.log(">> Controller communication has been stopped!");
             isAndroidAlive = false;
-            isArduinoAlive = false;
             comExtableshed = false;
         } 
+        
+        // the same goes for arduino. Node server sends
+        // periodical http request to arduino
+        // TODO
 
         forwardToArduino(direction);
         
@@ -80,21 +82,14 @@ app.post("/control", (req, res) => {
     }
 });
 
-app.post("/connection-check", (req, res) => {    //change to post
+app.post("/connection-check", (req, res) => {
     try {
         //check if json contains key "check"
         if (req.body.hasOwnProperty("androidCheck")){
             let lastAndroidCheck = req.body.androidCheck;
             isAndroidAlive = true;
-            isArduinoAlive = true;
             console.log(`Android check recieved: ${lastAndroidCheck}`);
-        }
-        else if (req.body.hasOwnProperty("arduinoCheck")){
-            let lastArduinoCheck = req.body.arduinoCheck;
-            isArduinoAlive = true;
-            console.log(`Arduino check recieved: ${lastArduinoCheck}`);
-        }
-        else{
+        } else{
             console.log("Invalid check recieved!");
             return;
         }
@@ -154,15 +149,14 @@ isValidDirection = (direction) => {
 
 
 setInterval(() => {
-    if (isAndroidAlive && isArduinoAlive){  //connection check passed! 
-        isAndroidAlive = false;  
-        isArduinoAlive = false;
+    if (isAndroidAlive){  //connection check passed! 
+        isAndroidAlive = false;
     } else if (comExtableshed){
         console.log(">>Error: stopping communication...");
         comExtableshed = false;
         isAndroidAlive = false;
-        isArduinoAlive = false;
         //send emergency stop to arduino
         forwardToArduino("emergencyStop");
     } 
 }, 11000);
+ 

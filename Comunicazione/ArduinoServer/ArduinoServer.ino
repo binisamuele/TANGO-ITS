@@ -25,7 +25,7 @@ void setup() {
   Ethernet.setLocalIP(ip);
 
   // -- Testing connectivity --
-  //DEBUG: Serial.println(">> Testing connectivity (using Node server connection on port 3000)");
+  /*DEBUG: */Serial.println(">> Testing connectivity (using Node server connection on port 3000)");
   
   if (Ethernet.linkStatus() == LinkOFF){
     Serial.println("Ethernet cable is not connected!");
@@ -34,7 +34,7 @@ void setup() {
   // -- HTTP GET request to test connectivity (using retries) --
   for (int retryCount = 0; retryCount < 3; retryCount++){
     if (client.connect(nodeServer, 3000)) {
-      //DEBUG: Serial.println("Connected to server");
+      /*DEBUG: */Serial.println("Connected to server");
 
       client.println("GET /");
       String connectionString = String("Host: 192.168.0." + String(currIPNode));
@@ -44,9 +44,9 @@ void setup() {
       break;
     } else{
       if (retryCount == 2){
-        //DEBUG: Serial.println("Connection failed!");
+        /*DEBUG: */Serial.println("Connection failed!");
       } else{
-        //DEBUG: Serial.println("Connection failed. Retrying...");
+        /*DEBUG: */Serial.println("Connection failed. Retrying...");
         delay(3000);
       }
     }
@@ -57,10 +57,10 @@ void setup() {
   server.begin();
 
   if (server){
-    //DEBUG: Serial.print(">> Server is listening at ");
-    //DEBUG: Serial.println(Ethernet.localIP());
+    /*DEBUG: */Serial.print(">> Server is listening at ");
+    /*DEBUG: */Serial.println(Ethernet.localIP());
   } else {
-    //DEBUG: Serial.println(">> Server failed to start. Restart Arduino!");
+    /*DEBUG: */Serial.println(">> Server failed to start. Restart Arduino!");
   }
 }
 
@@ -81,12 +81,14 @@ void loop() {
             client.println();
             client.println("{\"response\":\"ok\"}");
             String body = client.readString();
-            Serial1.println(body);
+            Serial.println(body);  //TODO: parse this to check if it's a periodical request
             break;
           }
         }
       }
       client.stop();
     }
+    // TODO: periodically (millis) check if arduino recives node client requests
+    // otherwise send emergency
   }
 }
