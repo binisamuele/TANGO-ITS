@@ -2,11 +2,14 @@ package com.example.irobotapplication;
 
 
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -45,6 +48,9 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
         toggle.getDrawerArrowDrawable().setColor(getResources().getColor(R.color.white));
+
+        changeStatusBarColor(getResources().getColor(R.color.dark));
+
 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -166,6 +172,14 @@ public class MainActivity extends AppCompatActivity {
         SpannableString spanString = new SpannableString(menuItem.getTitle().toString());
         spanString.setSpan(new ForegroundColorSpan(color), 0, spanString.length(), 0);
         menuItem.setTitle(spanString);
+    }
+    private void changeStatusBarColor(int color) {
+        // Verifica se il dispositivo sta eseguendo Android 5.0 (API level 21) o versioni successive
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(color);
+        }
     }
 
 
