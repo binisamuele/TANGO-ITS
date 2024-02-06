@@ -1,3 +1,7 @@
+const { arduinoHost, arduinoPort } = require('./costants.js');
+const http = require('http');
+
+
 forwardToArduino = (direction, lastDirection) => {
     if (!isValidDirection(direction)){
         console.log('Invalid direction. Not forwarding to Arduino.');

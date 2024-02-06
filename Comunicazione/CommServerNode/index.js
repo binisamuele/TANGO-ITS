@@ -7,13 +7,8 @@
 
 // Import modules
 const express = require('express');
-const http = require('http');
 const { forwardToArduino, periodicCheck } = require ('./client-requests.js');
-
-//Consts 
-const port = 3000;
-const arduinoHost = '192.168.1.4';
-const arduinoPort = '80'; 
+const { nodePort } = require('./costants.js');
 
 //Misc variables
 var app = express();
@@ -29,8 +24,8 @@ let firstFail = true;
 // Start server
 app.use(express.json());
 
-app.listen(port, () => {
-    console.log(`Server listening on port: ${port}`);
+app.listen(nodePort, () => {
+    console.log(`Server listening on port: ${nodePort}`);
     console.log('---------------------------------');
 });
 
@@ -119,14 +114,15 @@ setInterval(() => {
         firstFail = true;
     } else if (comExtableshed){
         if (firstFail){
-            console.log(">>Error: Android not responding...");
+            console.log(">> Error: Android not responding...");
             firstFail = false;
         }
         else{
-            console.log(">>Error: stopping communication...");
+            console.log(">> Error: stopping communication...");
             comExtableshed = false;
             isAndroidAlive = false;
             firstFail = true;
+            lastDirection = "";
             //send emergency stop to arduino
             forwardToArduino("emergencyStop", lastDirection);
         }
