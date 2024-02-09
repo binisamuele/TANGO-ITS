@@ -41,10 +41,12 @@ app.get("/", (req, res) => {
 
     console.log('Incoming GET request at /');
 
-    comExtableshed = true; //for testing purposes
+    /*for testing purposes
+    comExtableshed = true; 
     lastDirection = forwardToArduino('up', lastDirection);
     lastDirection = forwardToArduino('down', lastDirection);
     lastDirection = forwardToArduino('left', lastDirection);
+    */
 })
 
 app.post("/control", (req, res) => {
@@ -74,6 +76,7 @@ app.post("/control", (req, res) => {
             console.log(">> Controller communication has been stopped!");
             isAndroidAlive = false;
             comExtableshed = false;
+            periodicCheck("stop");
         }
 
         lastDirection = forwardToArduino(direction, lastDirection);
@@ -87,7 +90,7 @@ app.post("/control", (req, res) => {
 
 app.post("/connection-check", (req, res) => {
     try {
-        //check if json contains key "check"
+        //check if json contains key "androidCheck"
         if (req.body.hasOwnProperty("androidCheck")){
             let lastAndroidCheck = req.body.androidCheck;
             isAndroidAlive = true;
@@ -106,7 +109,7 @@ app.post("/connection-check", (req, res) => {
 
 setInterval(() => {
     if (comExtableshed){
-        periodicCheck();
+        comExtableshed = periodicCheck("ok");
     }
 
     if (isAndroidAlive){  //connection check passed! 
@@ -127,5 +130,5 @@ setInterval(() => {
             forwardToArduino("emergencyStop", lastDirection);
         }
     } 
-}, 6000);
+}, 4000);
  

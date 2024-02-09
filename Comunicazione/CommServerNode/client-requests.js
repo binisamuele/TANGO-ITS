@@ -50,9 +50,11 @@ isValidDirection = (direction) => {
 };
 
 
-periodicCheck = () => {
+periodicCheck = (value) => {
+    let comStatus = true;
+
     const jsonData = {
-        arduinoCheck: "ok"
+        arduinoCheck: value
     };
     
     const options = {
@@ -71,11 +73,14 @@ periodicCheck = () => {
     });
     
     req.on('error', (error) => {
+        comStatus = false;
         console.error('Error sending request to Arduino:', error);
     });
     
     req.write(JSON.stringify(jsonData));
     req.end();
+
+    return comStatus;
 }
 
 module.exports = {
