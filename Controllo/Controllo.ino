@@ -1,18 +1,16 @@
 String serial1String = "";
 String serial2String = "";
 String serial3String = "";
-int movementInt = 0;
-int dxForward = 28, dxBackward = 29, dxForwardEn = 26, dxBackwardEn = 27; // Motore DX
-int sxForward = 24, sxBackward = 25, sxForwardEn = 22, sxBackwardEn = 23;  // Motore SX che stiamo testando
-int startFromApp = 50 // pin collegato all'app per l'accensione
-int key = 30; // pin della chiave
+int movementInt;
+int dxForward = 2, dxBackward = 3, dxForwardEn = 9, dxBackwardEn = 10; // Motore DX
+int sxForward = 4, sxBackward = 5, sxForwardEn = 11, sxBackwardEn = 12;  // Motore SX
+int startFromApp = 50 // pin collegato all'app per la'accensione
+int key = 20; // pin della chiave
 int speed = 0;  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
 const int speedGain = 10;
 const int maxSpeed = 150;
 const int minSpeed = -100;
 bool isRotating = false;
-int instruction[] = {1, 1, 5, 2, 2, 5, 3, 5, 4, 5, 9};
-int i = 0;
 // float lidarDistance;
 // float signalStrength;
 // float batteryCharge;
@@ -22,6 +20,10 @@ int i = 0;
 bool emergency = true;
 
 void setup() {
+    Serial1.begin(9600);    // collegamento all'arduino di comunicazione
+    Serial2.begin(9600);    // collegamento all'arduino del LIDAR
+    Serial3.begin(9600);    // collegamento all'arduino dei sensori
+
     pinMode(dxForward, OUTPUT);
     pinMode(dxBackward, OUTPUT);
     pinMode(dxForwardEn, OUTPUT);
@@ -34,21 +36,24 @@ void setup() {
 
     pinMode(key, INPUT);
 
-    // attachInterrupt(0, emergencyState, FALLING); // Pin 2 per emergenza pulsanti
-    // attachInterrupt(1, emergencyState, RISING); // Pin 3 per emergenza bumper
-    // <attachInterrupt(2, emergencyState, RISING); // Pin 21 per emergenze arduino (hardware deve utilizzare un diodo)
+    attachInterrupt(0, emergencyState, FALLING); // Pin 2 per emergenza pulsanti
+    attachInterrupt(1, emergencyState, RISING); // Pin 3 per emergenza bumper
+    attachInterrupt(2, emergencyState, RISING); // Pin 21 per emergenze arduino (hardware deve utilizzare un diodo)
     //attachInterrupt(3, emergencyResolve, RISING); // Pin 20 per stato emergenza
 }
 
 void loop() {
     // controllo della comunicazione seriale (anche gli altri arduino devono fare il controllo del seriale)
-    if (emergency) {
+    if (!Serial1 || !Serial2 || !Serial3 || emergency) {
         emergencyState();
         return;
     }
-    movementInt = instruction[i];
-    i++;
-    
+    readSerial();
+
+    mapping(serial1String);
+    mapping(serial2String);
+    mapping(serial3String);
+
     movement(); // switch del movimento
 }
 
@@ -56,13 +61,34 @@ void loop() {
 void emergencyState() {
     if (!emergency){            // ferma la macchina e manda un messaggio di emergenza agli altri arduino
         emergency = true;
+        serialCommunications();     // manda segnale di emergenza agli altri arduino
         emergencyStop();
     }
     while (emergency || !digitalRead(key))      // rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
     {
         if (!digitalRead(key) || digitalRead(startFromApp)) emergency = false;
     }
+    serialCommunications();     // manda segnale di fine emergenza agli altri arduino
 }
+
+// funzione per la comunicazione in seriale
+void serialCommunications(){
+    // Serial1.println("Distanza Lidar :" + String(lidarDistance));
+    // Serial1.println("Potenza Segnale :" + String(signalStrength));
+    // Serial1.println("Carica Batteria :" + String(batteryCharge));
+    // Serial1.println("Distanza Ultrasuoni :" + String(ultrasoundDistance));
+    // Serial1.println("Temperatura :" + String(temperature));
+    // Serial1.println("Umidita :" + String(humidity));
+    if (emergency) {
+        Serial1.println("emergenza");
+        Serial2.println("emergenza");
+        Serial3.println("emergenza");
+    } else{
+        Serial1.println("emergenza risolta");
+        Serial2.println("emergenza risolta");
+        Serial3.println("emergenza risolta");
+    }
+}   
 
 // segnale di arresto del motore (potrebbe essere non necessaria)
 void emergencyStop() {
@@ -77,6 +103,90 @@ void emergencyStop() {
 void resetVariables() {
     speed = 0;
     movementInt = 0;
+}
+
+// lettura dei 3 arduino
+void readSerial(){
+    if(Serial1.available()) {
+        serial1String = Serial1.readStringUntil('\r\n');
+        Serial1.write("Messaggio ricevuto");
+    }
+    if(Serial2.available()) {
+        serial2String = Serial2.readStringUntil('\r\n');
+        Serial2.write("Messaggio ricevuto");
+    }
+    if(Serial3.available()) {
+        serial3String = Serial3.readStringUntil('\r\n');
+        Serial3.write("Messaggio ricevuto");
+    }
+}
+
+// mapping dei messaggi
+void mapping(String serialString) {
+    int index = serialString.lastIndexOf(':');
+    int length = serialString.length();
+    String topic = serialString.substring(0, index);
+    String serialVal = serialString.substring(index+1, length);
+
+    if (topic == "movimento") {
+
+        if (serialVal == "up"){
+            movementInt = 1;
+            return;
+        }
+        if (serialVal == "down"){
+            movementInt = 2;
+            return;
+        }
+        if (serialVal == "right"){ // ruotare a destra
+            movementInt = 3;
+            return;
+        }
+        if (serialVal == "left"){ // ruotare a sinistra
+            movementInt = 4;
+            return;
+        }
+        if (serialVal == "emergencyStop"){
+            movementInt = 5;
+            return;
+        }
+        // if (serialVal == ""){
+        //     movementInt = 6;
+        //     return;
+        // }
+        // if (serialVal == ""){
+        //     movementInt = 7;
+        //     return;
+        // }
+        movementInt = 0;
+        return;
+    }
+    
+    // trovare motivazione per queste variabili
+    // if (topic == "distanzaLidar"){
+    //     lidarDistance = serialVal.toFloat();
+    //     return;
+    // }
+    // if (topic == "potenzaSegnale"){
+    //     signalStrength = serialVal.toFloat();
+    //     return;
+    // }
+    // if (topic == "caricaBatteria"){
+    //     batteryCharge = serialVal.toFloat();
+    //     return;
+    // }
+    // if (topic == "distanzaUltraSuoni"){
+    //     ultrasoundDistance = serialVal.toFloat();
+    //     return;
+    // }
+    // if (topic == "temperatura"){
+    //     temperature = serialVal.toFloat();
+    //     return;
+    // }
+    // if (topic == "umidita"){
+    //     humidity = serialVal.toFloat();
+    //     return;
+    // }
 }
 
 // funzione con le opzioni di movimento
