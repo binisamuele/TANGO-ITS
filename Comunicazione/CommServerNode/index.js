@@ -6,13 +6,9 @@
 */
 
 // Import modules
-var express = require('express');
-const http = require('http');
-
-//Consts 
-const port = 3000;
-const arduinoHost = '192.168.0.2';
-const arduinoPort = '80'; 
+const express = require('express');
+const { forwardToArduino, periodicCheck } = require ('./client-requests.js');
+const { nodePort } = require('./costants.js');
 
 //Misc variables
 var app = express();
@@ -23,12 +19,13 @@ let lastDirection = null;
 let comExtableshed = false; // control if the communication has been extableshed
                             // emergency stop will be sent only if the communication has been extableshed
 let isAndroidAlive = false;
+let firstFail = true;
 
 // Start server
 app.use(express.json());
 
-app.listen(port, () => {
-    console.log(`Server listening on port: ${port}`);
+app.listen(nodePort, () => {
+    console.log(`Server listening on port: ${nodePort}`);
     console.log('---------------------------------');
 });
 
@@ -39,6 +36,16 @@ app.use(function(req, res, next) {
     next();
 });
 
+app.get("/", (req, res) => {
+    res.send('OK');
+
+    console.log('Incoming GET request at /');
+
+    comExtableshed = true; //for testing purposes
+    lastDirection = forwardToArduino('up', lastDirection);
+    lastDirection = forwardToArduino('down', lastDirection);
+    lastDirection = forwardToArduino('left', lastDirection);
+})
 
 app.post("/control", (req, res) => {
     try {
@@ -67,13 +74,9 @@ app.post("/control", (req, res) => {
             console.log(">> Controller communication has been stopped!");
             isAndroidAlive = false;
             comExtableshed = false;
-        } 
-        
-        // the same goes for arduino. Node server sends
-        // periodical http request to arduino
-        // TODO
+        }
 
-        forwardToArduino(direction);
+        lastDirection = forwardToArduino(direction, lastDirection);
         
         res.send('OK');
     } catch (error) {
@@ -101,62 +104,28 @@ app.post("/connection-check", (req, res) => {
     }
 });
 
-
-forwardToArduino = (direction) => {
-    if (!isValidDirection(direction)){
-        console.log('Invalid direction. Not forwarding to Arduino.');
-        return;
-    }
-
-    if (direction === lastDirection) {
-        console.log('Direction is the same as the previous one. Not forwarding to Arduino.');
-        return;
-    }
-
-    lastDirection = direction;
-
-    const jsonData = {
-        direction: direction
-    };
-
-    const options = {
-        hostname: arduinoHost,
-        port: arduinoPort,
-        path: '/', 
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': JSON.stringify(jsonData).length
-        },
-    };
-
-    const req = http.request(options, (res) => {
-        console.log(`Arduino server responded with status code: ${res.statusCode}`);
-    });
-
-    req.on('error', (error) => {
-        console.error('Error sending request to Arduino:', error);
-    });
-
-    req.write(JSON.stringify(jsonData));
-    req.end();
-};
-
-isValidDirection = (direction) => {
-    const validDirections = ['up', 'down', 'left', 'right', "released", "emergencyStop"];
-    return validDirections.includes(direction);
-};
-
-
 setInterval(() => {
+    if (comExtableshed){
+        periodicCheck();
+    }
+
     if (isAndroidAlive){  //connection check passed! 
         isAndroidAlive = false;
+        firstFail = true;
     } else if (comExtableshed){
-        console.log(">>Error: stopping communication...");
-        comExtableshed = false;
-        isAndroidAlive = false;
-        //send emergency stop to arduino
-        forwardToArduino("emergencyStop");
+        if (firstFail){
+            console.log(">> Error: Android not responding...");
+            firstFail = false;
+        }
+        else{
+            console.log(">> Error: stopping communication...");
+            comExtableshed = false;
+            isAndroidAlive = false;
+            firstFail = true;
+            lastDirection = "";
+            //send emergency stop to arduino
+            forwardToArduino("emergencyStop", lastDirection);
+        }
     } 
-}, 11000);
+}, 6000);
  
