@@ -133,19 +133,11 @@ String printHumidity() {
 
 //funzioni monitoraggio stato della batteria
 void measureVoltmeters() {
-    // Misura tensione da voltmeter1Pin e voltmeter2Pin
-    float voltage1 = analogRead(voltmeter1Pin) * (5.0 / 1023.0);
-    //float voltage2 = analogRead(voltmeter2Pin) * (5.0 / 1023.0);
-
-    // Stampa tensioni sulla porta seriale
-    Serial.print("V1: ");
-    Serial.print(voltage1, 2);
-    Serial.print("V");
-    //Serial.print(voltage2, 2);
-    //Serial.println("V");
-
+  // Misura tensione da voltmeter1Pin
+  float voltage1 = analogRead(voltmeter1Pin) /40.92;
+  sprintf(buffer, "voltaggio: %d.%d", (int)voltage1, ((int)(voltage1*10) % 10));
+  Serial.println(buffer);
 }
-
 
 /* WIP da sistemare
 void updateLCD() {
