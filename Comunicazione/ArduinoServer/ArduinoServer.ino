@@ -3,16 +3,19 @@
 #include <string.h>
 #include <ArduinoJson.h>
 
+//PINS
+int emergency = 13;
+
 //Check if connected to server
 unsigned long startTime = millis();
 unsigned long currentTime;
-unsigned long duration = 8000;
+unsigned long duration = 4500;
 bool checked = false;
-bool firstFail = true;
+bool failed = false;
 bool comExtableshed = false;
 
 //Connectivity Test IP
-int currIPNode = 3;
+int currIPNode = 2;
 
 //Arduino Server
 int arduinoIP = 4;
@@ -27,6 +30,8 @@ EthernetClient client;
 EthernetServer server(80);
 
 void setup() {
+  pinMode(13, OUTPUT);
+  
   unsigned long startTime = millis();
 
   Serial.begin(9600);
@@ -108,6 +113,14 @@ void loop() {
                 if (value != "emergencyStop"){
                   comExtableshed = true;
                 }
+                else {
+                  comExtableshed = false;
+                  Serial.println("EMERGENCY!");
+                  // emergency STOP
+                  digitalWrite(emergency, HIGH);
+                  delay(1000);
+                  digitalWrite(emergency, LOW);
+                }
               }
               Serial.print(key);
           }
@@ -136,17 +149,20 @@ void loop() {
     if (checked) {
       Serial.println("> Check passed!");
       checked = false; //check passed 
-      firstFail = true;
+      failed = false;
     } else if (comExtableshed){
-      if (firstFail){
-        firstFail = false;
+      if (!failed){
+        failed = true;
       }
       else {
         Serial.println("> Check failed!");
         comExtableshed = false;
         checked = false;
-        firstFail = true;
+        failed = false;
         // emergency STOP
+        digitalWrite(emergency, HIGH);
+        delay(1000);
+        digitalWrite(emergency, LOW);
       }
     }
   }
