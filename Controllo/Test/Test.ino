@@ -3,8 +3,8 @@ String serial2String = "";
 String serial3String = "";
 int movementInt = 0;
 int dxForward = 28, dxBackward = 29, dxForwardEn = 26, dxBackwardEn = 27; // Motore DX
-int sxForward = 24, sxBackward = 25, sxForwardEn = 22, sxBackwardEn = 23;  // Motore SX che stiamo testando
-int startFromApp = 50 // pin collegato all'app per l'accensione
+int sxForward = 25, sxBackward = 24, sxForwardEn = 23, sxBackwardEn = 22;  // Motore SX che stiamo testando
+int startFromApp = 50; // pin collegato all'app per l'accensione
 int key = 30; // pin della chiave
 int speed = 0;  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
 const int speedGain = 10;
@@ -32,9 +32,14 @@ void setup() {
     pinMode(sxForwardEn, OUTPUT);
     pinMode(sxBackwardEn, OUTPUT);
 
+    digitalWrite(dxForwardEn, HIGH);
+    digitalWrite(dxBackwardEn, HIGH);
+    digitalWrite(sxForwardEn, HIGH);
+    digitalWrite(sxBackwardEn, HIGH);
+
     pinMode(key, INPUT);
 
-    // attachInterrupt(0, emergencyState, FALLING); // Pin 2 per emergenza pulsanti
+    attachInterrupt(0, emergencyState, FALLING); // Pin 2 per emergenza pulsanti
     // attachInterrupt(1, emergencyState, RISING); // Pin 3 per emergenza bumper
     // <attachInterrupt(2, emergencyState, RISING); // Pin 21 per emergenze arduino (hardware deve utilizzare un diodo)
     //attachInterrupt(3, emergencyResolve, RISING); // Pin 20 per stato emergenza
@@ -47,7 +52,7 @@ void loop() {
         return;
     }
     movementInt = instruction[i];
-    i++;
+    i = i++ % sizeof(instruction);
     
     movement(); // switch del movimento
 }
@@ -70,7 +75,6 @@ void emergencyStop() {
 
     resetVariables();
 
-    delay(1000);
 }
 
 // reset delle variabili
