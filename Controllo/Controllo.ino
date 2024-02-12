@@ -1,28 +1,22 @@
-String serial1String = "";
-String serial2String = "";
-String serial3String = "";
-int movementInt;
-int dxForward = 2, dxBackward = 3, dxForwardEn = 9, dxBackwardEn = 10; // Motore DX
-int sxForward = 4, sxBackward = 5, sxForwardEn = 11, sxBackwardEn = 12;  // Motore SX
-int startFromApp = 50 // pin collegato all'app per la'accensione
-int key = 20; // pin della chiave
+const int dxForward = 2, dxBackward = 3, dxForwardEn = 26, dxBackwardEn = 27;   // Motore DX, pin da modificare
+const int sxForward = 4, sxBackward = 5, sxForwardEn = 23, sxBackwardEn = 22;   // Motore SX, pin da modificare
+const int startFromApp;     // pin collegato all'app per l'accensione
+const int key = 20;         // pin della chiave
+const int emergencyPin1; emergencyPin2; emergencyPin3;      // pin per inviare messaggi di emergenza
+const int communicationPin1; communicationPin2; communicationPin3;      // pin per la rispota ai messaggi
+String serialString = "";
+int movementInt = 0;
 int speed = 0;  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
 const int speedGain = 10;
 const int maxSpeed = 150;
 const int minSpeed = -100;
 bool isRotating = false;
-// float lidarDistance;
-// float signalStrength;
-// float batteryCharge;
-// float ultrasoundDistance;
-// float temperature;
-// float humidity;
 bool emergency = true;
 
 void setup() {
     Serial1.begin(9600);    // collegamento all'arduino di comunicazione
-    Serial2.begin(9600);    // collegamento all'arduino del LIDAR
-    Serial3.begin(9600);    // collegamento all'arduino dei sensori
+    Serial2.begin(9600);    // collegamento all'arduino dei sensori di movimento
+    Serial3.begin(9600);    // collegamento all'arduino degli altri sensori
 
     pinMode(dxForward, OUTPUT);
     pinMode(dxBackward, OUTPUT);
@@ -34,12 +28,19 @@ void setup() {
     pinMode(sxForwardEn, OUTPUT);
     pinMode(sxBackwardEn, OUTPUT);
 
+    pinMode(emergencyPin1, OUTPUT);
+    pinMode(emergencyPin2, OUTPUT);
+    pinMode(emergencyPin3, OUTPUT);
+
+    pinMode(communicationPin1, OUTPUT);
+    pinMode(communicationPin2, OUTPUT);
+    pinMode(communicationPin3, OUTPUT);
+
     pinMode(key, INPUT);
 
-    attachInterrupt(0, emergencyState, FALLING); // Pin 2 per emergenza pulsanti
-    attachInterrupt(1, emergencyState, RISING); // Pin 3 per emergenza bumper
-    attachInterrupt(2, emergencyState, RISING); // Pin 21 per emergenze arduino (hardware deve utilizzare un diodo)
-    //attachInterrupt(3, emergencyResolve, RISING); // Pin 20 per stato emergenza
+    attachInterrupt(0, emergencyState, FALLING);    // Pin 2 per emergenza pulsanti
+    attachInterrupt(1, emergencyState, RISING);     // Pin 3 per emergenza bumper
+    attachInterrupt(2, emergencyState, RISING);     // Pin 21 per emergenze arduino (hardware deve utilizzare un diodo)
 }
 
 void loop() {
@@ -48,11 +49,8 @@ void loop() {
         emergencyState();
         return;
     }
-    readSerial();
 
-    mapping(serial1String);
-    mapping(serial2String);
-    mapping(serial3String);
+    readSerial();
 
     movement(); // switch del movimento
 }
@@ -61,42 +59,38 @@ void loop() {
 void emergencyState() {
     if (!emergency){            // ferma la macchina e manda un messaggio di emergenza agli altri arduino
         emergency = true;
-        serialCommunications();     // manda segnale di emergenza agli altri arduino
         emergencyStop();
+        emergencyComm();        // segnale di emergenza agli altri arduino
     }
+
     while (emergency || !digitalRead(key))      // rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
     {
         if (!digitalRead(key) || digitalRead(startFromApp)) emergency = false;
     }
-    serialCommunications();     // manda segnale di fine emergenza agli altri arduino
+
+    emergencyComm();            // segnale di fine emergenza agli altri arduino
 }
 
-// funzione per la comunicazione in seriale
-void serialCommunications(){
-    // Serial1.println("Distanza Lidar :" + String(lidarDistance));
-    // Serial1.println("Potenza Segnale :" + String(signalStrength));
-    // Serial1.println("Carica Batteria :" + String(batteryCharge));
-    // Serial1.println("Distanza Ultrasuoni :" + String(ultrasoundDistance));
-    // Serial1.println("Temperatura :" + String(temperature));
-    // Serial1.println("Umidita :" + String(humidity));
-    if (emergency) {
-        Serial1.println("emergenza");
-        Serial2.println("emergenza");
-        Serial3.println("emergenza");
-    } else{
-        Serial1.println("emergenza risolta");
-        Serial2.println("emergenza risolta");
-        Serial3.println("emergenza risolta");
+// funzione di comunicazioni di emergenza
+void emergencyComm(){
+    if (emergency){
+        digitalWrite(emergencyPin1, HIGH);     // manda segnale di emergenza agli altri arduino
+        digitalWrite(emergencyPin2, HIGH);
+        digitalWrite(emergencyPin3, HIGH);
+        return;
     }
-}   
+
+    digitalWrite(emergencyPin1, LOW);     // manda segnale di fine emergenza agli altri arduino
+    digitalWrite(emergencyPin2, LOW);
+    digitalWrite(emergencyPin3, LOW);
+}
 
 // segnale di arresto del motore (potrebbe essere non necessaria)
 void emergencyStop() {
     stopMotor();
-
     resetVariables();
 
-    delay(1000);
+    delay(200);
 }
 
 // reset delle variabili
@@ -108,17 +102,26 @@ void resetVariables() {
 // lettura dei 3 arduino
 void readSerial(){
     if(Serial1.available()) {
-        serial1String = Serial1.readStringUntil('\r\n');
-        Serial1.write("Messaggio ricevuto");
+        serialString = Serial1.readStringUntil('\r\n');
+        digitalWrite(communicationPin1, HIGH);
+        delay(50); // da testare
+        digitalWrite(communicationPin1, LOW);
+        mapping(serialString);
     }
-    if(Serial2.available()) {
-        serial2String = Serial2.readStringUntil('\r\n');
-        Serial2.write("Messaggio ricevuto");
-    }
-    if(Serial3.available()) {
-        serial3String = Serial3.readStringUntil('\r\n');
-        Serial3.write("Messaggio ricevuto");
-    }
+    // if(Serial2.available()) {
+    //     serialString = Serial2.readStringUntil('\r\n');
+    //     digitalWrite(communicationPin2, HIGH);
+    //     delay(100);
+    //     digitalWrite(communicationPin2, LOW);
+    //     mapping(serialString);
+    // }
+    // if(Serial3.available()) {
+    //     serialString = Serial3.readStringUntil('\r\n');
+    //     digitalWrite(communicationPin3, HIGH);
+    //     delay(100);
+    //     digitalWrite(communicationPin3, LOW);
+    //     mapping(serialString);
+    // }
 }
 
 // mapping dei messaggi
@@ -150,44 +153,10 @@ void mapping(String serialString) {
             movementInt = 5;
             return;
         }
-        // if (serialVal == ""){
-        //     movementInt = 6;
-        //     return;
-        // }
-        // if (serialVal == ""){
-        //     movementInt = 7;
-        //     return;
-        // }
         movementInt = 0;
         return;
     }
-    
-    // trovare motivazione per queste variabili
-    // if (topic == "distanzaLidar"){
-    //     lidarDistance = serialVal.toFloat();
-    //     return;
-    // }
-    // if (topic == "potenzaSegnale"){
-    //     signalStrength = serialVal.toFloat();
-    //     return;
-    // }
-    // if (topic == "caricaBatteria"){
-    //     batteryCharge = serialVal.toFloat();
-    //     return;
-    // }
-    // if (topic == "distanzaUltraSuoni"){
-    //     ultrasoundDistance = serialVal.toFloat();
-    //     return;
-    // }
-    // if (topic == "temperatura"){
-    //     temperature = serialVal.toFloat();
-    //     return;
-    // }
-    // if (topic == "umidita"){
-    //     humidity = serialVal.toFloat();
-    //     return;
-    // }
-}
+} 
 
 // funzione con le opzioni di movimento
 void movement(){
@@ -195,32 +164,24 @@ void movement(){
         // andare avanti
         case 1:
             rotationCheck();
-            if (speed == maxSpeed) break;                       // se la velocità è al massimo, non fare niente
 
-            speed += speedGain;
-            speedControl();
-
-            if (speed < 10) {                                   // se la velocità era negativa, rallentiamo i motori
-                driveMotor(dxBackward, sxBackward, speed);
+            if (speed < 0) {                                   // se la velocità era negativa, rallentiamo i motori
+                decelerate();
                 break;
             }
 
-            driveMotor(dxForward, sxForward, speed);
+            accelerate();
             break;
         // andare indietro
         case 2:
             rotationCheck();
-            if (speed == minSpeed) break;                       // se la velocità è al minimo, non fare niente
 
-            speed -= speedGain;
-            speedControl();
-
-            if (speed > -10) {                                   // se la velocità era positiva, rallentiamo i motori
-                driveMotor(dxForward, sxForward, speed);
+            if (speed > 0) {                                   // se la velocità era positiva, rallentiamo i motori
+                decelerate();
                 break;
             }
 
-            driveMotor(dxBackward, sxBackward, speed);
+            accelerate();
             break;
         // rotazione in senso orario
         case 3:
@@ -228,7 +189,9 @@ void movement(){
                 decelerate();
                 break;
             }
+
             driveMotor(sxForward, dxBackward, 20);
+
             isRotating = true;
             break;
         // rotazione in senso antiorario
@@ -237,27 +200,22 @@ void movement(){
                 decelerate();
                 break;
             }
+
             driveMotor(dxForward, sxBackward, 20);
+
             isRotating = true;
             break;
         // frenata
         case 5:
             rotationCheck();
+
             decelerate();
             decelerate();
             break;
-        // // curvare destra DA FARE
-        // case 6:
-        //     halfMotor(sxForward);
-        //     driveMotor(dxForward);
-        //     break;
-        // // curvare sinistra DA FARE
-        // case 7:   
-        //     halfMotor(dxForward);
-        //     driveMotor(sxForward);
-        //     break;
+        // nessun comando di movimento
         default:
             rotationCheck();
+
             decelerate();
             break;
     }
@@ -273,8 +231,6 @@ void rotationCheck(){
     if (isRotating){
         stopMotor();
         isRotating = false;
-        
-        // delay(50); // da testare
     }
 }
 
@@ -285,32 +241,38 @@ void stopMotor(){
 
     analogWrite(sxForward, 0);
     analogWrite(sxBackward, 0);
+
+    delay(50); // da testare
 }
 
 // funzione per muoversi avanti o indietro
 void driveMotor(int motor1, int motor2, int spd) {
     if (spd < 0) spd = -spd;
+
     analogWrite(motor1, spd);
     analogWrite(motor2, spd);
 
-    // delay(50); // da testare
+    delay(50); // da testare
 }
 
-// funzione per girare DA FARE
-// void halfMotor(int motorForward) {
-//     int newSpeed = 0;
+// funzione per accelerare
+void accelerate(){
+    if (speed > 0) {
+        if (speed >= maxSpeed) return;      // se la velocità è al massimo, non fare niente
 
-//     if (speed > 0) newSpeed = speed - speedGain;
+        speed += speedGain;
+        driveMotor(dxForward, sxForward, speed);
+        return;
+    }
 
-//     if (motorForward == dxForward){
-//         analogWrite(dxForwardEn, newSpeed);
-//         return;
-//     }
-//     if (motorForward == sxForward){
-//         analogWrite(sxForwardEn, newSpeed);
-//         return;
-//     }
-// }
+    if (speed < 0) {
+        if (speed <= minSpeed) return;      // se la velocità è al minimo, non fare niente
+
+        speed -= speedGain;
+        driveMotor(dxBackward, sxBackward, speed);
+        return;
+    }
+}
 
 // funzione per decelerare e lentamente fermarsi
 void decelerate(){
