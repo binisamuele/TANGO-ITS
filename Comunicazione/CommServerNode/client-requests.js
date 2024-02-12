@@ -1,6 +1,9 @@
 const { arduinoHost, arduinoPort } = require('./costants.js');
 const http = require('http');
 
+//
+// forward direction to Arduino
+//
 
 forwardToArduino = (direction, lastDirection) => {
     if (!isValidDirection(direction)){
@@ -44,12 +47,17 @@ forwardToArduino = (direction, lastDirection) => {
     return lastDirection;
 };
 
+//
+// valid directions for Arduino
+//
 isValidDirection = (direction) => {
     const validDirections = ['up', 'down', 'left', 'right', "released", "emergencyStop"];
     return validDirections.includes(direction);
 };
 
-
+//
+// periodic connection checks between node and Arduino 
+//
 periodicCheck = (value) => {
     let comStatus = true;
 
