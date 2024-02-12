@@ -36,19 +36,18 @@ app.use(function(req, res, next) {
     next();
 });
 
+//
+// endpoint GET for test purposes
+//
 app.get("/", (req, res) => {
     res.send('OK');
 
     console.log('Incoming GET request at /');
-
-    /*for testing purposes
-    comExtableshed = true; 
-    lastDirection = forwardToArduino('up', lastDirection);
-    lastDirection = forwardToArduino('down', lastDirection);
-    lastDirection = forwardToArduino('left', lastDirection);
-    */
 })
 
+//
+// endpoint POST to control arduino 
+//
 app.post("/control", (req, res) => {
     try {
         const direction = req.body.direction;
@@ -67,7 +66,7 @@ app.post("/control", (req, res) => {
         // request from the client to keep the connection alive
         // otherwise send an emergency stop to arduino
 
-        if (!comExtableshed && req.body.direction !== "commStop"){
+        if (!comExtableshed && direction !== "commStop" && direction !== "emergencyStop"){
             console.log(">> Controller communication started!");
             comExtableshed = true;
         }
@@ -88,13 +87,15 @@ app.post("/control", (req, res) => {
     }
 });
 
+//
+// endpoint POST for connection check with android
+//
 app.post("/connection-check", (req, res) => {
     try {
         //check if json contains key "androidCheck"
         if (req.body.hasOwnProperty("androidCheck")){
-            let lastAndroidCheck = req.body.androidCheck;
             isAndroidAlive = true;
-            console.log(`Android check recieved: ${lastAndroidCheck}`);
+            console.log(`Android check recieved!`);
         } else{
             console.log("Invalid check recieved!");
             return;
@@ -107,12 +108,15 @@ app.post("/connection-check", (req, res) => {
     }
 });
 
+//
+// periodically check com with android and send checks to arduino
+//
 setInterval(() => {
     if (comExtableshed){
         comExtableshed = periodicCheck("ok");
     }
 
-    if (isAndroidAlive){  //connection check passed! 
+    if (isAndroidAlive){  // connection check passed! 
         isAndroidAlive = false;
         firstFail = true;
     } else if (comExtableshed){
