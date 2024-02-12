@@ -88,6 +88,7 @@ public class ControllerFragment extends Fragment {
         AppCompatImageButton buttonRotSx = requireView().findViewById(R.id.btnRotSX);
         AppCompatImageButton buttonRotDx = requireView().findViewById(R.id.btnRotDX);
         Switch switchOnOff = requireView().findViewById(R.id.switch_OnOff);
+        AppCompatImageButton btnStop = requireView().findViewById(R.id.btnStop);
         switchOnOff.setChecked(true);
 
         check = new ConnectivityCheck(requireActivity().getApplicationContext());
@@ -173,6 +174,12 @@ public class ControllerFragment extends Fragment {
             if (switchOnOff.isChecked()) {
                 check.startSending();
             }
+        });
+
+        btnStop.setOnClickListener(v -> {
+            postToServer(getString(R.string.conn_string) + "control", "emergencyStop");
+            switchOnOff.setChecked(false);
+            check.stopSending();
         });
     }
 
