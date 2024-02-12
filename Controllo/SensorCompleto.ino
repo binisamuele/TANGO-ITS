@@ -1,4 +1,3 @@
-#include <Wire.h>
 #include <DHT11.h>
 #include <LiquidCrystal.h>
 #include <NewPing.h>
@@ -6,7 +5,7 @@
 
 //costanti globali 
 #define SENSORS_NOMBER 6
-#define MAX_DISTANCE 700
+#define MAX_DISTANCE 200
 #define SPEED_OF_SOUND 0.0343
 #define EMERGENCY_PIN 1
 #define VOLTMETER_COSTANT 40.92
@@ -16,7 +15,7 @@
 const int fiveMinutes = 300000;
 const int tenMinutes = 600000;
 
-//
+//funzione per sensore Temperatura e Umidità
 DHT11 dht11(2);
 
 
