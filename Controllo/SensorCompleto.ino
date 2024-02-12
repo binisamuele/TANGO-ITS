@@ -1,4 +1,4 @@
-#include <Wire.h>
+
 #include <DHT11.h>
 #include <LiquidCrystal.h>
 #include <NewPing.h>
@@ -6,7 +6,7 @@
 
 //costanti globali 
 #define SENSORS_NOMBER 4
-#define MAX_DISTANCE 700
+#define MAX_DISTANCE 200
 #define SPEED_OF_SOUND 0.0343
 #define EMERGENCY_PIN 1
 
@@ -67,18 +67,17 @@ double measureDistance(int sonarNum) {
 
 }
 String printDistance(double distance) { 
-  // Serial.print("Distanza: ");
-  // Serial.print(distance);
-  // Serial.print(" cm \n");
-
-  String contenitore = String("Distan: " + (String)distance +"cm ");
-  return contenitore;
+  Serial.print("\n");
+  
+  return  String("Dist: " + (String)distance +"cm ");
 
 }
 
 void distanceManagement() {
+  char setLcd;
 
-  if(sensorIndex < SENSORS_NOMBER) {
+  if(
+     < SENSORS_NOMBER) {
 
     if(alarm == true) {
 
@@ -86,13 +85,15 @@ void distanceManagement() {
       distance = measureDistance(sensorIndex);
 
       Serial.print(printDistance(distance));
-      Serial.print("E");
-      lcd.print(printDistance(distance));
+      Serial.print(" E");
+      setLcd ='E';
+      lcdManagement(distance,setLcd);  //lcd.print(printDistance(distance));
+      
 
       if (distance > 30) {
         alarm = false;
         Serial.print("FINE EMERGENZA \n");
-        lcd.print("FINE EMERGENZA \n");
+
       }
 
     } else {
@@ -101,16 +102,16 @@ void distanceManagement() {
       distance = measureDistance(sensorIndex);
 
       Serial.print(printDistance(distance));
-      lcd.print(printDistance(distance));
-      //lcd.print(printDistance(distance));
+      setLcd ='N';
+      lcdManagement(distance,setLcd);
+      
 
 
       if(distance < 20) {
 
         digitalWrite(EMERGENCY_PIN, HIGH);
         alarm = true;
-        Serial.print("EMERGENZA \n");
-        lcd.print("EMERGENZA \n");
+        Serial.print("/n EMERGENZA");
       } else {
         sensorIndex++;
       }
@@ -158,7 +159,7 @@ void measureVoltmeters() {
 void updateLCD() {
   lcd.setCursor(0, 1);
   lcd.print("distanzaUltraSuoni:");
-  lcd.print(distanceCm);
+  lcd.print("EMERGENZA \n");
   lcd.print(printTemperature());
   lcd.print(printHumidity());
 }
@@ -171,22 +172,60 @@ void setup() {
   lcd.setCursor(0,0);
 }
 
+void lcdManagement(int distance,char set) {
+  lcd.clear();
+
+  switch (set)
+  {
+  case 'N':
+    lcd.setCursor(0, 1);
+    lcd.print(printDistance(distance));
+    
+    break;
+
+    case 'E':
+    lcd.setCursor(0, 0);
+    lcd.print("EMMERGENZA");
+    lcd.setCursor(0, 1);
+    lcd.print(printDistance(distance));
+
+    
+    break;
+  case 'T':
+    lcd.setCursor(0, 0);
+    lcd.print(printTemperature());
+    break;
+  case 'H':
+  lcd.setCursor(0, 1);
+    lcd.print(printHumidity());
+    break;   
+
+    default:
+    lcd.print("FATAL ERROR");
+
+  }
+
+
+}
+
 void loop() {
 
 
-  delay(500);
-    lcd.setCursor(0, 1);
-
-  lcd.print(printDistance(34));
-  //distanceManagement();
-  
+  distanceManagement();
+  delay(30);
   // funzioni da eseguire ogni 5 minuti
+
   if (millis() % fiveMinutes == 0) {
-    //updateLCD();
+ 
     measureVoltmeters();
   }
   if(millis() % tenMinutes == 0) {
   Serial.print(printTemperature());
   Serial.print(printHumidity());
+  char setLcd='T';
+  lcdManagement(0,setLcd);
+
+  setLcd='H';
+  lcdManagement(0,setLcd);
   }
 }
