@@ -5,14 +5,11 @@
 
 
 //costanti globali 
-#define SENSORS_NOMBER 1
+#define SENSORS_NOMBER 6
 #define MAX_DISTANCE 700
 #define SPEED_OF_SOUND 0.0343
 #define EMERGENCY_PIN 1
-
-
-//array di support per invio stringhe al seriale
-char buffer[40];
+#define VOLTMETER_COSTANT 40.92
 
 //constanti gestione millis
 const int fiveMinutes = 300000;
@@ -22,26 +19,36 @@ const int tenMinutes = 600000;
 DHT11 dht11(2);
 
 
-//configurazione pin sensori distanza (vanno messi su pin in maniera crescente per esigenze del codice 
-//                                      altrimenti sostituire i for del programma)
-const int trigPinUp = 2;
-const int echoPinUp = 3; 
-
-const int trigPinDown = 4;
-const int echoPinDown = 5; 
-
-const int trigPinRh = 6;
-const int echoPinRh = 7; 
-
-const int trigPinLh = 8;
-const int echoPinLh = 9; 
+//frontale
+const int trigPinU = 22;
+const int echoPinU = 23; 
+//frontale destro
+const int trigPinUR = 24;
+const int echoPinUR = 25; 
+//frontale sinistro
+const int trigPinUL = 26;
+const int echoPinUL = 27; 
 
 
+//posteriore
+const int trigPinD = 28;
+const int echoPinD = 29; 
+//posteriore destro
+const int trigPinDR = 30;
+const int echoPinDR = 31; 
+//posteriore sinistro
+const int trigPinDL = 32;
+const int echoPinDL = 33; 
+
+
+//Inizializzazione sensori
 NewPing sonar[SENSORS_NOMBER] = {   // Sensor object array.
-  NewPing(trigPinUp, echoPinUp, MAX_DISTANCE),
-  NewPing(trigPinDown, echoPinDown, MAX_DISTANCE),
-  NewPing(trigPinRh, echoPinRh, MAX_DISTANCE),
-  NewPing(trigPinLh, echoPinLh, MAX_DISTANCE)
+  NewPing(trigPinU, echoPinU, MAX_DISTANCE),
+  NewPing(trigPinUR, echoPinUR, MAX_DISTANCE),
+  NewPing(trigPinUL, echoPinUL, MAX_DISTANCE),
+  NewPing(trigPinD, echoPinD, MAX_DISTANCE),
+  NewPing(trigPinDR, echoPinDR, MAX_DISTANCE),
+  NewPing(trigPinDL, echoPinDL, MAX_DISTANCE)
 };
 
 
@@ -56,7 +63,8 @@ bool alarm = false;
 int sensorIndex = 0;
 
 
-LiquidCrystal lcd(12, 11, 6, 5, 8, 7);
+LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
+
 
 //funzioni per la gestione della distanza
 double measureDistance(int sonarNum) {
@@ -64,10 +72,10 @@ double measureDistance(int sonarNum) {
   return (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
 
 }
-void printDistance(double distance) { 
-  Serial.print("Distanza: ");
-  Serial.print(distance);
-  Serial.print(" cm \n");
+String printDistance(double distance) { 
+
+  return String("Distanza: " + (String)distance +"cm ");
+
 }
 
 void distanceManagement() {
@@ -78,24 +86,32 @@ void distanceManagement() {
 
       //stato di emergenza
       distance = measureDistance(sensorIndex);
-      printDistance(distance);
+
+      Serial.print(printDistance(distance));
+      Serial.print("E");
+      //lcd.print(printDistance(distance));
 
       if (distance > 30) {
         alarm = false;
         Serial.print("FINE EMERGENZA \n");
+        //lcd.print("FINE EMERGENZA \n");
       }
 
     } else {
 
       //stato normale
       distance = measureDistance(sensorIndex);
-      printDistance(distance);
+
+      Serial.print(printDistance(distance));
+      //lcd.print(printDistance(distance));
+
 
       if(distance < 20) {
 
         digitalWrite(EMERGENCY_PIN, HIGH);
         alarm = true;
         Serial.print("EMERGENZA \n");
+        //lcd.print("EMERGENZA \n");
       } else {
         sensorIndex++;
       }
@@ -132,28 +148,18 @@ String printHumidity() {
 
 
 //funzioni monitoraggio stato della batteria
-void measureVoltmeters() {
+float measureVoltmeters() {
   // Misura tensione da voltmeter1Pin
-  float voltage1 = analogRead(voltmeter1Pin) /40.92;
+  float voltage1 = analogRead(voltmeter1Pin) / VOLTMETER_COSTANT;
   sprintf(buffer, "voltaggio: %d.%d", (int)voltage1, ((int)(voltage1*10) % 10));
   Serial.println(buffer);
 }
-
-/* WIP da sistemare
-void updateLCD() {
-  lcd.setCursor(0, 1);
-  lcd.print("distanzaUltraSuoni:");
-  lcd.print(distanceCm);
-  lcd.print(printTemperature());
-  lcd.print(printHumidity());
-}
-*/
 
 void setup() {
 
   Serial.begin(9600);       // Inizializza la comunicazione seriale a 9600 bps
   lcd.begin(16, 2);         // Inizializza il display LCD
-
+  lcd.setCursor(0,0);
 }
 
 void loop() {
