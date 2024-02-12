@@ -5,14 +5,11 @@
 
 
 //costanti globali 
-#define SENSORS_NOMBER 4
+#define SENSORS_NOMBER 6
 #define MAX_DISTANCE 700
 #define SPEED_OF_SOUND 0.0343
 #define EMERGENCY_PIN 1
-
-
-//array di support per invio stringhe al seriale
-char buffer[40];
+#define VOLTMETER_COSTANT 40.92
 
 //constanti gestione millis
 const int fiveMinutes = 300000;
@@ -22,26 +19,34 @@ const int tenMinutes = 600000;
 DHT11 dht11(2);
 
 
-//configurazione pin sensori distanza (vanno messi su pin in maniera crescente per esigenze del codice 
-//                                      altrimenti sostituire i for del programma)
-const int trigPinUp = 22;
-const int echoPinUp = 23; 
+//frontale
+const int trigPinU = 22;
+const int echoPinU = 23; 
+//frontale destro
+const int trigPinUR = 24;
+const int echoPinUR = 25; 
+//frontale sinistro
+const int trigPinUL = 26;
+const int echoPinUL = 27; 
 
-const int trigPinDown = 24;
-const int echoPinDown = 25; 
+//posteriore
+const int trigPinD = 28;
+const int echoPinD = 29; 
+//posteriore destro
+const int trigPinDR = 30;
+const int echoPinDR = 31; 
+//posteriore sinistro
+const int trigPinDL = 32;
+const int echoPinDL = 33; 
 
-const int trigPinRh = 26;
-const int echoPinRh = 27; 
-
-const int trigPinLh = 28;
-const int echoPinLh = 29; 
-
-
+//Inizializzazione sensori
 NewPing sonar[SENSORS_NOMBER] = {   // Sensor object array.
-  NewPing(trigPinUp, echoPinUp, MAX_DISTANCE),
-  NewPing(trigPinDown, echoPinDown, MAX_DISTANCE),
-  NewPing(trigPinRh, echoPinRh, MAX_DISTANCE),
-  NewPing(trigPinLh, echoPinLh, MAX_DISTANCE)
+  NewPing(trigPinU, echoPinU, MAX_DISTANCE),
+  NewPing(trigPinUR, echoPinUR, MAX_DISTANCE),
+  NewPing(trigPinUL, echoPinUL, MAX_DISTANCE),
+  NewPing(trigPinD, echoPinD, MAX_DISTANCE),
+  NewPing(trigPinDR, echoPinDR, MAX_DISTANCE),
+  NewPing(trigPinDL, echoPinDL, MAX_DISTANCE)
 };
 
 
@@ -67,8 +72,8 @@ double measureDistance(int sonarNum) {
 }
 String printDistance(double distance) { 
 
-  String contenitore = String("Distan: " + (String)distance +"cm ");
-  return contenitore;
+  String buffer = String("Distan: " + (String)distance +"cm ");
+  return buffer;
 
 }
 
@@ -142,9 +147,9 @@ String printHumidity() {
 
 
 //funzioni monitoraggio stato della batteria
-void measureVoltmeters() {
+float measureVoltmeters() {
   // Misura tensione da voltmeter1Pin
-  float voltage1 = analogRead(voltmeter1Pin) /40.92;
+  float voltage1 = analogRead(voltmeter1Pin) / VOLTMETER_COSTANT;
   sprintf(buffer, "voltaggio: %d.%d", (int)voltage1, ((int)(voltage1*10) % 10));
   Serial.println(buffer);
 }
