@@ -4,7 +4,6 @@
 
 
 //costanti globali 
-<<<<<<< HEAD
 #define SENSORS_NOMBER 4
 #define MAX_DISTANCE 200
 =======
@@ -12,8 +11,10 @@
 #define MAX_DISTANCE 200
 #define SPEED_OF_SOUND 0.0343
 #define EMERGENCY_PIN 1
-#define VOLTMETER_COSTANT 40.92
-#define MAX_VOLTAGE 25
+
+
+//array di support per invio stringhe al seriale
+char buffer[40];
 
 //constanti gestione millis
 const int fiveMinutes = 300000;
@@ -23,36 +24,26 @@ const int tenMinutes = 600000;
 DHT11 dht11(2);
 
 
-//frontale
-const int trigPinU = 22;
-const int echoPinU = 23; 
-//frontale destro
-const int trigPinUR = 24;
-const int echoPinUR = 25; 
-//frontale sinistro
-const int trigPinUL = 26;
-const int echoPinUL = 27; 
+//configurazione pin sensori distanza (vanno messi su pin in maniera crescente per esigenze del codice 
+//                                      altrimenti sostituire i for del programma)
+const int trigPinUp = 22;
+const int echoPinUp = 23; 
+
+const int trigPinDown = 24;
+const int echoPinDown = 25; 
+
+const int trigPinRh = 26;
+const int echoPinRh = 27; 
+
+const int trigPinLh = 28;
+const int echoPinLh = 29; 
 
 
-//posteriore
-const int trigPinD = 28;
-const int echoPinD = 29; 
-//posteriore destro
-const int trigPinDR = 30;
-const int echoPinDR = 31; 
-//posteriore sinistro
-const int trigPinDL = 32;
-const int echoPinDL = 33; 
-
-
-//Inizializzazione sensori
 NewPing sonar[SENSORS_NOMBER] = {   // Sensor object array.
-  NewPing(trigPinU, echoPinU, MAX_DISTANCE),
-  NewPing(trigPinUR, echoPinUR, MAX_DISTANCE),
-  NewPing(trigPinUL, echoPinUL, MAX_DISTANCE),
-  NewPing(trigPinD, echoPinD, MAX_DISTANCE),
-  NewPing(trigPinDR, echoPinDR, MAX_DISTANCE),
-  NewPing(trigPinDL, echoPinDL, MAX_DISTANCE)
+  NewPing(trigPinUp, echoPinUp, MAX_DISTANCE),
+  NewPing(trigPinDown, echoPinDown, MAX_DISTANCE),
+  NewPing(trigPinRh, echoPinRh, MAX_DISTANCE),
+  NewPing(trigPinLh, echoPinLh, MAX_DISTANCE)
 };
 
 
@@ -67,19 +58,21 @@ bool alarm = false;
 int sensorIndex = 0;
 
 
+LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
+
+
+
 //funzioni per la gestione della distanza
 double measureDistance(int sonarNum) {
+
   return (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
+
 }
 String printDistance(double distance) { 
-<<<<<<< HEAD
   Serial.print("\n");
   
   return  String("Dist: " + (String)distance +"cm ");
 
-=======
-  return String("\nDistanza: " + (String)distance +"cm ");
->>>>>>> 2ee1231d531b79d9681f3855c3fb84daf5ca6c7c
 }
 
 void distanceManagement() {
@@ -94,24 +87,15 @@ void distanceManagement() {
       distance = measureDistance(sensorIndex);
 
       Serial.print(printDistance(distance));
-<<<<<<< HEAD
       Serial.print(" E");
       setLcd ='E';
       lcdManagement(distance,setLcd);  //lcd.print(printDistance(distance));
       
-=======
-      Serial.print("E");
-      //lcd.print(printDistance(distance));
->>>>>>> 2ee1231d531b79d9681f3855c3fb84daf5ca6c7c
 
       if (distance > 30) {
         alarm = false;
         Serial.print("FINE EMERGENZA \n");
-<<<<<<< HEAD
 
-=======
-        //lcd.print("FINE EMERGENZA \n");
->>>>>>> 2ee1231d531b79d9681f3855c3fb84daf5ca6c7c
       }
 
     } else {
@@ -120,25 +104,16 @@ void distanceManagement() {
       distance = measureDistance(sensorIndex);
 
       Serial.print(printDistance(distance));
-<<<<<<< HEAD
       setLcd ='N';
       lcdManagement(distance,setLcd);
       
-=======
-      //lcd.print(printDistance(distance));
->>>>>>> 2ee1231d531b79d9681f3855c3fb84daf5ca6c7c
 
 
       if(distance < 20) {
 
         digitalWrite(EMERGENCY_PIN, HIGH);
         alarm = true;
-<<<<<<< HEAD
         Serial.print("/n EMERGENZA");
-=======
-        Serial.print("EMERGENZA \n");
-        //lcd.print("EMERGENZA \n");
->>>>>>> 2ee1231d531b79d9681f3855c3fb84daf5ca6c7c
       } else {
         sensorIndex++;
       }
@@ -159,7 +134,7 @@ int measureTemperature() {
 }
 String printTemperature() {
   char buffer[40];
-  sprintf(buffer, "\nTemperatura: %d °C", measureTemperature());
+  sprintf(buffer, "Temperatura: %d °C \n", measureTemperature());
   return buffer;
 }
 
@@ -169,22 +144,19 @@ int measureHumidity() {
 }
 String printHumidity() {
   char buffer[40];
-  sprintf(buffer, "\nUmidità: %d %%", measureHumidity());
+  sprintf(buffer, "Umidità: %d %% \n", measureHumidity());
   return buffer;
 }
 
 
 //funzioni monitoraggio stato della batteria
-float measureVoltage() {
+void measureVoltmeters() {
   // Misura tensione da voltmeter1Pin
-  return analogRead(voltmeter1Pin) / VOLTMETER_COSTANT;
-
+  float voltage1 = analogRead(voltmeter1Pin) /40.92;
+  sprintf(buffer, "voltaggio: %d.%d", (int)voltage1, ((int)(voltage1*10) % 10));
+  Serial.println(buffer);
 }
-String printVoltage(float voltage) { 
 
-  return String("\nCarica batteria: " + (String)((voltage*100)/MAX_VOLTAGE) +"% ");
-
-<<<<<<< HEAD
 /* WIP da sistemare
 void updateLCD() {
   lcd.setCursor(0, 1);
@@ -192,15 +164,14 @@ void updateLCD() {
   lcd.print("EMERGENZA \n");
   lcd.print(printTemperature());
   lcd.print(printHumidity());
-=======
->>>>>>> 2ee1231d531b79d9681f3855c3fb84daf5ca6c7c
 }
+*/
 
 void setup() {
 
   Serial.begin(9600);       // Inizializza la comunicazione seriale a 9600 bps
-  //lcd.begin(16, 2);         // Inizializza il display LCD
-  //lcd.setCursor(0,0);
+  lcd.begin(16, 2);         // Inizializza il display LCD
+  lcd.setCursor(0,0);
 }
 
 void lcdManagement(int distance,char set) {
@@ -241,24 +212,14 @@ void lcdManagement(int distance,char set) {
 
 void loop() {
 
-<<<<<<< HEAD
 
   distanceManagement();
   delay(30);
-=======
-  distanceManagement();
-  
->>>>>>> 2ee1231d531b79d9681f3855c3fb84daf5ca6c7c
   // funzioni da eseguire ogni 5 minuti
 
   if (millis() % fiveMinutes == 0) {
-<<<<<<< HEAD
  
     measureVoltmeters();
-=======
-    //updateLCD();
-    Serial.print(printVoltage(measureVoltage()));
->>>>>>> 2ee1231d531b79d9681f3855c3fb84daf5ca6c7c
   }
   if(millis() % tenMinutes == 0) {
   Serial.print(printTemperature());

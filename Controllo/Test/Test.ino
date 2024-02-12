@@ -22,9 +22,6 @@ int i = 0;
 bool emergency = true;
 
 void setup() {
-    Serial.begin(9600);
-
-    /*
     pinMode(dxForward, OUTPUT);
     pinMode(dxBackward, OUTPUT);
     pinMode(dxForwardEn, OUTPUT);
@@ -34,66 +31,50 @@ void setup() {
     pinMode(sxBackward, OUTPUT);
     pinMode(sxForwardEn, OUTPUT);
     pinMode(sxBackwardEn, OUTPUT);
-    */
-    pinMode(2, INPUT_PULLUP);
-/*
+
     digitalWrite(dxForwardEn, HIGH);
     digitalWrite(dxBackwardEn, HIGH);
     digitalWrite(sxForwardEn, HIGH);
     digitalWrite(sxBackwardEn, HIGH);
 
     pinMode(key, INPUT);
-*/
-    attachInterrupt(digitalPinToInterrupt(2), Cyao, FALLING); // Pin 2 per emergenza pulsanti
+
+    attachInterrupt(0, emergencyState, FALLING); // Pin 2 per emergenza pulsanti
     // attachInterrupt(1, emergencyState, RISING); // Pin 3 per emergenza bumper
     // <attachInterrupt(2, emergencyState, RISING); // Pin 21 per emergenze arduino (hardware deve utilizzare un diodo)
     //attachInterrupt(3, emergencyResolve, RISING); // Pin 20 per stato emergenza
 }
 
-void Cyao() {
-    Serial.println("ho premuto");
-    //emergencyState();
-}
-
-void loop() {/*
+void loop() {
     // controllo della comunicazione seriale (anche gli altri arduino devono fare il controllo del seriale)
-    Serial.println("Cyao o inisiato illup");
     if (emergency) {
         emergencyState();
         return;
     }
     movementInt = instruction[i];
     i = i++ % sizeof(instruction);
-    Serial.println(i + ", o esecuito istrusione " + instruction[i]);
     
     movement(); // switch del movimento
-    Serial.println("Spid: " + speed);
-    */
-   Serial.println("Non faccio nulla");
 }
 
 // funzione stato emergenza
 void emergencyState() {
-  emergencyStop();
-  emergency = true;
-   /* while (emergency || !digitalRead(key))      // rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
+    if (!emergency){            // ferma la macchina e manda un messaggio di emergenza agli altri arduino
+        emergency = true;
+        emergencyStop();
+    }
+    while (emergency || !digitalRead(key))      // rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
     {
-        Serial.println("Cyao sto cnotrolando il uail");
         if (!digitalRead(key) || digitalRead(startFromApp)) emergency = false;
-    } */
-
-    while(digitalRead(key)) continue;
-
-    while(!digitalRead(key))
-      continue;
-
-    emergency = false;
+    }
 }
 
 // segnale di arresto del motore (potrebbe essere non necessaria)
 void emergencyStop() {
     stopMotor();
+
     resetVariables();
+
 }
 
 // reset delle variabili
@@ -104,11 +85,10 @@ void resetVariables() {
 
 // funzione con le opzioni di movimento
 void movement(){
-    Serial.println("El movemento");
     switch (movementInt) {
         // andare avanti
         case 1:
-            rotationCheck();        // >=
+            rotationCheck();
             if (speed == maxSpeed) break;                       // se la velocità è al massimo, non fare niente
 
             speed += speedGain;
