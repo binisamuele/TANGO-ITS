@@ -5,7 +5,7 @@
 
 
 //costanti globali 
-#define SENSORS_NOMBER 1
+#define SENSORS_NOMBER 4
 #define MAX_DISTANCE 700
 #define SPEED_OF_SOUND 0.0343
 #define EMERGENCY_PIN 1
@@ -24,17 +24,17 @@ DHT11 dht11(2);
 
 //configurazione pin sensori distanza (vanno messi su pin in maniera crescente per esigenze del codice 
 //                                      altrimenti sostituire i for del programma)
-const int trigPinUp = 2;
-const int echoPinUp = 3; 
+const int trigPinUp = 22;
+const int echoPinUp = 23; 
 
-const int trigPinDown = 4;
-const int echoPinDown = 5; 
+const int trigPinDown = 24;
+const int echoPinDown = 25; 
 
-const int trigPinRh = 6;
-const int echoPinRh = 7; 
+const int trigPinRh = 26;
+const int echoPinRh = 27; 
 
-const int trigPinLh = 8;
-const int echoPinLh = 9; 
+const int trigPinLh = 28;
+const int echoPinLh = 29; 
 
 
 NewPing sonar[SENSORS_NOMBER] = {   // Sensor object array.
@@ -56,7 +56,9 @@ bool alarm = false;
 int sensorIndex = 0;
 
 
-LiquidCrystal lcd(12, 11, 6, 5, 8, 7);
+LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
+
+
 
 //funzioni per la gestione della distanza
 double measureDistance(int sonarNum) {
@@ -64,10 +66,14 @@ double measureDistance(int sonarNum) {
   return (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
 
 }
-void printDistance(double distance) { 
-  Serial.print("Distanza: ");
-  Serial.print(distance);
-  Serial.print(" cm \n");
+String printDistance(double distance) { 
+  // Serial.print("Distanza: ");
+  // Serial.print(distance);
+  // Serial.print(" cm \n");
+
+  String contenitore = String("Distan: " + (String)distance +"cm ");
+  return contenitore;
+
 }
 
 void distanceManagement() {
@@ -78,24 +84,33 @@ void distanceManagement() {
 
       //stato di emergenza
       distance = measureDistance(sensorIndex);
-      printDistance(distance);
+
+      Serial.print(printDistance(distance));
+      Serial.print("E");
+      lcd.print(printDistance(distance));
 
       if (distance > 30) {
         alarm = false;
         Serial.print("FINE EMERGENZA \n");
+        lcd.print("FINE EMERGENZA \n");
       }
 
     } else {
 
       //stato normale
       distance = measureDistance(sensorIndex);
-      printDistance(distance);
+
+      Serial.print(printDistance(distance));
+      lcd.print(printDistance(distance));
+      //lcd.print(printDistance(distance));
+
 
       if(distance < 20) {
 
         digitalWrite(EMERGENCY_PIN, HIGH);
         alarm = true;
         Serial.print("EMERGENZA \n");
+        lcd.print("EMERGENZA \n");
       } else {
         sensorIndex++;
       }
@@ -153,12 +168,17 @@ void setup() {
 
   Serial.begin(9600);       // Inizializza la comunicazione seriale a 9600 bps
   lcd.begin(16, 2);         // Inizializza il display LCD
-
+  lcd.setCursor(0,0);
 }
 
 void loop() {
 
-  distanceManagement();
+
+  delay(500);
+    lcd.setCursor(0, 1);
+
+  lcd.print(printDistance(34));
+  //distanceManagement();
   
   // funzioni da eseguire ogni 5 minuti
   if (millis() % fiveMinutes == 0) {
