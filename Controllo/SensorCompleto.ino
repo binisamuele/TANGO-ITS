@@ -4,6 +4,10 @@
 
 
 //costanti globali 
+<<<<<<< HEAD
+#define SENSORS_NOMBER 4
+#define MAX_DISTANCE 200
+=======
 #define SENSORS_NOMBER 6
 #define MAX_DISTANCE 200
 #define SPEED_OF_SOUND 0.0343
@@ -68,12 +72,21 @@ double measureDistance(int sonarNum) {
   return (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
 }
 String printDistance(double distance) { 
+<<<<<<< HEAD
+  Serial.print("\n");
+  
+  return  String("Dist: " + (String)distance +"cm ");
+
+=======
   return String("\nDistanza: " + (String)distance +"cm ");
+>>>>>>> 2ee1231d531b79d9681f3855c3fb84daf5ca6c7c
 }
 
 void distanceManagement() {
+  char setLcd;
 
-  if(sensorIndex < SENSORS_NOMBER) {
+  if(
+     < SENSORS_NOMBER) {
 
     if(alarm == true) {
 
@@ -81,13 +94,24 @@ void distanceManagement() {
       distance = measureDistance(sensorIndex);
 
       Serial.print(printDistance(distance));
+<<<<<<< HEAD
+      Serial.print(" E");
+      setLcd ='E';
+      lcdManagement(distance,setLcd);  //lcd.print(printDistance(distance));
+      
+=======
       Serial.print("E");
       //lcd.print(printDistance(distance));
+>>>>>>> 2ee1231d531b79d9681f3855c3fb84daf5ca6c7c
 
       if (distance > 30) {
         alarm = false;
         Serial.print("FINE EMERGENZA \n");
+<<<<<<< HEAD
+
+=======
         //lcd.print("FINE EMERGENZA \n");
+>>>>>>> 2ee1231d531b79d9681f3855c3fb84daf5ca6c7c
       }
 
     } else {
@@ -96,15 +120,25 @@ void distanceManagement() {
       distance = measureDistance(sensorIndex);
 
       Serial.print(printDistance(distance));
+<<<<<<< HEAD
+      setLcd ='N';
+      lcdManagement(distance,setLcd);
+      
+=======
       //lcd.print(printDistance(distance));
+>>>>>>> 2ee1231d531b79d9681f3855c3fb84daf5ca6c7c
 
 
       if(distance < 20) {
 
         digitalWrite(EMERGENCY_PIN, HIGH);
         alarm = true;
+<<<<<<< HEAD
+        Serial.print("/n EMERGENZA");
+=======
         Serial.print("EMERGENZA \n");
         //lcd.print("EMERGENZA \n");
+>>>>>>> 2ee1231d531b79d9681f3855c3fb84daf5ca6c7c
       } else {
         sensorIndex++;
       }
@@ -150,6 +184,16 @@ String printVoltage(float voltage) {
 
   return String("\nCarica batteria: " + (String)((voltage*100)/MAX_VOLTAGE) +"% ");
 
+<<<<<<< HEAD
+/* WIP da sistemare
+void updateLCD() {
+  lcd.setCursor(0, 1);
+  lcd.print("distanzaUltraSuoni:");
+  lcd.print("EMERGENZA \n");
+  lcd.print(printTemperature());
+  lcd.print(printHumidity());
+=======
+>>>>>>> 2ee1231d531b79d9681f3855c3fb84daf5ca6c7c
 }
 
 void setup() {
@@ -159,17 +203,70 @@ void setup() {
   //lcd.setCursor(0,0);
 }
 
+void lcdManagement(int distance,char set) {
+  lcd.clear();
+
+  switch (set)
+  {
+  case 'N':
+    lcd.setCursor(0, 1);
+    lcd.print(printDistance(distance));
+    
+    break;
+
+    case 'E':
+    lcd.setCursor(0, 0);
+    lcd.print("EMMERGENZA");
+    lcd.setCursor(0, 1);
+    lcd.print(printDistance(distance));
+
+    
+    break;
+  case 'T':
+    lcd.setCursor(0, 0);
+    lcd.print(printTemperature());
+    break;
+  case 'H':
+  lcd.setCursor(0, 1);
+    lcd.print(printHumidity());
+    break;   
+
+    default:
+    lcd.print("FATAL ERROR");
+
+  }
+
+
+}
+
 void loop() {
 
+<<<<<<< HEAD
+
+  distanceManagement();
+  delay(30);
+=======
   distanceManagement();
   
+>>>>>>> 2ee1231d531b79d9681f3855c3fb84daf5ca6c7c
   // funzioni da eseguire ogni 5 minuti
+
   if (millis() % fiveMinutes == 0) {
+<<<<<<< HEAD
+ 
+    measureVoltmeters();
+=======
     //updateLCD();
     Serial.print(printVoltage(measureVoltage()));
+>>>>>>> 2ee1231d531b79d9681f3855c3fb84daf5ca6c7c
   }
   if(millis() % tenMinutes == 0) {
   Serial.print(printTemperature());
   Serial.print(printHumidity());
+  char setLcd='T';
+  lcdManagement(0,setLcd);
+
+  setLcd='H';
+  lcdManagement(0,setLcd);
   }
 }
