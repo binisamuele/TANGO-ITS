@@ -29,6 +29,7 @@ const int echoPinUR = 25;
 const int trigPinUL = 26;
 const int echoPinUL = 27; 
 
+
 //posteriore
 const int trigPinD = 28;
 const int echoPinD = 29; 
@@ -38,6 +39,7 @@ const int echoPinDR = 31;
 //posteriore sinistro
 const int trigPinDL = 32;
 const int echoPinDL = 33; 
+
 
 //Inizializzazione sensori
 NewPing sonar[SENSORS_NOMBER] = {   // Sensor object array.
@@ -72,8 +74,7 @@ double measureDistance(int sonarNum) {
 }
 String printDistance(double distance) { 
 
-  String buffer = String("Distan: " + (String)distance +"cm ");
-  return buffer;
+  return String("Distanza: " + (String)distance +"cm ");
 
 }
 
