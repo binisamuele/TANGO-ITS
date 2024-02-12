@@ -36,19 +36,18 @@ app.use(function(req, res, next) {
     next();
 });
 
+//
+// endpoint GET for test purposes
+//
 app.get("/", (req, res) => {
     res.send('OK');
 
     console.log('Incoming GET request at /');
-
-    /*for testing purposes
-    comExtableshed = true; 
-    lastDirection = forwardToArduino('up', lastDirection);
-    lastDirection = forwardToArduino('down', lastDirection);
-    lastDirection = forwardToArduino('left', lastDirection);
-    */
 })
 
+//
+// endpoint POST to control arduino 
+//
 app.post("/control", (req, res) => {
     try {
         const direction = req.body.direction;
@@ -88,6 +87,9 @@ app.post("/control", (req, res) => {
     }
 });
 
+//
+// endpoint POST for connection check with android
+//
 app.post("/connection-check", (req, res) => {
     try {
         //check if json contains key "androidCheck"
@@ -107,12 +109,15 @@ app.post("/connection-check", (req, res) => {
     }
 });
 
+//
+// periodically check com with android and send checks to arduino
+//
 setInterval(() => {
     if (comExtableshed){
         comExtableshed = periodicCheck("ok");
     }
 
-    if (isAndroidAlive){  //connection check passed! 
+    if (isAndroidAlive){  // connection check passed! 
         isAndroidAlive = false;
         firstFail = true;
     } else if (comExtableshed){
