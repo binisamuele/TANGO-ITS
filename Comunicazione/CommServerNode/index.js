@@ -36,17 +36,18 @@ app.use(function(req, res, next) {
     next();
 });
 
+//
+// endpoint GET for test purposes
+//
 app.get("/", (req, res) => {
     res.send('OK');
 
     console.log('Incoming GET request at /');
-
-    comExtableshed = true; //for testing purposes
-    lastDirection = forwardToArduino('up', lastDirection);
-    lastDirection = forwardToArduino('down', lastDirection);
-    lastDirection = forwardToArduino('left', lastDirection);
 })
 
+//
+// endpoint POST to control arduino 
+//
 app.post("/control", (req, res) => {
     try {
         const direction = req.body.direction;
@@ -65,7 +66,7 @@ app.post("/control", (req, res) => {
         // request from the client to keep the connection alive
         // otherwise send an emergency stop to arduino
 
-        if (!comExtableshed && req.body.direction !== "commStop"){
+        if (!comExtableshed && direction !== "commStop" && direction !== "emergencyStop"){
             console.log(">> Controller communication started!");
             comExtableshed = true;
         }
@@ -74,6 +75,7 @@ app.post("/control", (req, res) => {
             console.log(">> Controller communication has been stopped!");
             isAndroidAlive = false;
             comExtableshed = false;
+            periodicCheck("stop");
         }
 
         lastDirection = forwardToArduino(direction, lastDirection);
@@ -85,13 +87,15 @@ app.post("/control", (req, res) => {
     }
 });
 
+//
+// endpoint POST for connection check with android
+//
 app.post("/connection-check", (req, res) => {
     try {
-        //check if json contains key "check"
+        //check if json contains key "androidCheck"
         if (req.body.hasOwnProperty("androidCheck")){
-            let lastAndroidCheck = req.body.androidCheck;
             isAndroidAlive = true;
-            console.log(`Android check recieved: ${lastAndroidCheck}`);
+            console.log(`Android check recieved!`);
         } else{
             console.log("Invalid check recieved!");
             return;
@@ -104,12 +108,15 @@ app.post("/connection-check", (req, res) => {
     }
 });
 
+//
+// periodically check com with android and send checks to arduino
+//
 setInterval(() => {
     if (comExtableshed){
-        periodicCheck();
+        comExtableshed = periodicCheck("ok");
     }
 
-    if (isAndroidAlive){  //connection check passed! 
+    if (isAndroidAlive){  // connection check passed! 
         isAndroidAlive = false;
         firstFail = true;
     } else if (comExtableshed){
@@ -127,5 +134,5 @@ setInterval(() => {
             forwardToArduino("emergencyStop", lastDirection);
         }
     } 
-}, 6000);
+}, 4000);
  

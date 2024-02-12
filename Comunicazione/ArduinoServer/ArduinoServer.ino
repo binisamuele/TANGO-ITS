@@ -3,16 +3,19 @@
 #include <string.h>
 #include <ArduinoJson.h>
 
-//Check if connected to server
+//PINS
+int emergency = 13;
+
+// Connection checks variables
 unsigned long startTime = millis();
 unsigned long currentTime;
-unsigned long duration = 8000;
+unsigned long duration = 4500;
 bool checked = false;
-bool firstFail = true;
+bool failed = false;
 bool comExtableshed = false;
 
-//Connectivity Test IP
-int currIPNode = 3;
+//Connectivity Test IP (Node Server)
+int currIPNode = 2;
 
 //Arduino Server
 int arduinoIP = 4;
@@ -21,12 +24,15 @@ int arduinoPort = 80;
 // Network Settings
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };  // MAC address
 IPAddress ip(192, 168, 1, arduinoIP); // IP address
-IPAddress nodeServer(192, 168, 1, currIPNode);  // IP address of the server you want to connect to
+IPAddress nodeServer(192, 168, 1, currIPNode);  // IP address of the node server
 
 EthernetClient client;
 EthernetServer server(80);
 
 void setup() {
+  // emergency PIN
+  pinMode(13, OUTPUT);
+  
   unsigned long startTime = millis();
 
   Serial.begin(9600);
@@ -42,7 +48,9 @@ void setup() {
     Serial.println("Ethernet cable is not connected!");
   }
 
+  //
   // -- HTTP GET request to test connectivity (using retries) --
+  //
   for (int retryCount = 0; retryCount < 3; retryCount++){
     if (client.connect(nodeServer, 3000)) {
       /*DEBUG: */Serial.println("Connected to server");
@@ -64,6 +72,9 @@ void setup() {
   }
   client.stop();
 
+
+  // ----  START ARDUINO SERVER  -----
+  // ---------------------------------
   // -- Arduino As A Server AAAS ;) -- 
   server.begin();
 
@@ -75,11 +86,29 @@ void setup() {
   }
 }
 
+// send interrupt to control arduino to perform an emergency stop
+void startEmergencyStop(){
+        digitalWrite(emergency, HIGH);
+        delay(1000);
+        digitalWrite(emergency, LOW);
+}
+
+// function to send direction string to the other arduino
+void forwardToControlArduino(String value){
+  Serial.println(value);
+}
+
+void readSensorValues(){
+  if (Serial.available()) {
+    String received = Serial.readStringUntil('\n');
+  }
+}
+
 void loop() {
   currentTime = millis();
 
   EthernetClient client = server.available();
-  // -- If there's a POST request forward it to the other Arduino -- 
+  // -- POST ENDPOINT ON ARDUINO SERVER -- 
   if (client) {
     // an http request ends with a blank line
     boolean currentLineIsBlank = true;
@@ -91,7 +120,7 @@ void loop() {
         // so you can send a reply
         if (c == '\n' && currentLineIsBlank) {
 
-  // Here is where the POST data is.  
+          // Here is where the POST data is.  
           while(client.available())
           {
               String body = client.readString();
@@ -106,7 +135,14 @@ void loop() {
               }
               if (key == "direction"){
                 if (value != "emergencyStop"){
+                  forwardToControlArduino(value);
                   comExtableshed = true;
+                }
+                else {
+                  comExtableshed = false;
+                  Serial.println("EMERGENCY!");
+                  // emergency STOP
+                  startEmergencyStop();
                 }
               }
               Serial.print(key);
@@ -130,24 +166,28 @@ void loop() {
       }
     }
   }  
-  
+
   if (currentTime - startTime > duration) {
     startTime = currentTime;
     if (checked) {
       Serial.println("> Check passed!");
       checked = false; //check passed 
-      firstFail = true;
+      failed = false;
     } else if (comExtableshed){
-      if (firstFail){
-        firstFail = false;
+      if (!failed){
+        failed = true;
       }
       else {
         Serial.println("> Check failed!");
         comExtableshed = false;
         checked = false;
-        firstFail = true;
+        failed = false;
         // emergency STOP
+        startEmergencyStop();
       }
     }
   }
+
+  // read another arduino's serial to get sensors values 
+  readSensorValues();
 }

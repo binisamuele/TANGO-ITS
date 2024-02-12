@@ -88,6 +88,8 @@ public class ControllerFragment extends Fragment {
         AppCompatImageButton buttonRotSx = requireView().findViewById(R.id.btnRotSX);
         AppCompatImageButton buttonRotDx = requireView().findViewById(R.id.btnRotDX);
         Switch switchOnOff = requireView().findViewById(R.id.switch_OnOff);
+        AppCompatImageButton btnStop = requireView().findViewById(R.id.btnStop);
+        switchOnOff.setChecked(true);
 
         check = new ConnectivityCheck(requireActivity().getApplicationContext());
         check.startSending();
@@ -96,13 +98,13 @@ public class ControllerFragment extends Fragment {
         AtomicBoolean anyButtonPressed = new AtomicBoolean(false);
 
         buttonForward.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get()) {
+            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is released
                 anyButtonPressed.set(false);
                 postToServer(getString(R.string.conn_string) + "control", "released");
                 buttonForward.setImageResource(R.drawable.vettoreup_bianco__removebg_preview);
                 return true;
-            } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
+            } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
                 postToServer(getString(R.string.conn_string) + "control", "up");
@@ -113,13 +115,13 @@ public class ControllerFragment extends Fragment {
         });
 
         buttonBackwards.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get()) {
+            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is released
                 anyButtonPressed.set(false);
                 postToServer(getString(R.string.conn_string) + "control", "released");
                 buttonBackwards.setImageResource(R.drawable.vettoredown_bianco__removebg_preview);
                 return true;
-            } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
+            } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
                 postToServer(getString(R.string.conn_string) + "control", "down");
@@ -130,13 +132,13 @@ public class ControllerFragment extends Fragment {
         });
 
         buttonRotSx.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get()) {
+            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is released
                 anyButtonPressed.set(false);
                 postToServer(getString(R.string.conn_string) + "control", "released");
                 buttonRotSx.setImageResource(R.drawable.rotsx_bianco_2);
                 return true;
-            } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
+            } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
                 postToServer(getString(R.string.conn_string) + "control", "left");
@@ -147,13 +149,13 @@ public class ControllerFragment extends Fragment {
         });
 
         buttonRotDx.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get()) {
+            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is released
                 anyButtonPressed.set(false);
                 postToServer(getString(R.string.conn_string) + "control", "released");
                 buttonRotDx.setImageResource(R.drawable.rotdx_bianco);
                 return true;
-            } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
+            } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
                 postToServer(getString(R.string.conn_string) + "control", "right");
@@ -165,7 +167,19 @@ public class ControllerFragment extends Fragment {
 
         //CONTROLLO SWITCH
         switchOnOff.setOnCheckedChangeListener((v, event) -> {
+            if (!switchOnOff.isChecked()) {
+                postToServer(getString(R.string.conn_string) + "control", "commStop");
+                check.stopSending();
+            }
+            if (switchOnOff.isChecked()) {
+                check.startSending();
+            }
+        });
 
+        btnStop.setOnClickListener(v -> {
+            postToServer(getString(R.string.conn_string) + "control", "emergencyStop");
+            switchOnOff.setChecked(false);
+            check.stopSending();
         });
     }
 

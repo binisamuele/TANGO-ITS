@@ -42,9 +42,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/topFrame">
 
-        <!-- Aggiungi i tuoi elementi al frame se necessario -->
+        <com.example.irobotapplication.TemperatureView
+            android:id="@+id/temperatureView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 
     </FrameLayout>
+
 
     <!-- Frame al Centro del TopFrame -->
     <FrameLayout
