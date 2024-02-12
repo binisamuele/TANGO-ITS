@@ -2,12 +2,16 @@ const int dxForward = 4, dxBackward = 5, dxForwardEn = 26, dxBackwardEn = 27;   
 const int sxForward = 6, sxBackward = 7, sxForwardEn = 23, sxBackwardEn = 22;   // Motore SX, pin da modificare
 int movementInt = 0;
 int speed = 0;  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
+int key = 40; // pin della chiave
 const int speedGain = 10;
 const int maxSpeed = 100;
 const int minSpeed = -100;
 bool emergency = true;
+bool isRotating = false;
 
 void setup() {
+    Serial.begin(9600);
+
     pinMode(dxForward, OUTPUT);
     pinMode(dxBackward, OUTPUT);
     pinMode(dxForwardEn, OUTPUT);
@@ -18,9 +22,11 @@ void setup() {
     pinMode(sxForwardEn, OUTPUT);
     pinMode(sxBackwardEn, OUTPUT);
 
-    pinMode(key, INPUT);
+    pinMode(key, INPUT_PULLUP); // necessario per far funzionare la chiave
 
-    attachInterrupt(0, emergencyState, FALLING);    // Pin 2 per emergenza pulsanti
+    pinMode(2, INPUT_PULLUP); // necessario per fare funzionare i bottoni
+
+    attachInterrupt(digitalPinToInterrupt(2), emergencyState, FALLING);    // Pin 2 per emergenza pulsanti
 }
 
 void loop() {
@@ -30,12 +36,21 @@ void loop() {
         return;
     }
 
-	if (speed == 0) movementInt = 1;
-	if (speed >= maxSpeed) movementInt = 5;
+	if (speed == 0){
+        movementInt = 1;
+        Serial.println("velocità: ");
+        Serial.println(speed);
+    }
+	if (speed >= maxSpeed){
+        movementInt = 5;
+        Serial.println("velocità: ");
+        Serial.println(speed);
+    }
 
     movement(); // switch del movimento
 
-	digitalPrintln("velocità: " + speed);
+    Serial.println("chiave: " );
+    Serial.println(digitalRead(key));
 }
 
 // funzione stato emergenza
@@ -43,11 +58,15 @@ void emergencyState() {
     if (!emergency){            // ferma la macchina e manda un messaggio di emergenza agli altri arduino
         emergency = true;
         emergencyStop();
+        Serial.println("sono in emergenza");
     }
 
     while (emergency)      		// rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
     {
-        if (!digitalRead(key)) emergency = false;
+        if (!digitalRead(key)){
+            emergency = false;
+            Serial.println("chiave a 0");
+        }
     }
 }
 
