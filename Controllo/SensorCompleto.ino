@@ -59,7 +59,6 @@ int sensorIndex = 0;
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
 
-
 //funzioni per la gestione della distanza
 double measureDistance(int sonarNum) {
 
@@ -67,9 +66,6 @@ double measureDistance(int sonarNum) {
 
 }
 String printDistance(double distance) { 
-  // Serial.print("Distanza: ");
-  // Serial.print(distance);
-  // Serial.print(" cm \n");
 
   String contenitore = String("Distan: " + (String)distance +"cm ");
   return contenitore;
@@ -87,12 +83,12 @@ void distanceManagement() {
 
       Serial.print(printDistance(distance));
       Serial.print("E");
-      lcd.print(printDistance(distance));
+      //lcd.print(printDistance(distance));
 
       if (distance > 30) {
         alarm = false;
         Serial.print("FINE EMERGENZA \n");
-        lcd.print("FINE EMERGENZA \n");
+        //lcd.print("FINE EMERGENZA \n");
       }
 
     } else {
@@ -101,7 +97,6 @@ void distanceManagement() {
       distance = measureDistance(sensorIndex);
 
       Serial.print(printDistance(distance));
-      lcd.print(printDistance(distance));
       //lcd.print(printDistance(distance));
 
 
@@ -110,7 +105,7 @@ void distanceManagement() {
         digitalWrite(EMERGENCY_PIN, HIGH);
         alarm = true;
         Serial.print("EMERGENZA \n");
-        lcd.print("EMERGENZA \n");
+        //lcd.print("EMERGENZA \n");
       } else {
         sensorIndex++;
       }
@@ -154,16 +149,6 @@ void measureVoltmeters() {
   Serial.println(buffer);
 }
 
-/* WIP da sistemare
-void updateLCD() {
-  lcd.setCursor(0, 1);
-  lcd.print("distanzaUltraSuoni:");
-  lcd.print(distanceCm);
-  lcd.print(printTemperature());
-  lcd.print(printHumidity());
-}
-*/
-
 void setup() {
 
   Serial.begin(9600);       // Inizializza la comunicazione seriale a 9600 bps
@@ -173,12 +158,7 @@ void setup() {
 
 void loop() {
 
-
-  delay(500);
-    lcd.setCursor(0, 1);
-
-  lcd.print(printDistance(34));
-  //distanceManagement();
+  distanceManagement();
   
   // funzioni da eseguire ogni 5 minuti
   if (millis() % fiveMinutes == 0) {
