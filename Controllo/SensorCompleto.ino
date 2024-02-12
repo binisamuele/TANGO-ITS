@@ -10,12 +10,13 @@
 #define SPEED_OF_SOUND 0.0343
 #define EMERGENCY_PIN 1
 #define VOLTMETER_COSTANT 40.92
+#define MAX_VOLTAGE 25
 
 //constanti gestione millis
 const int fiveMinutes = 300000;
 const int tenMinutes = 600000;
 
-//!!da definire il funzionamento!!
+//
 DHT11 dht11(2);
 
 
@@ -63,19 +64,12 @@ bool alarm = false;
 int sensorIndex = 0;
 
 
-LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
-
-
 //funzioni per la gestione della distanza
 double measureDistance(int sonarNum) {
-
   return (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
-
 }
 String printDistance(double distance) { 
-
-  return String("Distanza: " + (String)distance +"cm ");
-
+  return String("\nDistanza: " + (String)distance +"cm ");
 }
 
 void distanceManagement() {
@@ -132,7 +126,7 @@ int measureTemperature() {
 }
 String printTemperature() {
   char buffer[40];
-  sprintf(buffer, "Temperatura: %d °C \n", measureTemperature());
+  sprintf(buffer, "\nTemperatura: %d °C", measureTemperature());
   return buffer;
 }
 
@@ -142,24 +136,28 @@ int measureHumidity() {
 }
 String printHumidity() {
   char buffer[40];
-  sprintf(buffer, "Umidità: %d %% \n", measureHumidity());
+  sprintf(buffer, "\nUmidità: %d %%", measureHumidity());
   return buffer;
 }
 
 
 //funzioni monitoraggio stato della batteria
-float measureVoltmeters() {
+float measureVoltage() {
   // Misura tensione da voltmeter1Pin
-  float voltage1 = analogRead(voltmeter1Pin) / VOLTMETER_COSTANT;
-  sprintf(buffer, "voltaggio: %d.%d", (int)voltage1, ((int)(voltage1*10) % 10));
-  Serial.println(buffer);
+  return analogRead(voltmeter1Pin) / VOLTMETER_COSTANT;
+
+}
+String printVoltage(float voltage) { 
+
+  return String("\nCarica batteria: " + (String)((voltage*100)/MAX_VOLTAGE) +"% ");
+
 }
 
 void setup() {
 
   Serial.begin(9600);       // Inizializza la comunicazione seriale a 9600 bps
-  lcd.begin(16, 2);         // Inizializza il display LCD
-  lcd.setCursor(0,0);
+  //lcd.begin(16, 2);         // Inizializza il display LCD
+  //lcd.setCursor(0,0);
 }
 
 void loop() {
@@ -169,7 +167,7 @@ void loop() {
   // funzioni da eseguire ogni 5 minuti
   if (millis() % fiveMinutes == 0) {
     //updateLCD();
-    measureVoltmeters();
+    Serial.print(printVoltage(measureVoltage()));
   }
   if(millis() % tenMinutes == 0) {
   Serial.print(printTemperature());
