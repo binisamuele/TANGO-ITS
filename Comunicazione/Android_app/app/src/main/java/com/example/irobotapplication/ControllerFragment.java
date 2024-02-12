@@ -1,7 +1,11 @@
 package com.example.irobotapplication;
 
+import static android.view.View.MeasureSpec.getMode;
+
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -15,10 +19,13 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Switch;
 import android.widget.Toast;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.RetryPolicy;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -32,11 +39,25 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ControllerFragment extends Fragment {
 
-    private ConnectiviyCheck check;
+    private ConnectivityCheck check;
     private ActionBar actionBar;
 
     public ControllerFragment() {
         // Required empty public constructor
+    }
+
+    private Context fragmentContext;
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        fragmentContext = context;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d("FragmentController", "onCreate");
     }
 
     @Override
@@ -66,24 +87,27 @@ public class ControllerFragment extends Fragment {
         AppCompatImageButton buttonBackwards = requireView().findViewById(R.id.btnDown);
         AppCompatImageButton buttonRotSx = requireView().findViewById(R.id.btnRotSX);
         AppCompatImageButton buttonRotDx = requireView().findViewById(R.id.btnRotDX);
+        Switch switchOnOff = requireView().findViewById(R.id.switch_OnOff);
+        AppCompatImageButton btnStop = requireView().findViewById(R.id.btnStop);
+        switchOnOff.setChecked(true);
 
-        check = new ConnectiviyCheck(requireActivity().getApplicationContext());
-        check.startPeriodicRequests();
+        check = new ConnectivityCheck(requireActivity().getApplicationContext());
+        check.startSending();
 
         //using this boolean to prevent multiple buttons from being pressed at the same time
         AtomicBoolean anyButtonPressed = new AtomicBoolean(false);
 
         buttonForward.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get()) {
+            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is released
                 anyButtonPressed.set(false);
-                postToServer("btnReleased");
+                postToServer(getString(R.string.conn_string) + "control", "released");
                 buttonForward.setImageResource(R.drawable.vettoreup_bianco__removebg_preview);
                 return true;
-            } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
+            } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
-                postToServer("up");
+                postToServer(getString(R.string.conn_string) + "control", "up");
                 buttonForward.setImageResource((R.drawable.vettoreup_rosso__removebg_preview));
                 return true;
             }
@@ -91,16 +115,16 @@ public class ControllerFragment extends Fragment {
         });
 
         buttonBackwards.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get()) {
+            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is released
                 anyButtonPressed.set(false);
-                postToServer("btnReleased");
+                postToServer(getString(R.string.conn_string) + "control", "released");
                 buttonBackwards.setImageResource(R.drawable.vettoredown_bianco__removebg_preview);
                 return true;
-            } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
+            } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
-                postToServer("down");
+                postToServer(getString(R.string.conn_string) + "control", "down");
                 buttonBackwards.setImageResource((R.drawable.vettoredown_rosso__removebg_preview));
                 return true;
             }
@@ -108,16 +132,16 @@ public class ControllerFragment extends Fragment {
         });
 
         buttonRotSx.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get()) {
+            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is released
                 anyButtonPressed.set(false);
-                postToServer("btnReleased");
+                postToServer(getString(R.string.conn_string) + "control", "released");
                 buttonRotSx.setImageResource(R.drawable.rotsx_bianco_2);
                 return true;
-            } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
+            } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
-                postToServer("left");
+                postToServer(getString(R.string.conn_string) + "control", "left");
                 buttonRotSx.setImageResource(R.drawable.rotsx_rosso__removebg_preview);
                 return true;
             }
@@ -125,20 +149,37 @@ public class ControllerFragment extends Fragment {
         });
 
         buttonRotDx.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get()) {
+            if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is released
                 anyButtonPressed.set(false);
-                postToServer("btnReleased");
+                postToServer(getString(R.string.conn_string) + "control", "released");
                 buttonRotDx.setImageResource(R.drawable.rotdx_bianco);
                 return true;
-            } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get()) {
+            } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
-                postToServer("right");
+                postToServer(getString(R.string.conn_string) + "control", "right");
                 buttonRotDx.setImageResource(R.drawable.rotdx_rosso__removebg_preview);
                 return true;
             }
             return false;
+        });
+
+        //CONTROLLO SWITCH
+        switchOnOff.setOnCheckedChangeListener((v, event) -> {
+            if (!switchOnOff.isChecked()) {
+                postToServer(getString(R.string.conn_string) + "control", "commStop");
+                check.stopSending();
+            }
+            if (switchOnOff.isChecked()) {
+                check.startSending();
+            }
+        });
+
+        btnStop.setOnClickListener(v -> {
+            postToServer(getString(R.string.conn_string) + "control", "emergencyStop");
+            switchOnOff.setChecked(false);
+            check.stopSending();
         });
     }
 
@@ -151,18 +192,19 @@ public class ControllerFragment extends Fragment {
             actionBar.show();
         }
 
-        check.stopPeriodicRequests();
-        postToServer("commStop");
+        check.stopSending();
+        postToServer(getString(R.string.conn_string) + "control", "commStop");
     }
 
-    private void postToServer(String direction) {
+    private void postToServer(String url, String direction) {
 
         RequestQueue queue = Volley.newRequestQueue(requireContext());
 
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, getString(R.string.conn_string) + "/control",
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 response -> Log.d("HTTP-POST", "Response: " + response),
                 error -> {
-                    // Handle errors here.
+                    // Handle errors
+                    Toast.makeText(fragmentContext, "Errore di connessione", Toast.LENGTH_SHORT).show();
                     Log.e("HTTP-POST", "Error: " + error.toString());
                 })
         {
@@ -189,6 +231,15 @@ public class ControllerFragment extends Fragment {
             @Override
             public String getBodyContentType() {
                 return "application/json";
+            }
+
+            @Override
+            public RetryPolicy getRetryPolicy() {
+                return new DefaultRetryPolicy(
+                        1000,
+                        0,
+                        1
+                );
             }
         };
         queue.add(stringRequest);

@@ -1,0 +1,17 @@
+<!-- Nel file res/drawable/frame_border.xml -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:left="4dp"
+        android:right="4dp"
+        android:top="4dp"
+        android:bottom="4dp">
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent" />
+            <corners android:radius="16dp" />
+            <stroke
+                android:width="8dp"
+                android:color="@color/Grigio_chiaro" />
+        </shape>
+    </item>
+</layer-list>
