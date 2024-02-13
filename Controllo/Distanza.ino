@@ -34,17 +34,18 @@ const int echoPinDR = 31;
 double distance = 0;
 bool alarm = false;
 int sensorIndex = 0;
+
 const int sensoriMancanti = 2;
 
 
 //Inizializzazione sensori
-NewPing sonar[SENSORS_NOMBER] = {   // Sensor object array.
-  NewPing(trigPinU, echoPinU, MAX_DISTANCE),
-  NewPing(trigPinUR, echoPinUR, MAX_DISTANCE),
-  //NewPing(trigPinUL, echoPinUL, MAX_DISTANCE),
-  NewPing(trigPinD, echoPinD, MAX_DISTANCE),
-  NewPing(trigPinDR, echoPinDR, MAX_DISTANCE)
-  //NewPing(trigPinDL, echoPinDL, MAX_DISTANCE)
+NewPing sonar[SENSORS_NOMBER] = {   
+  NewPing(trigPinU, echoPinU, MAX_DISTANCE),      //sensore frontale
+  NewPing(trigPinUR, echoPinUR, MAX_DISTANCE),    //sensore frontale destro
+  //NewPing(trigPinUL, echoPinUL, MAX_DISTANCE),  //sensore frontale sinistro
+  NewPing(trigPinD, echoPinD, MAX_DISTANCE),      //sensore posteriore 
+  NewPing(trigPinDR, echoPinDR, MAX_DISTANCE)     //sensore posteriore destro
+  //NewPing(trigPinDL, echoPinDL, MAX_DISTANCE)   //sensore posteriore sinistro
 };
 
 //funzioni per la gestione della distanza
@@ -54,7 +55,8 @@ double measureDistance(int sonarNum) {
 String printDistance(double distance) { 
 
     if(alarm == true) Serial.print("E");
-    if(sensorIndex == 0)
+    if(sensorIndex == 0) Serial.print("U");
+    if(sensorIndex == 1) Serial.print("UR");
     return String("\nDistanza: " + (String)distance +"cm ");
         
 }
@@ -91,12 +93,15 @@ void distanceManagement() {
       }
 
     }
-  }
-
-  if(alarm == false) {
+  } else {
     sensorIndex = 0;
     distance = 0;
   }
+
+  //else if(alarm == false) {
+  //  sensorIndex = 0;
+  //  distance = 0;
+  //}
 
   delay(50);
 }
