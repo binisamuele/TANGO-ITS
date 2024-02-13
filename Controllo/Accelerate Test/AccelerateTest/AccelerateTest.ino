@@ -27,17 +27,15 @@ void setup() {
     digitalWrite(dxBackwardEn, HIGH);
     digitalWrite(sxBackwardEn, HIGH);
 
-    pinMode(key, INPUT_PULLUP); // necessario per far funzionare la chiave
+    pinMode(key, INPUT_PULLUP); // necessario per far funzionare la chiave -- fare attenzione alle interferenze nel caso in cui il motore non venga messo a 0
 
     pinMode(2, INPUT_PULLUP); // necessario per fare funzionare i bottoni
 
-    attachInterrupt(digitalPinToInterrupt(2), toDelete, FALLING);    // Pin 2 per emergenza pulsanti    //DEBUG
+    attachInterrupt(0, toDelete, CHANGE);    // Pin 2 per emergenza pulsanti    //DEBUG
 }
 
 void toDelete(){                        //DEBUG 
   Serial.println("Button Pressed");
-
-  emergencyState();
 }
 
 void loop() {
@@ -55,9 +53,9 @@ void loop() {
         delay(2000);
     }
 
-    movement(); // switch del movimento
-    Serial.println("velocità: ");
-    Serial.println(speed);
+    //movement(); // switch del movimento
+    //Serial.println("velocità: ");
+    //Serial.println(speed);
 }
 
 // funzione stato emergenza
