@@ -1,21 +1,27 @@
-const int dxForward = 2, dxBackward = 3, dxForwardEn = 26, dxBackwardEn = 27;   // Motore DX, pin da modificare
-const int sxForward = 4, sxBackward = 5, sxForwardEn = 23, sxBackwardEn = 22;   // Motore SX, pin da modificare
-const int startFromApp;     // pin collegato all'app per l'accensione
+// PINS
+const int dxForward = 5, dxBackward = 4, dxForwardEn = 27, dxBackwardEn = 26;   // Motore DX
+const int sxForward = 7, sxBackward = 6, sxForwardEn = 22, sxBackwardEn = 23;   // Motore SX
+
 const int key = 20;         // pin della chiave
+const int startFromApp;     // pin collegato all'app per l'accensione
 const int emergencyPin1; emergencyPin2; emergencyPin3;      // pin per inviare messaggi di emergenza
-const int communicationPin1; communicationPin2; communicationPin3;      // pin per la rispota ai messaggi
-String serialString = "";
+const int communicationPin;                                // pin per la rispota ai messaggi
+
+// VARIABILI
+const int speedGain = 2;    // da testare
+const int maxSpeed = 50;    // da testare
+const int minSpeed = -50;   // da testare
+int speed = 0;              // Valore del PWM tra 0 (spento) e 255 (massima velocità)
 int movementInt = 0;
-int speed = 0;  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
-const int speedGain = 10;
-const int maxSpeed = 150;
-const int minSpeed = -100;
+
 bool isRotating = false;
 bool emergency = true;
 
+String serialString = "";
+
 void setup() {
     Serial1.begin(9600);    // collegamento all'arduino di comunicazione
-    Serial2.begin(9600);    // collegamento all'arduino dei sensori di movimento
+    Serial2.begin(9600);    // collegamento all'arduino dei sensori a ultrasuoni
     Serial3.begin(9600);    // collegamento all'arduino degli altri sensori
 
     pinMode(dxForward, OUTPUT);
@@ -37,10 +43,9 @@ void setup() {
     pinMode(communicationPin3, OUTPUT);
 
     pinMode(key, INPUT_PULLUP); // necessario per far funzionare la chiave
-
     pinMode(2, INPUT_PULLUP); // necessario per fare funzionare i bottoni
 
-    attachInterrupt(digitalPinToInterrupt(2), emergencyState, FALLING);     // Pin 2 per emergenza pulsanti
+    attachInterrupt(0, emergencyState, FALLING);                            // Pin 2 per emergenza pulsanti
     attachInterrupt(1, emergencyState, RISING);                             // Pin 3 per emergenza bumper
     attachInterrupt(2, emergencyState, RISING);                             // Pin 21 per emergenze arduino (hardware deve utilizzare un diodo)
 }
@@ -92,7 +97,7 @@ void emergencyStop() {
     stopMotor();
     resetVariables();
 
-    delay(200);
+    delay(1000); // da testare
 }
 
 // reset delle variabili
@@ -105,25 +110,11 @@ void resetVariables() {
 void readSerial(){
     if(Serial1.available()) {
         serialString = Serial1.readStringUntil('\r\n');
-        digitalWrite(communicationPin1, HIGH);
+        digitalWrite(communicationPin, HIGH);
         delay(50); // da testare
-        digitalWrite(communicationPin1, LOW);
+        digitalWrite(communicationPin, LOW);
         mapping(serialString);
     }
-    // if(Serial2.available()) {
-    //     serialString = Serial2.readStringUntil('\r\n');
-    //     digitalWrite(communicationPin2, HIGH);
-    //     delay(100);
-    //     digitalWrite(communicationPin2, LOW);
-    //     mapping(serialString);
-    // }
-    // if(Serial3.available()) {
-    //     serialString = Serial3.readStringUntil('\r\n');
-    //     digitalWrite(communicationPin3, HIGH);
-    //     delay(100);
-    //     digitalWrite(communicationPin3, LOW);
-    //     mapping(serialString);
-    // }
 }
 
 // mapping dei messaggi
@@ -234,7 +225,7 @@ void rotationCheck(){
         stopMotor();
         isRotating = false;
         
-        delay(50); // da testare
+        delay(1000); // da testare
     }
 }
 
@@ -246,7 +237,7 @@ void stopMotor(){
     analogWrite(sxForward, 0);
     analogWrite(sxBackward, 0);
 
-    delay(50); // da testare
+    delay(1000); // da testare
 }
 
 // funzione per muoversi avanti o indietro
@@ -256,7 +247,7 @@ void driveMotor(int motor1, int motor2, int spd) {
     analogWrite(motor1, spd);
     analogWrite(motor2, spd);
 
-    delay(50); // da testare
+    delay(1000); // da testare
 }
 
 // funzione per accelerare
