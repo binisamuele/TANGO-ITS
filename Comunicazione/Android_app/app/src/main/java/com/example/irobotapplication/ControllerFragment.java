@@ -175,7 +175,7 @@ public class ControllerFragment extends Fragment {
                 check.startSending();
             }
         });
-
+        
         btnStop.setOnClickListener(v -> {
             postToServer(getString(R.string.conn_string) + "control", "emergencyStop");
             switchOnOff.setChecked(false);

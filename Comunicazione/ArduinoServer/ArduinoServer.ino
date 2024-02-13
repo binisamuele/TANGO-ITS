@@ -165,7 +165,7 @@ void loop() {
         } 
       }
     }
-  }  
+  }
 
   if (currentTime - startTime > duration) {
     startTime = currentTime;
@@ -187,7 +187,7 @@ void loop() {
       }
     }
   }
-
+  
   // read another arduino's serial to get sensors values 
   readSensorValues();
 }

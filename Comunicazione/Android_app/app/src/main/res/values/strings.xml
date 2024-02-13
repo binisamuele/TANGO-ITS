@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">IRobotApplication</string>
+    <string name="app_name">Tango</string>
     <string name="open">open</string>
     <string name="close">close</string>
     <string name="conn_string">http://172.20.10.12:3000/</string>

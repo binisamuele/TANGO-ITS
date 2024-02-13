@@ -90,7 +90,7 @@ periodicCheck = (value) => {
         const req = http.request(options, (res) => {
             console.log(`Arduino server responded with status code: ${res.statusCode}`);
         });
-        
+
         req.on('error', (error) => {
             comStatus = false;
             if (error.code === 'EHOSTUNREACH') {
@@ -99,13 +99,21 @@ periodicCheck = (value) => {
                 console.error('An error occurred:', error);
             }
         });
-        
+
         req.write(JSON.stringify(jsonData));
         req.end();
     }
     catch(error){
         console.error('An error occurred:', error);
     }
+    
+    req.on('error', (error) => {
+        comStatus = false;
+        console.error('Error sending request to Arduino:', error);
+    });
+    
+    req.write(JSON.stringify(jsonData));
+    req.end();
 
     return comStatus;
 }
