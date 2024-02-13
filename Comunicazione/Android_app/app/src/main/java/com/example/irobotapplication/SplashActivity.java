@@ -1,12 +1,15 @@
 package com.example.irobotapplication;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 
-@SuppressLint("CustomSplashScreen")
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.irobotapplication.MainActivity;
+import com.example.irobotapplication.R;
+
 public class SplashActivity extends AppCompatActivity {
 
     @Override
@@ -14,21 +17,13 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        Thread myThread = new Thread(){
+        // Utilizza un Handler per avviare l'Intent dopo un ritardo
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
-                try {
-                    sleep(3000);
-                }
-                catch (Exception e){
-                    e.printStackTrace();
-                }
-                finally {
-                    startActivity(new Intent(SplashActivity.this, MainActivity.class));
-                }
+                startActivity(new Intent(SplashActivity.this, MainActivity.class));
+                finish(); // Chiudi la SplashActivity per evitare di tornarci con il tasto indietro
             }
-        };
-
-        myThread.start();
+        }, 3000);
     }
 }
