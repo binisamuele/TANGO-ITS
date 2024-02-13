@@ -4,7 +4,7 @@ int movementInt = 0;
 int speed = 0;  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
 int key = 40; // pin della chiave
 const int speedGain = 2;
-const int maxSpeed = 50;
+const int maxSpeed = 100;
 const int minSpeed = -50;
 bool emergency = true;
 bool isRotating = false;
@@ -21,7 +21,8 @@ void setup() {
     pinMode(sxBackward, OUTPUT);
     pinMode(sxForwardEn, OUTPUT);
     pinMode(sxBackwardEn, OUTPUT);
-
+  
+    digitalWrite(3, HIGH);
     digitalWrite(dxForwardEn, HIGH);
     digitalWrite(sxForwardEn, HIGH);
     digitalWrite(dxBackwardEn, HIGH);
@@ -29,9 +30,9 @@ void setup() {
 
     pinMode(key, INPUT_PULLUP); // necessario per far funzionare la chiave -- fare attenzione alle interferenze nel caso in cui il motore non venga messo a 0
 
-    pinMode(2, INPUT_PULLUP); // necessario per fare funzionare i bottoni
+    pinMode(2, INPUT); // necessario per fare funzionare i bottoni
 
-    attachInterrupt(0, toDelete, CHANGE);    // Pin 2 per emergenza pulsanti    //DEBUG
+    attachInterrupt(0, toDelete, RISING);    // Pin 2 per emergenza pulsanti    //DEBUG
 }
 
 void toDelete(){                        //DEBUG 
@@ -48,14 +49,15 @@ void loop() {
 	if (speed == 0){
         movementInt = 1;
     }
-	if (speed >= maxSpeed){
-        movementInt = 5;
-        delay(2000);
-    }
+	if (speed < maxSpeed){
+  //  Serial.println("velocità: ");
+  //  Serial.println(speed);
+  //      movementInt = 5;
+  //      delay(2000);
+  }
 
-    //movement(); // switch del movimento
-    //Serial.println("velocità: ");
-    //Serial.println(speed);
+    movement(); // switch del movimento
+
 }
 
 // funzione stato emergenza
