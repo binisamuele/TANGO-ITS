@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     DrawerLayout drawerLayout;
     Toolbar toolbar;
     NavigationView navigationView;
+    private boolean isSplashActivity = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,26 +64,11 @@ public class MainActivity extends AppCompatActivity {
                     fragmentR(new ControllerFragment());
                     drawerLayout.closeDrawer(GravityCompat.START);
                     handleMenuItemSelection(item);
-                } else if (itemId == R.id.lidar || itemId == R.id.telecamere) {
-                    Fragment fragment;
-                    String title;
-
-                    if (itemId == R.id.lidar) {
-                        fragment = new LidarFragment();
-                        title = "Lidar";
-                    } else {
-                        fragment = new FotocamereFragment();
-                        title = "Telecamere";
-                    }
-
-                    fragmentR(fragment);
-                    drawerLayout.closeDrawer(GravityCompat.START);
-                    setToolbarTitle(title);
-                    handleMenuItemSelection(item);
                 }
 
                 return true;
             }
+
         });
 
         // Imposta il menu selezionato inizialmente
@@ -93,7 +79,23 @@ public class MainActivity extends AppCompatActivity {
             fragmentR(new HomeFragment());
             setToolbarTitle("Tango");
         }
+
+        isSplashActivity=false;
     }
+    @Override
+    public void onBackPressed() {
+        // Controlla se l'activity corrente è la splash screen
+        if (isSplashActivity) {
+            // Se è la splash screen, chiudi l'app invece di tornare indietro
+            finish();
+        } else {
+            // Altrimenti, esegui il comportamento di default
+            super.onBackPressed();
+        }
+    }
+
+
+
 
     private void fragmentR(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
