@@ -93,11 +93,10 @@
                 android:id="@+id/Display"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="90dp"
-                android:layout_marginBottom="30dp"
+                android:layout_marginBottom="12dp"
                 android:contentDescription="display"
                 android:src="@drawable/display"
-                app:layout_constraintBottom_toTopOf="@+id/btnStop"
+                app:layout_constraintBottom_toTopOf="@id/switch_OnOff"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
@@ -107,15 +106,15 @@
                 android:id="@+id/btnStop"
                 android:layout_width="142dp"
                 android:layout_height="129dp"
-                android:layout_marginBottom="120dp"
                 android:background="#00FFFFFF"
                 android:contentDescription="stop"
                 android:scaleType="fitCenter"
                 android:src="@drawable/stopbutton"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.495"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/Display" />
+                app:layout_constraintTop_toBottomOf="@+id/switch_OnOff" />
 
             <TextView
                 android:id="@+id/Velocita"
@@ -139,6 +138,23 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/Velocita" />
 
+            <Switch
+                android:id="@+id/switch_OnOff"
+                android:layout_width="54dp"
+                android:layout_height="24dp"
+                android:layout_marginBottom="20dp"
+                android:checked="false"
+                android:enabled="true"
+                android:scaleX="2"
+                android:scaleY="2"
+                android:thumb="@drawable/ic_thumb"
+                android:track="@drawable/bg_track"
+                app:layout_constraintBottom_toTopOf="@id/btnStop"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.497"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/Display" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </FrameLayout>
@@ -161,30 +177,30 @@
 
             <ImageButton
                 android:id="@+id/btnSX"
-                android:contentDescription="sx"
-                android:src="@drawable/vettoredown_bianco__removebg_preview"
                 android:layout_width="104dp"
                 android:layout_height="95dp"
                 android:layout_marginBottom="50dp"
                 android:background="#00FFFFFF"
+                android:contentDescription="sx"
                 android:rotation="90"
                 android:scaleType="fitCenter"
+                android:src="@drawable/vettoredown_bianco__removebg_preview"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/btnDX"
-                app:layout_constraintStart_toStartOf="parent"/>
+                app:layout_constraintStart_toStartOf="parent" />
 
             <ImageButton
                 android:id="@+id/btnRotDX"
-                android:contentDescription="rotDx"
-                android:src="@drawable/rotdx_bianco"
                 android:layout_width="104dp"
                 android:layout_height="95dp"
                 android:layout_marginTop="50dp"
                 android:background="#00FFFFFF"
+                android:contentDescription="rotDx"
                 android:scaleType="fitCenter"
+                android:src="@drawable/rotdx_bianco"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/btnRotSX"
-                app:layout_constraintTop_toTopOf="parent"/>
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
                 android:id="@+id/btnRotSX"
@@ -201,32 +217,30 @@
 
             <ImageButton
                 android:id="@+id/btnDX"
-                android:contentDescription="dx"
-                android:src="@drawable/vettoredown_bianco__removebg_preview"
                 android:layout_width="104dp"
                 android:layout_height="95dp"
                 android:layout_marginBottom="50dp"
                 android:background="#00FFFFFF"
+                android:contentDescription="dx"
                 android:rotation="-90"
                 android:scaleType="fitCenter"
+                android:src="@drawable/vettoredown_bianco__removebg_preview"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/btnSX"/>
+                app:layout_constraintStart_toEndOf="@+id/btnSX" />
 
-            <Switch
-                android:id="@+id/switch_OnOff"
-                android:track="@drawable/bg_track"
-                android:thumb="@drawable/ic_thumb"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:scaleX="2"
-                android:scaleY="2"
-                android:checked="false"
-                android:enabled="true"
-                app:layout_constraintBottom_toTopOf="@+id/btnDX"
+            <ImageButton
+                android:id="@+id/btnLights"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:backgroundTint="#00FFFFFF"
+                android:scaleType="centerInside"
+                android:src="@drawable/lights_off"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/btnRotSX" />
+                app:layout_constraintTop_toTopOf="parent"
+                android:contentDescription="TODO" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
