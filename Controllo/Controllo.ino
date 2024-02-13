@@ -42,7 +42,7 @@ void setup() {
     pinMode(communicationPin2, OUTPUT);
     pinMode(communicationPin3, OUTPUT);
 
-    pinMode(key, INPUT_PULLUP); // necessario per far funzionare la chiave
+    pinMode(key, INPUT_PULLUP); // necessario per far funzionare la chiave -- fare attenzione alle interferenze nel caso in cui il motore non venga messo a 0
     pinMode(2, INPUT_PULLUP); // necessario per fare funzionare i bottoni
 
     attachInterrupt(0, emergencyState, FALLING);                            // Pin 2 per emergenza pulsanti
