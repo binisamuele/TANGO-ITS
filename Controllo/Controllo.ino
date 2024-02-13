@@ -261,7 +261,7 @@ void driveMotor(int motor1, int motor2, int spd) {
 
 // funzione per accelerare
 void accelerate(){
-    if (speed > 0) {
+    if (speed >= 0) {
         if (speed >= maxSpeed) return;      // se la velocità è al massimo, non fare niente
 
         speed += speedGain;
@@ -269,7 +269,7 @@ void accelerate(){
         return;
     }
 
-    if (speed < 0) {
+    if (speed <= 0) {
         if (speed <= minSpeed) return;      // se la velocità è al minimo, non fare niente
 
         speed -= speedGain;
