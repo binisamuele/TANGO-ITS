@@ -29,39 +29,80 @@
 
     </FrameLayout>
 
-    <!-- Frame a Sinistra del TopFrame -->
+    <!-- Frame in basso sinistra (Temperature) -->
     <FrameLayout
         android:id="@+id/bottomLeftFrame"
         android:layout_width="140dp"
         android:layout_height="170dp"
         android:layout_gravity="start"
         android:layout_marginStart="30dp"
-        android:layout_marginTop="-200dp"
+        android:layout_marginTop="180dp"
         android:background="@drawable/frame_border"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/topFrame">
 
-        <com.example.irobotapplication.TemperatureView
-            android:id="@+id/temperatureView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+        <ImageView
+            android:layout_width="68dp"
+        android:layout_height="68dp"
+        android:layout_gravity="center"
+        android:rotation="-90"
+        android:src="@drawable/baseline_device_thermostat_24" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="50dp"
+        android:text="25°C"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
 
     </FrameLayout>
 
-
-    <!-- Frame al Centro del TopFrame -->
+    <!-- Frame in basso destra (Humidity) -->
     <FrameLayout
-        android:id="@+id/batteryFrame"
+        android:id="@+id/bottomRightFrame"
         android:layout_width="140dp"
         android:layout_height="170dp"
-        android:layout_gravity="start"
-        android:layout_marginTop="-200dp"
+        android:layout_gravity="end"
         android:layout_marginEnd="30dp"
+        android:layout_marginTop="180dp"
         android:background="@drawable/frame_border"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/topFrame">
+
+        <ImageView
+            android:layout_width="68dp"
+            android:layout_height="68dp"
+            android:layout_gravity="center"
+            android:src="@drawable/baseline_water_drop_24" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="50dp"
+            android:text="75%"
+            android:textColor="@android:color/white"
+            android:textSize="18sp" />
+
+    </FrameLayout>
+
+    <!-- Frame al Centro del TopFrame (Batteria) -->
+    <FrameLayout
+        android:id="@+id/batteryFrame"
+        android:layout_width="140dp"
+        android:layout_height="170dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="-200dp"
+        android:background="@drawable/frame_border"
+        app:layout_constraintTop_toBottomOf="@id/topFrame"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.5">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -79,40 +120,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
-
         </androidx.constraintlayout.widget.ConstraintLayout>
-
     </FrameLayout>
 
-    <!-- Frame sotto bottomLeftFrame -->
-    <FrameLayout
-        android:id="@+id/bottomLeftFrame2"
-        android:layout_width="140dp"
-        android:layout_height="170dp"
-        android:layout_gravity="start"
-        android:layout_marginStart="30dp"
-        android:background="@drawable/frame_border"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/bottomLeftFrame">
-
-        <!-- Aggiungi i tuoi elementi al frame se necessario -->
-
-    </FrameLayout>
-
-    <!-- Frame sotto batteryFrame -->
-    <FrameLayout
-        android:id="@+id/batteryFrame2"
-        android:layout_width="140dp"
-        android:layout_height="170dp"
-        android:layout_gravity="start"
-        android:layout_marginEnd="30dp"
-        android:background="@drawable/frame_border"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/batteryFrame">
-
-        <!-- Aggiungi i tuoi elementi al frame se necessario -->
-
-    </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
