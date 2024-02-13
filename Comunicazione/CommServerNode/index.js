@@ -66,7 +66,7 @@ app.post("/control", (req, res) => {
         // request from the client to keep the connection alive
         // otherwise send an emergency stop to arduino
 
-        if (!comExtableshed && req.body.direction !== "commStop"){
+        if (!comExtableshed && direction !== "commStop" && direction !== "emergencyStop"){
             console.log(">> Controller communication started!");
             comExtableshed = true;
         }
@@ -94,9 +94,8 @@ app.post("/connection-check", (req, res) => {
     try {
         //check if json contains key "androidCheck"
         if (req.body.hasOwnProperty("androidCheck")){
-            let lastAndroidCheck = req.body.androidCheck;
             isAndroidAlive = true;
-            console.log(`Android check recieved: ${lastAndroidCheck}`);
+            console.log(`Android check recieved!`);
         } else{
             console.log("Invalid check recieved!");
             return;

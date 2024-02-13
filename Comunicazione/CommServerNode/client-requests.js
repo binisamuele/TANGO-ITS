@@ -11,7 +11,7 @@ forwardToArduino = (direction, lastDirection) => {
         return;
     }
 
-    if (direction === lastDirection) {
+    if (direction === lastDirection && direction != "emergencyStop") {
         console.log('Direction is the same as the previous one. Not forwarding to Arduino.');
         return;
     }
@@ -33,16 +33,26 @@ forwardToArduino = (direction, lastDirection) => {
         }
     };
 
-    const req = http.request(options, (res) => {
-        console.log(`Arduino server responded with status code: ${res.statusCode}`);
-    });
+    try {
+        const req = http.request(options, (res) => {
+            console.log(`Arduino server responded with status code: ${res.statusCode}`);
+        });
 
-    req.on('error', (error) => {
-        console.error('Error sending request to Arduino:', error);
-    });
+        req.on('error', (error) => {
+            comStatus = false;
+            if (error.code === 'EHOSTUNREACH') {
+                console.error('>> Error sending request to Arduino: Arduino is unreachable.');
+            } else {
+                console.error('An error occurred:', error);
+            }
+        });
 
-    req.write(JSON.stringify(jsonData));
-    req.end();
+        req.write(JSON.stringify(jsonData));
+        req.end();
+    }
+    catch(error){
+        console.error('An error occurred:', error);
+    }
     
     return lastDirection;
 };
@@ -76,9 +86,26 @@ periodicCheck = (value) => {
         }
     };
     
-    const req = http.request(options, (res) => {
-        console.log(`Arduino server responded with status code: ${res.statusCode}`);
-    });
+    try {
+        const req = http.request(options, (res) => {
+            console.log(`Arduino server responded with status code: ${res.statusCode}`);
+        });
+
+        req.on('error', (error) => {
+            comStatus = false;
+            if (error.code === 'EHOSTUNREACH') {
+                console.error('>> Error sending request to Arduino: Arduino is unreachable.');
+            } else {
+                console.error('An error occurred:', error);
+            }
+        });
+
+        req.write(JSON.stringify(jsonData));
+        req.end();
+    }
+    catch(error){
+        console.error('An error occurred:', error);
+    }
     
     req.on('error', (error) => {
         comStatus = false;
