@@ -156,12 +156,21 @@ String printHumidity() {
 
 
 //funzioni monitoraggio stato della batteria
-void measureVoltmeters() {
+float measureVoltmeters() {
   // Misura tensione da voltmeter1Pin
-  float voltage1 = analogRead(voltmeter1Pin) /40.92;
+   
+  return analogRead(voltmeter1Pin) /40.92;
+}
+
+String printVoltmeters() {
+  char buffer[40];
+  float voltage1=measureVoltmeters();
   sprintf(buffer, "voltaggio: %d.%d", (int)voltage1, ((int)(voltage1*10) % 10));
   Serial.println(buffer);
+  return buffer;
 }
+
+
 
 
 void setup() {
@@ -195,31 +204,37 @@ void lcdManagement(int distance,char set) {
     lcd.print(printTemperature());
     break;
   case 'H':
-  lcd.setCursor(0, 1);
+    lcd.setCursor(0, 1);
     lcd.print(printHumidity());
     break;   
+  case 'V':
+    lcd.setCursor(0, 1);
+    lcd.print(printVoltmeters());
+    break;   
 
-    default:
+  default:
     lcd.print("FATAL ERROR");
 
   }
 }
 
 void loop() {
-
+  char setLcd;
 
   distanceManagement();
   delay(30);
   // funzioni da eseguire ogni 5 minuti
 
   if (millis() % fiveMinutes == 0) {
-    measureVoltmeters();
+    Serial.print(printVoltmeters());
+    setLcd='V';
+    lcdManagement(0,setLcd);
   }
   
   if(millis() % tenMinutes == 0) {
   Serial.print(printTemperature());
   Serial.print(printHumidity());
-  char setLcd='T';
+  setLcd='T';
   lcdManagement(0,setLcd);
 
   setLcd='H';
