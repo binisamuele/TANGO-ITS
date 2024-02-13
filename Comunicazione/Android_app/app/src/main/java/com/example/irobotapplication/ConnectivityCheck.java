@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 
 public class ConnectivityCheck {
     Context context;
-    private static final int INTERVAL_MILLISECONDS = 5000;
+    private static final int INTERVAL_MILLISECONDS = 3000;
 
     private Handler handler;
     private Runnable apiRunnable;
