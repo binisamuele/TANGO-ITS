@@ -83,6 +83,7 @@ public class ControllerFragment extends Fragment {
 
         requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
+        AppCompatImageButton buttonLights = requireView().findViewById(R.id.btnLights);
         AppCompatImageButton buttonForward = requireView().findViewById(R.id.bntUp);
         AppCompatImageButton buttonBackwards = requireView().findViewById(R.id.btnDown);
         AppCompatImageButton buttonRotSx = requireView().findViewById(R.id.btnRotSX);
@@ -110,6 +111,22 @@ public class ControllerFragment extends Fragment {
                 return true;
             }
             return false;
+        });
+
+        buttonLights.setOnClickListener(new View.OnClickListener() {
+            boolean lights_state = false; // Stato iniziale
+            @Override
+            public void onClick(View v) {
+                if (!lights_state) {
+                    // Se le luci sono spente, accendile
+                    buttonLights.setImageResource(R.drawable.lights_on);
+                    lights_state = true;
+                } else {
+                    // Se le luci sono accese, spegnile
+                    buttonLights.setImageResource(R.drawable.lights_off);
+                    lights_state = false;
+                }
+            }
         });
 
         buttonBackwards.setOnTouchListener((v, event) -> {
