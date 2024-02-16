@@ -11,7 +11,7 @@ public class ConnectToArduino {
     private static final int UDP_PORT = 8888;
     private static final String BROADCAST_IP = "192.168.1.255";
 
-    public static void main(String[] args) {
+    public String tryConnection() {
         try {
             DatagramSocket socket = new DatagramSocket();
 
@@ -50,8 +50,11 @@ public class ConnectToArduino {
             socket.close();
 
             Log.d("UDP Broadcast", "Broadcasted message received: " + message);
+
+            return arduinoIP;
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
     }
 }

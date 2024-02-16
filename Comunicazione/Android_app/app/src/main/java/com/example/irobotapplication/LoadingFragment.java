@@ -1,5 +1,6 @@
 package com.example.irobotapplication;
 
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -13,6 +14,8 @@ import androidx.fragment.app.Fragment;
 public class LoadingFragment extends Fragment {
 
     private LoadingListener loadingListener;
+
+    private ConnectToArduino connect;
 
     public void setLoadingListener(LoadingListener listener) {
         this.loadingListener = listener;
@@ -36,5 +39,21 @@ public class LoadingFragment extends Fragment {
         }, 3000); // Simula il caricamento per 3 secondi
 
         return super.onCreateView(inflater, container, savedInstanceState);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        connect = new ConnectToArduino();
+        do {
+            // prova a connetterti all'Arduino e scamabia l'IP
+            GlobalVars.arduinoIP = connect.tryConnection();
+        } while (GlobalVars.arduinoIP == null);
+
+        // chiudi il fragment
+        requireActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
     }
 }
