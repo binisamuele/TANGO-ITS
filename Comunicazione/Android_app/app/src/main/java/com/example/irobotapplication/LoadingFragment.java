@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 
 public class LoadingFragment extends Fragment {
 
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -25,5 +26,21 @@ public class LoadingFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        connect = new ConnectToArduino();
+        do {
+            // prova a connetterti all'Arduino e scamabia l'IP
+            GlobalVars.arduinoIP = connect.tryConnection();
+        } while (GlobalVars.arduinoIP == null);
+
+        // chiudi il fragment
+        requireActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
     }
 }
