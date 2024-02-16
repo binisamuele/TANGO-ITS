@@ -11,7 +11,13 @@ public class LoadingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_loading);
+        setContentView(R.layout.activity_loading);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+        connect = new ConnectToArduino();
+        do {
+            // prova a connetterti all'Arduino e scamabia l'IP
+            GlobalVars.arduinoIP = connect.tryConnection();
+        } while (GlobalVars.arduinoIP == null);
     }
 }
