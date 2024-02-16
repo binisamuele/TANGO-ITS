@@ -2,14 +2,18 @@
 const int dxForward = 5, dxBackward = 4, dxForwardEn = 27, dxBackwardEn = 26;   // Motore DX
 const int sxForward = 7, sxBackward = 6, sxForwardEn = 22, sxBackwardEn = 23;   // Motore SX
 
-const int key = 20;         // pin della chiave
-const int startFromApp;     // pin collegato all'app per l'accensione
-const int emergencyPin1; emergencyPin2; emergencyPin3;      // pin per inviare messaggi di emergenza
-const int communicationPin;                                // pin per la rispota ai messaggi
+const int key = 40;             // pin della chiave
+const int startFromApp;         // pin collegato all'app per l'accensione
+const int emergencyPin;         // pin per inviare messaggi di emergenza
+const int communicationPin;     // pin per la rispota ai messaggi
 
 // VARIABILI
+unsigned long startTime;
+unsigned long currentTime;
+const long interval = 1000;
+
 const int speedGain = 2;    // da testare
-const int maxSpeed = 50;    // da testare
+const int maxSpeed = 100;    // da testare
 const int minSpeed = -50;   // da testare
 int speed = 0;              // Valore del PWM tra 0 (spento) e 255 (massima velocità)
 int movementInt = 0;
@@ -24,6 +28,8 @@ void setup() {
     Serial2.begin(9600);    // collegamento all'arduino dei sensori a ultrasuoni
     Serial3.begin(9600);    // collegamento all'arduino degli altri sensori
 
+    startTime = millis();
+
     pinMode(dxForward, OUTPUT);
     pinMode(dxBackward, OUTPUT);
     pinMode(dxForwardEn, OUTPUT);
@@ -34,25 +40,22 @@ void setup() {
     pinMode(sxForwardEn, OUTPUT);
     pinMode(sxBackwardEn, OUTPUT);
 
-    pinMode(emergencyPin1, OUTPUT);
-    pinMode(emergencyPin2, OUTPUT);
-    pinMode(emergencyPin3, OUTPUT);
+    pinMode(emergencyPin, OUTPUT);
 
-    pinMode(communicationPin1, OUTPUT);
-    pinMode(communicationPin2, OUTPUT);
-    pinMode(communicationPin3, OUTPUT);
+    pinMode(communicationPin, OUTPUT);
 
     pinMode(key, INPUT_PULLUP); // necessario per far funzionare la chiave -- fare attenzione alle interferenze nel caso in cui il motore non venga messo a 0
-    pinMode(2, INPUT_PULLUP); // necessario per fare funzionare i bottoni
+    pinMode(2, INPUT_PULLUP);   // necessario per fare funzionare i bottoni
 
-    attachInterrupt(0, emergencyState, FALLING);                            // Pin 2 per emergenza pulsanti
+    attachInterrupt(0, emergencyState, RISING);                             // Pin 2 per emergenza pulsanti
     attachInterrupt(1, emergencyState, RISING);                             // Pin 3 per emergenza bumper
     attachInterrupt(2, emergencyState, RISING);                             // Pin 21 per emergenze arduino (hardware deve utilizzare un diodo)
 }
 
 void loop() {
-    // controllo della comunicazione seriale (anche gli altri arduino devono fare il controllo del seriale)
-    if (!Serial1 || !Serial2 || !Serial3 || emergency) {
+    currentTime = millis();
+
+    if (!Serial1 || !Serial2 || !Serial3 || emergency) {        // controllo della comunicazione seriale
         emergencyState();
         return;
     }
@@ -96,8 +99,7 @@ void emergencyComm(){
 void emergencyStop() {
     stopMotor();
     resetVariables();
-
-    delay(1000); // da testare
+    
 }
 
 // reset delle variabili
@@ -203,7 +205,6 @@ void movement(){
             rotationCheck();
 
             decelerate();
-            decelerate();
             break;
         // nessun comando di movimento
         default:
@@ -246,42 +247,50 @@ void driveMotor(int motor1, int motor2, int spd) {
 
     analogWrite(motor1, spd);
     analogWrite(motor2, spd);
-
-    delay(1000); // da testare
 }
 
 // funzione per accelerare
 void accelerate(){
-    if (speed >= 0) {
-        if (speed >= maxSpeed) return;      // se la velocità è al massimo, non fare niente
+    if (currentTime - startTime >= interval){
 
-        speed += speedGain;
-        driveMotor(dxForward, sxForward, speed);
-        return;
-    }
+        startTime = currentTime;
 
-    if (speed <= 0) {
-        if (speed <= minSpeed) return;      // se la velocità è al minimo, non fare niente
+        if (speed >= 0) {
+            if (speed >= maxSpeed) return;      // se la velocità è al massimo, non fare niente
 
-        speed -= speedGain;
-        driveMotor(dxBackward, sxBackward, speed);
-        return;
+            speed += speedGain;
+            driveMotor(dxForward, sxForward, speed);
+            return;
+        }
+
+        if (speed <= 0) {
+            if (speed <= minSpeed) return;      // se la velocità è al minimo, non fare niente
+
+            speed -= speedGain;
+            driveMotor(dxBackward, sxBackward, speed);
+            return;
+        }
     }
 }
 
 // funzione per decelerare e lentamente fermarsi
 void decelerate(){
-    if (speed < 0) {
-        speed += speedGain;
-        speedControl();
-        driveMotor(dxBackward, sxBackward, speed);
-        return;
-    }
+    if (currentTime - startTime >= interval){
 
-    if (speed > 0) {
-        speed -= speedGain;
-        speedControl();
-        driveMotor(dxForward, sxForward, speed);
-        return;
+        startTime = currentTime;
+
+        if (speed < 0) {
+            speed += speedGain;
+            speedControl();
+            driveMotor(dxBackward, sxBackward, speed);
+            return;
+        }
+
+        if (speed > 0) {
+            speed -= speedGain;
+            speedControl();
+            driveMotor(dxForward, sxForward, speed);
+            return;
+        }
     }
 }
