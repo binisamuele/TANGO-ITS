@@ -8,7 +8,8 @@
 // Import modules
 const express = require('express');
 const { forwardToArduino, periodicCheck } = require ('./client-requests.js');
-const { nodePort } = require('./costants.js');
+const globals = require('./globals.js');
+const { multicastDNS } = require('./multicastDns.js');
 
 //Misc variables
 var app = express();
@@ -21,11 +22,14 @@ let comExtableshed = false; // control if the communication has been extableshed
 let isAndroidAlive = false;
 let firstFail = true;
 
+// Retrieve Arduino IP address
+multicastDNS();
+
 // Start server
 app.use(express.json());
 
-app.listen(nodePort, () => {
-    console.log(`Server listening on port: ${nodePort}`);
+app.listen(globals.nodePort, () => {
+    console.log(`Server listening on port: ${globals.nodePort}`);
     console.log('---------------------------------');
 });
 
