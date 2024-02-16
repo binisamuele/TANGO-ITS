@@ -1,4 +1,4 @@
-const { arduinoHost, arduinoPort } = require('./costants.js');
+const { arduinoHost, arduinoPort } = require('./globals.js');
 const http = require('http');
 
 //

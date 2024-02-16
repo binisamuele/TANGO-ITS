@@ -2,29 +2,30 @@
 #include <Ethernet.h>
 #include <string.h>
 #include <ArduinoJson.h>
+#include <EthernetUdp.h>
 
 //PINS
 int emergency = 13;
 
+// Connection Variables
+int UDP_PORT = 8888;
+EthernetUDP udp;
+IPAddress androidIP = nullptr;
+
 // Connection checks variables
-unsigned long startTime = millis();
+unsigned long startTime;
 unsigned long currentTime;
 unsigned long duration = 4500;
 bool checked = false;
 bool failed = false;
 bool comExtableshed = false;
 
-//Connectivity Test IP (Node Server)
-int currIPNode = 2;
-
 //Arduino Server
-int arduinoIP = 4;
 int arduinoPort = 80;
 
 // Network Settings
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };  // MAC address
-IPAddress ip(192, 168, 1, arduinoIP); // IP address
-IPAddress nodeServer(192, 168, 1, currIPNode);  // IP address of the node server
+IPAddress ip(192, 168, 1, 4); // IP address
 
 EthernetClient client;
 EthernetServer server(80);
@@ -33,45 +34,23 @@ void setup() {
   // emergency PIN
   pinMode(13, OUTPUT);
   
-  unsigned long startTime = millis();
+  startTime = millis();
 
   Serial.begin(9600);
   
   // -- Start the Ethernet connection --
   Ethernet.begin(mac);
   Ethernet.setLocalIP(ip);
-
-  // -- Testing connectivity --
-  Serial.println(">> Testing connectivity (using Node server connection on port 3000)");
   
-  if (Ethernet.linkStatus() == LinkOFF){
+  // Make sure that Ethernet is linked
+  if (Ethernet.linkStatus() == LinkOFF){                              // TEST THIS ONE!
     Serial.println("Ethernet cable is not connected!");
+    while (Ethernet.linkStatus() == LinkOFF);
+    Serial.println("Ethernet cable is now connected!");
   }
 
-  //
-  // -- HTTP GET request to test connectivity (using retries) --
-  //
-  for (int retryCount = 0; retryCount < 3; retryCount++){
-    if (client.connect(nodeServer, 3000)) {
-      /*DEBUG: */Serial.println("Connected to server");
-
-      client.println("GET /");
-      String connectionString = String("Host: 192.168.0." + String(currIPNode));
-      client.println(connectionString);   // Replace with the actual IP address or domain of Node server
-      client.println("Connection: keep-alive");
-      client.println();
-      break;
-    } else{
-      if (retryCount == 2){
-        /*DEBUG: */Serial.println("Connection failed!");
-      } else{
-        /*DEBUG: */Serial.println("Connection failed. Retrying...");
-        delay(3000);
-      }
-    }
-  }
-  client.stop();
-
+  udp.begin(UDP_PORT);
+  connectToAndroidApp();    //possible issue: i may have passed variable by value insted of reference
 
   // ----  START ARDUINO SERVER  -----
   // ---------------------------------
@@ -83,24 +62,6 @@ void setup() {
     /*DEBUG: */Serial.println(Ethernet.localIP());
   } else {
     /*DEBUG: */Serial.println(">> Server failed to start. Restart Arduino!");
-  }
-}
-
-// send interrupt to control arduino to perform an emergency stop
-void startEmergencyStop(){
-        digitalWrite(emergency, HIGH);
-        delay(1000);
-        digitalWrite(emergency, LOW);
-}
-
-// function to send direction string to the other arduino
-void forwardToControlArduino(String value){
-  Serial.println(value);
-}
-
-void readSensorValues(){
-  if (Serial.available()) {
-    String received = Serial.readStringUntil('\n');
   }
 }
 
@@ -190,4 +151,43 @@ void loop() {
   
   // read another arduino's serial to get sensors values 
   readSensorValues();
+}
+
+void connectToAndroidApp(){
+  while (androidIP == nullptr){
+    int packetSize = udp.parsePacket();
+    if (packetSize) {
+      // Read the packet
+      char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
+      udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
+      
+      // DEBUG: print the received packet
+      Serial.print("Received packet: ");
+      Serial.println(packetBuffer);
+
+      // Storing androidIP address and using it to send Arduino's IP
+      androidIP = udp.remoteIP();
+      udp.beginPacket(androidIP, UDP_PORT);
+      udp.write(Ethernet.localIP());
+      udp.endPacket();
+    }
+  }
+}
+
+// send interrupt to control arduino to perform an emergency stop
+void startEmergencyStop(){
+        digitalWrite(emergency, HIGH);
+        delay(1000);
+        digitalWrite(emergency, LOW);
+}
+
+// function to send direction string to the other arduino
+void forwardToControlArduino(String value){
+  Serial.println(value);
+}
+
+void readSensorValues(){
+  if (Serial.available()) {
+    String received = Serial.readStringUntil('\n');
+  }
 }
