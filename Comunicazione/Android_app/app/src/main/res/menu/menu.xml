@@ -13,15 +13,5 @@
             android:id="@+id/controller"
             android:icon="@drawable/controller"
             android:title="Controller" />
-
-        <item
-            android:id="@+id/lidar"
-            android:icon="@drawable/lidar"
-            android:title="Lidar" />
-
-        <item
-            android:id="@+id/telecamere"
-            android:icon="@drawable/fotocamera"
-            android:title="Telecamere" />
     </group>
 </menu>

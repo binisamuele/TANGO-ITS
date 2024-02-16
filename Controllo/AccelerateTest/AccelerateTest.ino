@@ -1,12 +1,12 @@
-const int dxForward = 4, dxBackward = 5, dxForwardEn = 26, dxBackwardEn = 27;   // Motore DX, pin da modificare
-const int sxForward = 6, sxBackward = 7, sxForwardEn = 23, sxBackwardEn = 22;   // Motore SX, pin da modificare
+const int dxForward = 5, dxBackward = 4, dxForwardEn = 27, dxBackwardEn = 26;   // Motore DX, pin da modificare
+const int sxForward = 7, sxBackward = 6, sxForwardEn = 22, sxBackwardEn = 23;   // Motore SX, pin da modificare
 int movementInt = 0;
 int speed = 0;  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
 int key = 40; // pin della chiave
-const int speedGain = 10;
-const int maxSpeed = 100;
-const int minSpeed = -100;
-bool emergency = true;
+const int speedGain = 3;
+const int maxSpeed = 150;
+const int minSpeed = -50;
+bool emergency = false;
 bool isRotating = false;
 
 void setup() {
@@ -22,11 +22,20 @@ void setup() {
     pinMode(sxForwardEn, OUTPUT);
     pinMode(sxBackwardEn, OUTPUT);
 
-    pinMode(key, INPUT_PULLUP); // necessario per far funzionare la chiave
+    digitalWrite(dxForwardEn, HIGH);
+    digitalWrite(sxForwardEn, HIGH);
+    digitalWrite(dxBackwardEn, HIGH);
+    digitalWrite(sxBackwardEn, HIGH);
+
+    pinMode(key, INPUT_PULLUP); // necessario per far funzionare la chiave -- fare attenzione alle interferenze nel caso in cui il motore non venga messo a 0
 
     pinMode(2, INPUT_PULLUP); // necessario per fare funzionare i bottoni
 
-    attachInterrupt(digitalPinToInterrupt(2), emergencyState, FALLING);    // Pin 2 per emergenza pulsanti
+    // attachInterrupt(0, toDelete, RISING);    // Pin 2 per emergenza pulsanti    //DEBUG
+}
+
+void toDelete(){                        //DEBUG 
+  Serial.println("Button Pressed");
 }
 
 void loop() {
@@ -38,19 +47,14 @@ void loop() {
 
 	if (speed == 0){
         movementInt = 1;
-        Serial.println("velocità: ");
-        Serial.println(speed);
     }
-	if (speed >= maxSpeed){
-        movementInt = 5;
-        Serial.println("velocità: ");
-        Serial.println(speed);
-    }
+	// if (speed < maxSpeed){
+    //     Serial.println("velocità: ");
+    //     Serial.println(speed);
+    // }
 
     movement(); // switch del movimento
 
-    Serial.println("chiave: " );
-    Serial.println(digitalRead(key));
 }
 
 // funzione stato emergenza
@@ -58,14 +62,12 @@ void emergencyState() {
     if (!emergency){            // ferma la macchina e manda un messaggio di emergenza agli altri arduino
         emergency = true;
         emergencyStop();
-        Serial.println("sono in emergenza");
     }
 
-    while (emergency)      		// rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
+    while (emergency || !digitalRead(key))      		// rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
     {
         if (!digitalRead(key)){
             emergency = false;
-            Serial.println("chiave a 0");
         }
     }
 }
@@ -75,7 +77,7 @@ void emergencyStop() {
     stopMotor();
     resetVariables();
 
-    delay(200);
+    delay(1000);
 }
 
 // reset delle variabili
@@ -146,7 +148,7 @@ void stopMotor(){
     analogWrite(sxForward, 0);
     analogWrite(sxBackward, 0);
 
-    delay(50); // da testare
+    delay(1000); // da testare
 }
 
 // funzione per muoversi avanti o indietro
@@ -156,12 +158,12 @@ void driveMotor(int motor1, int motor2, int spd) {
     analogWrite(motor1, spd);
     analogWrite(motor2, spd);
 
-    delay(50); // da testare
+    delay(1000); // da testare
 }
 
 // funzione per accelerare
 void accelerate(){
-    if (speed > 0) {
+    if (speed >= 0) {
         if (speed >= maxSpeed) return;      // se la velocità è al massimo, non fare niente
 
         speed += speedGain;
@@ -169,7 +171,7 @@ void accelerate(){
         return;
     }
 
-    if (speed < 0) {
+    if (speed <= 0) {
         if (speed <= minSpeed) return;      // se la velocità è al minimo, non fare niente
 
         speed -= speedGain;
