@@ -4,9 +4,8 @@
 
 
 //costanti globali 
-#define SENSORS_NOMBER 4
 #define MAX_DISTANCE 200
-#define SENSORS_NOMBER 6
+#define SENSORS_NOMBER 8
 #define MAX_DISTANCE 200
 #define SPEED_OF_SOUND 0.0343
 #define EMERGENCY_PIN 1
@@ -15,13 +14,21 @@
 //setup pin lcd
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
+
+
 //constanti gestione millis
-const int fiveMinutes = 300000;
-const int tenMinutes = 600000;
+
+const long fiveSeconds = 3000 + millis();
+const long fiveMinutes = 3000 + millis();
+const long tenMinutes = 6000 + millis();
+long t0 = millis();
+
+
 
 
 //funzione per sensore Temperatura e Umidità
 DHT11 dht11(2);
+
 
 
 //frontale
@@ -50,11 +57,13 @@ const int echoPinDR = 31;
 double distance = 0;
 bool alarm = false;
 int sensorIndex = 0;
-const int sensoriMancanti = 2;
+const int sensoriMancanti = 4;
 
+// costante di controllo per lcd
+  char setLcd;
 
 //Inizializzazione sensori
-NewPing sonar[SENSORS_NOMBER] = {   // Sensor object array.
+NewPing sonar[SENSORS_NOMBER-sensoriMancanti] = {   // Sensor object array.
   NewPing(trigPinU, echoPinU, MAX_DISTANCE),
   NewPing(trigPinUR, echoPinUR, MAX_DISTANCE),
   //NewPing(trigPinUL, echoPinUL, MAX_DISTANCE),
@@ -78,14 +87,14 @@ double measureDistance(int sonarNum) {
 String printDistance(double distance) { 
   Serial.print("\n");
   
-  return  String("Dist: " + (String)distance +"cm ");
+  return  String("Dist: " + (String)distance +"cm     ");
 
 }
 
 void distanceManagement() {
-  char setLcd;
 
-  if( sensorIndex < SENSORS_NOMBER) {
+
+  if( sensorIndex < SENSORS_NOMBER -sensoriMancanti) {
 
     if(alarm == true) {
 
@@ -95,7 +104,7 @@ void distanceManagement() {
       Serial.print(printDistance(distance));
       Serial.print(" E");
       setLcd ='E';
-      lcdManagement(distance,setLcd);  //lcd.print(printDistance(distance));
+      //lcdManagement(distance,setLcd);  //lcd.print(printDistance(distance));
       
 
       if (distance > 30) {
@@ -110,8 +119,8 @@ void distanceManagement() {
       distance = measureDistance(sensorIndex);
 
       Serial.print(printDistance(distance));
-      setLcd ='N';
-      lcdManagement(distance,setLcd);
+      // setLcd ='N';
+      // lcdManagement(distance,setLcd);
       
 
 
@@ -131,7 +140,7 @@ void distanceManagement() {
     distance = 0;
   }
 
-  delay(50);
+  delay(500);
 }
 
 //funzioni gestione Temperatura
@@ -140,7 +149,8 @@ int measureTemperature() {
 }
 String printTemperature() {
   char buffer[40];
-  sprintf(buffer, "Temperatura: %d °C \n", measureTemperature());
+  int tempValCalc =(int) 1.0/(log(1023.0/(float)measureTemperature()-1.0)/4275+1/298.15)-273.15;
+  sprintf(buffer, "         T: %dC   \n", tempValCalc);
   return buffer;
 }
 
@@ -150,7 +160,7 @@ int measureHumidity() {
 }
 String printHumidity() {
   char buffer[40];
-  sprintf(buffer, "Umidità: %d %% \n", measureHumidity());
+  sprintf(buffer, "U: %d%%", measureHumidity());
   return buffer;
 }
 
@@ -181,7 +191,7 @@ void setup() {
 }
 
 void lcdManagement(int distance,char set) {
-  lcd.clear();
+  //lcd.clear();
 
   switch (set)
   {
@@ -193,7 +203,7 @@ void lcdManagement(int distance,char set) {
 
     case 'E':
     lcd.setCursor(0, 0);
-    lcd.print("EMMERGENZA");
+    lcd.print("EMMERGENZA      ");
     lcd.setCursor(0, 1);
     lcd.print(printDistance(distance));
 
@@ -204,7 +214,7 @@ void lcdManagement(int distance,char set) {
     lcd.print(printTemperature());
     break;
   case 'H':
-    lcd.setCursor(0, 1);
+    lcd.setCursor(0, 0);
     lcd.print(printHumidity());
     break;   
   case 'V':
@@ -219,25 +229,42 @@ void lcdManagement(int distance,char set) {
 }
 
 void loop() {
-  char setLcd;
+  
 
   distanceManagement();
   delay(30);
-  // funzioni da eseguire ogni 5 minuti
 
-  if (millis() % fiveMinutes == 0) {
+   setLcd ='N';
+      lcdManagement(distance,setLcd);
+  if( alarm == false){
+    if (millis() - t0 > fiveSeconds ) {
+      //aggiorna e stampa LCD
+      setLcd ='N';
+      lcdManagement(distance,setLcd);
+    }   
+  }
+
+  if (millis() - t0 > fiveMinutes ) {
     Serial.print(printVoltmeters());
+
+    //aggiorna e stampa LCD
     setLcd='V';
     lcdManagement(0,setLcd);
+    t0 = millis();
   }
   
-  if(millis() % tenMinutes == 0) {
+  if(millis() - t0 >  tenMinutes == 0) {
   Serial.print(printTemperature());
   Serial.print(printHumidity());
+
+  //aggiorna e stampa LCD
   setLcd='T';
   lcdManagement(0,setLcd);
 
   setLcd='H';
   lcdManagement(0,setLcd);
+  t0 = millis();
   }
+
+  
 }
