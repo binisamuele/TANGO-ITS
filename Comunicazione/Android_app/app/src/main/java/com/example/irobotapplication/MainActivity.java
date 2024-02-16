@@ -82,17 +82,6 @@ public class MainActivity extends AppCompatActivity {
 
         isSplashActivity=false;
     }
-    @Override
-    public void onBackPressed() {
-        // Controlla se l'activity corrente è la splash screen
-        if (isSplashActivity) {
-            // Se è la splash screen, chiudi l'app invece di tornare indietro
-            finish();
-        } else {
-            // Altrimenti, esegui il comportamento di default
-            super.onBackPressed();
-        }
-    }
 
 
 
