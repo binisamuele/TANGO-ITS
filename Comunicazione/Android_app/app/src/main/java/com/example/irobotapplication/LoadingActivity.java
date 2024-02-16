@@ -5,7 +5,7 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-public class LoadingFragment extends AppCompatActivity {
+public class LoadingActivity extends AppCompatActivity {
     private ConnectToArduino connect;
 
     @Override
