@@ -1,34 +1,23 @@
 #include <DHT11.h>
 #include <LiquidCrystal.h>
-#include <NewPing.h>
-
 
 //costanti globali 
-
+#define EMERGENCY_PIN 1
 
 
 //setup pin lcd
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
 //constanti gestione millis
-const int fiveMinutes = 300000;
-const int tenMinutes = 600000;
+
+const long fiveSeconds = 3000 + millis();
+const long fiveMinutes = 3000 + millis();
+const long tenMinutes = 6000 + millis();
+long t0 = millis();
 
 
 //funzione per sensore Temperatura e Umidità
 DHT11 dht11(2);
-
-
-
-
-
-
-
-//pin sensori voltimetri
-const int voltmeter1Pin = A0;
-const int voltmeter2Pin = A1;
-
-
 
 //funzioni gestione Temperatura
 int measureTemperature() {
@@ -36,7 +25,8 @@ int measureTemperature() {
 }
 String printTemperature() {
   char buffer[40];
-  sprintf(buffer, "Temperatura: %d °C \n", measureTemperature());
+  int tempValCalc =(int) 1.0/(log(1023.0/(float)measureTemperature()-1.0)/4275+1/298.15)-273.15;
+  sprintf(buffer, "        T : %d C", tempValCalc);
   return buffer;
 }
 
@@ -46,7 +36,7 @@ int measureHumidity() {
 }
 String printHumidity() {
   char buffer[40];
-  sprintf(buffer, "Umidità: %d %% \n", measureHumidity());
+  sprintf(buffer, "U : %d%% ", measureHumidity());
   return buffer;
 }
 
@@ -61,7 +51,11 @@ float measureVoltmeters() {
 String printVoltmeters() {
   char buffer[40];
   float voltage1=measureVoltmeters();
-  sprintf(buffer, "voltaggio: %d.%d", (int)voltage1, ((int)(voltage1*10) % 10));
+  
+  //      voltage1/12=x/100
+  voltage1 =(2*100)/(voltage1-10)
+
+  sprintf(buffer, "Batteria:%d.%d %%", (int)voltage1, ((int)(voltage1*10) % 10));
   Serial.println(buffer);
   return buffer;
 }
@@ -76,31 +70,22 @@ void setup() {
   lcd.setCursor(0,0);
 }
 
-void lcdManagement(int distance,char set) {
-  lcd.clear();
+void lcdManagement(char set) {
+  //lcd.clear();
 
-  switch (set)
-  {
-  case 'N':
-    lcd.setCursor(0, 1);
-    lcd.print(printDistance(distance));
-    
-    break;
-
+  switch (set) {
     case 'E':
     lcd.setCursor(0, 0);
-    lcd.print("EMMERGENZA");
+    lcd.print("EMERGENZA       ");
     lcd.setCursor(0, 1);
-    lcd.print(printDistance(distance));
-
-    
+    lcd.print("EMERGENZA       ");    
     break;
   case 'T':
     lcd.setCursor(0, 0);
     lcd.print(printTemperature());
     break;
   case 'H':
-    lcd.setCursor(0, 1);
+    lcd.setCursor(0, 0);
     lcd.print(printHumidity());
     break;   
   case 'V':
@@ -115,25 +100,22 @@ void lcdManagement(int distance,char set) {
 }
 
 void loop() {
-  char setLcd;
-
-  distanceManagement();
-  delay(30);
-  // funzioni da eseguire ogni 5 minuti
-
-  if (millis() % fiveMinutes == 0) {
-    Serial.print(printVoltmeters());
-    setLcd='V';
-    lcdManagement(0,setLcd);
-  }
   
-  if(millis() % tenMinutes == 0) {
-  Serial.print(printTemperature());
-  Serial.print(printHumidity());
-  setLcd='T';
-  lcdManagement(0,setLcd);
+  if( Serial.digitalWrite() == "EMERGENZA"){
+      lcdManagement(E);
+  }   
 
-  setLcd='H';
-  lcdManagement(0,setLcd);
-  }
+  if(millis() - t0 >  tenMinutes) {
+    Serial.print(printVoltmeters());
+    Serial.print(printTemperature());
+    Serial.print(printHumidity());
+
+    //aggiorna e stampa LCD
+    lcdManagement(V);
+    lcdManagement(T);
+    lcdManagement(H);
+    t0 = millis();
+    }
+
+  
 }

@@ -1,4 +1,12 @@
-// PINS
+#include <NewPing.h>
+
+//costanti globali 
+#define SENSORS_NOMBER 6
+#define MAX_DISTANCE 200
+#define SPEED_OF_SOUND 0.0343
+#define EMERGENCY_PIN 1
+
+// COSTANTI PINS
 const int dxForward = 5, dxBackward = 4, dxForwardEn = 27, dxBackwardEn = 26;   // Motore DX
 const int sxForward = 7, sxBackward = 6, sxForwardEn = 22, sxBackwardEn = 23;   // Motore SX
 
@@ -10,6 +18,27 @@ const int key = 40;                 // pin della chiave
 const int startFromApp;             // pin collegato all'app per l'accensione
 const int emergencyPin;             // pin per inviare messaggi di emergenza
 const int communicationPin;         // pin per la rispota ai messaggi
+
+//Pin sensori prossimità
+//frontale
+const int TRIG_PIN_U = 32;     
+const int ECHO_PIN_U = 33;     
+//frontale destro
+const int TRIG_PIN_UR = 34;
+const int ECHO_PIN_UR = 35; 
+//frontale sinistro
+const int TRIG_PIN_UL = 36;  
+const int ECHO_PIN_UL = 37;  
+
+//posteriore
+const int TRIG_PIN_D = 38;
+const int ECHO_PIN_D = 39; 
+//posteriore destro
+const int TRIG_PIN_DR = 40;
+const int ECHO_PIN_DR = 41; 
+//posteriore sinistro
+const int TRIG_PIN_DL = 42;
+const int ECHO_PIN_DL = 43; 
 
 // VARIABILI
 unsigned long startTime;
@@ -26,6 +55,24 @@ bool isRotating = false;
 bool emergency = true;
 
 String serialString = "";
+
+//variabili di supporto
+double distance = 0;
+bool alarm = false;
+int sensorIndex = 0;
+const int sensoriMancanti = 2;
+const int SONAR_INTERVAL = 50;
+
+
+//Array inizializzazione sensori
+NewPing sonar[SENSORS_NOMBER - sensoriMancanti] = {   
+  NewPing(TRIG_PIN_U, ECHO_PIN_U, MAX_DISTANCE),      //sensore frontale
+  NewPing(TRIG_PIN_UR, ECHO_PIN_UR, MAX_DISTANCE),    //sensore frontale destro
+  NewPing(TRIG_PIN_UL, ECHO_PIN_UL, MAX_DISTANCE),    //sensore frontale sinistro
+  NewPing(TRIG_PIN_D, ECHO_PIN_D, MAX_DISTANCE)       //sensore posteriore 
+  //NewPing(TRIG_PIN_DR, ECHO_PIN_DR, MAX_DISTANCE)   //sensore posteriore destro
+  //NewPing(TRIG_PIN_DL, ECHO_PIN_DL, MAX_DISTANCE)   //sensore posteriore sinistro
+};
 
 
 void setup() {
@@ -288,4 +335,65 @@ void decelerate(){
             return;
         }
     }
+}
+
+
+// MISURA DISTANZA           
+///////////////////////////////////////////////////////////////////////////////
+//funzioni per la gestione della distanza
+double measureDistance(int sonarNum) {
+  return (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
+}
+String printDistance(double distance) { 
+
+    if(alarm == true) Serial.print("\n E ");
+    if(sensorIndex == 0) Serial.print("\n S0 ");
+    if(sensorIndex == 1) Serial.print("\n S1 ");
+    if(sensorIndex == 2) Serial.print("\n S2 ");
+    if(sensorIndex == 3) Serial.print("\n S3 ");
+    return String("Distanza: " + (String)distance +"cm");
+        
+}
+
+void distanceManagement() {
+
+    //ciclo non bloccante ogni 50 ms
+    if (currentTime - startTime >= SONAR_INTERVAL){
+
+        if(sensorIndex < SENSORS_NOMBER) {
+
+            if(alarm == true) {
+
+            //stato di emergenza
+            distance = measureDistance(sensorIndex);
+            Serial.print(printDistance(distance));
+
+
+            if (distance > 60) {
+                alarm = false;
+                Serial.print("FINE EMERGENZA \n");
+            }
+
+            } else {
+
+            //stato normale
+            distance = measureDistance(sensorIndex);
+            Serial.print(printDistance(distance));
+
+
+            if(distance < 40) {
+                //digitalWrite(EMERGENCY_PIN, HIGH);
+                alarm = true;
+                Serial.print("EMERGENZA \n");
+            } else {
+                sensorIndex++;
+            }
+
+            }
+        } else {
+            sensorIndex = 0;
+            distance = 0;
+        }
+    }
+
 }
