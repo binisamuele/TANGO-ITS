@@ -47,7 +47,7 @@ void setup() {
     pinMode(key, INPUT_PULLUP); // necessario per far funzionare la chiave -- fare attenzione alle interferenze nel caso in cui il motore non venga messo a 0
     pinMode(2, INPUT_PULLUP);   // necessario per fare funzionare i bottoni
 
-    attachInterrupt(0, emergencyState, RISING);                             // Pin 2 per emergenza pulsanti
+    attachInterrupt(0, emergencyState, FALLING);                            // Pin 2 per emergenza pulsanti
     attachInterrupt(1, emergencyState, RISING);                             // Pin 3 per emergenza bumper
     attachInterrupt(2, emergencyState, RISING);                             // Pin 21 per emergenze arduino (hardware deve utilizzare un diodo)
 }
@@ -55,7 +55,7 @@ void setup() {
 void loop() {
     currentTime = millis();
 
-    if (!Serial1 || !Serial2 || !Serial3 || emergency) {        // controllo della comunicazione seriale
+    if (!Serial1 || !Serial2 || !Serial3 || emergency || digitalRead(2)) {        // controllo della comunicazione seriale
         emergencyState();
         return;
     }
@@ -84,22 +84,17 @@ void emergencyState() {
 // funzione di comunicazioni di emergenza
 void emergencyComm(){
     if (emergency){
-        digitalWrite(emergencyPin1, HIGH);     // manda segnale di emergenza agli altri arduino
-        digitalWrite(emergencyPin2, HIGH);
-        digitalWrite(emergencyPin3, HIGH);
+        digitalWrite(emergencyPin, HIGH);
         return;
     }
 
-    digitalWrite(emergencyPin1, LOW);     // manda segnale di fine emergenza agli altri arduino
-    digitalWrite(emergencyPin2, LOW);
-    digitalWrite(emergencyPin3, LOW);
+    digitalWrite(emergencyPin, LOW);
 }   
 
 // segnale di arresto del motore (potrebbe essere non necessaria)
 void emergencyStop() {
     stopMotor();
     resetVariables();
-    
 }
 
 // reset delle variabili

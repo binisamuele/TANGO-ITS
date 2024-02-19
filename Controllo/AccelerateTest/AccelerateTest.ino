@@ -31,7 +31,7 @@ void setup() {
 
     pinMode(2, INPUT_PULLUP); // necessario per fare funzionare i bottoni
 
-    // attachInterrupt(0, toDelete, RISING);    // Pin 2 per emergenza pulsanti    //DEBUG
+    attachInterrupt(0, toDelete, FALLING);    // Pin 2 per emergenza pulsanti
 }
 
 void toDelete(){                        //DEBUG 
