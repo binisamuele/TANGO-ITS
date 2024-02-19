@@ -21,24 +21,24 @@ const int communicationPin;         // pin per la rispota ai messaggi
 
 //Pin sensori prossimità
 //frontale
-//const int TRIG_PIN_U = 22;        //da modificare per conflitto motori
-//const int ECHO_PIN_U = 23;        //da modificare per conflitto motori 
+const int TRIG_PIN_U = 32;     
+const int ECHO_PIN_U = 33;     
 //frontale destro
-const int TRIG_PIN_UR = 24;
-const int ECHO_PIN_UR = 25; 
+const int TRIG_PIN_UR = 34;
+const int ECHO_PIN_UR = 35; 
 //frontale sinistro
-//const int TRIG_PIN_UL = 26;        //da modificare per conflitto motori
-//const int ECHO_PIN_UL = 27;        //da modificare per conflitto motori
+const int TRIG_PIN_UL = 36;  
+const int ECHO_PIN_UL = 37;  
 
 //posteriore
-const int TRIG_PIN_D = 28;
-const int ECHO_PIN_D = 29; 
+const int TRIG_PIN_D = 38;
+const int ECHO_PIN_D = 39; 
 //posteriore destro
-const int TRIG_PIN_DR = 30;
-const int ECHO_PIN_DR = 31; 
+const int TRIG_PIN_DR = 40;
+const int ECHO_PIN_DR = 41; 
 //posteriore sinistro
-const int TRIG_PIN_DL = 32;
-const int ECHO_PIN_DL = 33; 
+const int TRIG_PIN_DL = 42;
+const int ECHO_PIN_DL = 43; 
 
 // VARIABILI
 unsigned long startTime;
@@ -56,14 +56,15 @@ bool emergency = true;
 
 String serialString = "";
 
-//variabili di supporto
+//variabili di supporto sensori di prossimità
 double distance = 0;
 bool alarm = false;
 int sensorIndex = 0;
 const int sensoriMancanti = 2;
+const int SONAR_INTERVAL = 50;
 
 
-//Array inizializzazione sensori
+//Array inizializzazione sensori di prossimità
 NewPing sonar[SENSORS_NOMBER - sensoriMancanti] = {   
   NewPing(TRIG_PIN_U, ECHO_PIN_U, MAX_DISTANCE),      //sensore frontale
   NewPing(TRIG_PIN_UR, ECHO_PIN_UR, MAX_DISTANCE),    //sensore frontale destro
@@ -94,14 +95,9 @@ void setup() {
 
     pinMode(key, INPUT_PULLUP);
 
-    pinMode(buttons, INPUT_PULLUP);     // emergenza bottoni
+    pinMode(buttons, INPUT);     // emergenza bottoni
     pinMode(bumpers, INPUT_PULLUP);     // emergenza bumper
     pinMode(arduinoEmergencies, INPUT);  //emergenza arduino
-
-
-    // attachInterrupt(0, emergencyState, FALLING);                            // Pin 2 per emergenza pulsanti
-    // attachInterrupt(1, emergencyState, RISING);                             // Pin 3 per emergenza bumper
-    // attachInterrupt(2, emergencyState, RISING);                             // Pin 21 per emergenze arduino (hardware deve utilizzare un diodo)
 }
 
 
@@ -361,40 +357,43 @@ String printDistance(double distance) {
 
 void distanceManagement() {
 
-  if(sensorIndex < SENSORS_NOMBER - sensoriMancanti) {
+    //ciclo non bloccante ogni 50 ms
+    if (currentTime - startTime >= SONAR_INTERVAL){
 
-    if(alarm == true) {
+        if(sensorIndex < SENSORS_NOMBER) {
 
-      //stato di emergenza
-      distance = measureDistance(sensorIndex);
-      Serial.print(printDistance(distance));
+            if(alarm == true) {
 
-
-      if (distance > 30) {
-        alarm = false;
-        Serial.print("FINE EMERGENZA \n");
-      }
-
-    } else {
-
-      //stato normale
-      distance = measureDistance(sensorIndex);
-      Serial.print(printDistance(distance));
+            //stato di emergenza
+            distance = measureDistance(sensorIndex);
+            Serial.print(printDistance(distance));
 
 
-      if(distance < 20) {
-        digitalWrite(EMERGENCY_PIN, HIGH);
-        alarm = true;
-        Serial.print("EMERGENZA \n");
-      } else {
-        sensorIndex++;
-      }
+            if (distance > 60) {
+                alarm = false;
+                Serial.print("FINE EMERGENZA \n");
+            }
 
+            } else {
+
+            //stato normale
+            distance = measureDistance(sensorIndex);
+            Serial.print(printDistance(distance));
+
+
+            if(distance < 40) {
+                //digitalWrite(EMERGENCY_PIN, HIGH);
+                alarm = true;
+                Serial.print("EMERGENZA \n");
+            } else {
+                sensorIndex++;
+            }
+
+            }
+        } else {
+            sensorIndex = 0;
+            distance = 0;
+        }
     }
-  } else {
-    sensorIndex = 0;
-    distance = 0;
-  }
 
-  delay(50);
 }
