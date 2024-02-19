@@ -110,7 +110,7 @@ void resetVariables() {
     movementInt = 0;
 }
 
-// lettura dei 3 arduino
+// lettura dell'arduino di comunicazione
 void readSerial(){
     if(Serial1.available()) {
         serialString = Serial1.readStringUntil('\r\n');
