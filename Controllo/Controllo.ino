@@ -98,6 +98,18 @@ void setup() {
     pinMode(buttons, INPUT);     // emergenza bottoni
     pinMode(bumpers, INPUT_PULLUP);     // emergenza bumper
     pinMode(arduinoEmergencies, INPUT);  //emergenza arduino
+
+    pinMode(TRIG_PIN_U, OUTPUT);
+    pinMode(ECHO_PIN_U, INPUT);
+
+    pinMode(TRIG_PIN_UR, OUTPUT);
+    pinMode(ECHO_PIN_UR, INPUT);
+
+    pinMode(TRIG_PIN_UL, OUTPUT);
+    pinMode(ECHO_PIN_UL, INPUT);
+
+    pinMode(TRIG_PIN_D, OUTPUT);
+    pinMode(ECHO_PIN_D, INPUT);
 }
 
 
