@@ -340,3 +340,61 @@ void decelerate(){
         }
     }
 }
+
+
+// MISURA DISTANZA           
+///////////////////////////////////////////////////////////////////////////////
+//funzioni per la gestione della distanza
+double measureDistance(int sonarNum) {
+  return (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
+}
+String printDistance(double distance) { 
+
+    if(alarm == true) Serial.print("\n E ");
+    if(sensorIndex == 0) Serial.print("\n S0 ");
+    if(sensorIndex == 1) Serial.print("\n S1 ");
+    if(sensorIndex == 2) Serial.print("\n S2 ");
+    if(sensorIndex == 3) Serial.print("\n S3 ");
+    return String("Distanza: " + (String)distance +"cm");
+        
+}
+
+void distanceManagement() {
+
+  if(sensorIndex < SENSORS_NOMBER - sensoriMancanti) {
+
+    if(alarm == true) {
+
+      //stato di emergenza
+      distance = measureDistance(sensorIndex);
+      Serial.print(printDistance(distance));
+
+
+      if (distance > 30) {
+        alarm = false;
+        Serial.print("FINE EMERGENZA \n");
+      }
+
+    } else {
+
+      //stato normale
+      distance = measureDistance(sensorIndex);
+      Serial.print(printDistance(distance));
+
+
+      if(distance < 20) {
+        digitalWrite(EMERGENCY_PIN, HIGH);
+        alarm = true;
+        Serial.print("EMERGENZA \n");
+      } else {
+        sensorIndex++;
+      }
+
+    }
+  } else {
+    sensorIndex = 0;
+    distance = 0;
+  }
+
+  delay(50);
+}
