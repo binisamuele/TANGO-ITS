@@ -21,24 +21,24 @@ const int communicationPin;         // pin per la rispota ai messaggi
 
 //Pin sensori prossimità
 //frontale
-//const int TRIG_PIN_U = 22;        //da modificare per conflitto motori
-//const int ECHO_PIN_U = 23;        //da modificare per conflitto motori 
+const int TRIG_PIN_U = 32;     
+const int ECHO_PIN_U = 33;     
 //frontale destro
-const int TRIG_PIN_UR = 24;
-const int ECHO_PIN_UR = 25; 
+const int TRIG_PIN_UR = 34;
+const int ECHO_PIN_UR = 35; 
 //frontale sinistro
-//const int TRIG_PIN_UL = 26;        //da modificare per conflitto motori
-//const int ECHO_PIN_UL = 27;        //da modificare per conflitto motori
+const int TRIG_PIN_UL = 36;  
+const int ECHO_PIN_UL = 37;  
 
 //posteriore
-const int TRIG_PIN_D = 28;
-const int ECHO_PIN_D = 29; 
+const int TRIG_PIN_D = 38;
+const int ECHO_PIN_D = 39; 
 //posteriore destro
-const int TRIG_PIN_DR = 30;
-const int ECHO_PIN_DR = 31; 
+const int TRIG_PIN_DR = 40;
+const int ECHO_PIN_DR = 41; 
 //posteriore sinistro
-const int TRIG_PIN_DL = 32;
-const int ECHO_PIN_DL = 33; 
+const int TRIG_PIN_DL = 42;
+const int ECHO_PIN_DL = 43; 
 
 // VARIABILI
 unsigned long startTime;
@@ -61,6 +61,7 @@ double distance = 0;
 bool alarm = false;
 int sensorIndex = 0;
 const int sensoriMancanti = 2;
+const int SONAR_INTERVAL = 50;
 
 
 //Array inizializzazione sensori
@@ -361,40 +362,43 @@ String printDistance(double distance) {
 
 void distanceManagement() {
 
-  if(sensorIndex < SENSORS_NOMBER - sensoriMancanti) {
+    //ciclo non bloccante ogni 50 ms
+    if (currentTime - startTime >= SONAR_INTERVAL){
 
-    if(alarm == true) {
+        if(sensorIndex < SENSORS_NOMBER) {
 
-      //stato di emergenza
-      distance = measureDistance(sensorIndex);
-      Serial.print(printDistance(distance));
+            if(alarm == true) {
 
-
-      if (distance > 30) {
-        alarm = false;
-        Serial.print("FINE EMERGENZA \n");
-      }
-
-    } else {
-
-      //stato normale
-      distance = measureDistance(sensorIndex);
-      Serial.print(printDistance(distance));
+            //stato di emergenza
+            distance = measureDistance(sensorIndex);
+            Serial.print(printDistance(distance));
 
 
-      if(distance < 20) {
-        digitalWrite(EMERGENCY_PIN, HIGH);
-        alarm = true;
-        Serial.print("EMERGENZA \n");
-      } else {
-        sensorIndex++;
-      }
+            if (distance > 30) {
+                alarm = false;
+                Serial.print("FINE EMERGENZA \n");
+            }
 
+            } else {
+
+            //stato normale
+            distance = measureDistance(sensorIndex);
+            Serial.print(printDistance(distance));
+
+
+            if(distance < 20) {
+                //digitalWrite(EMERGENCY_PIN, HIGH);
+                alarm = true;
+                Serial.print("EMERGENZA \n");
+            } else {
+                sensorIndex++;
+            }
+
+            }
+        } else {
+            sensorIndex = 0;
+            distance = 0;
+        }
     }
-  } else {
-    sensorIndex = 0;
-    distance = 0;
-  }
 
-  delay(50);
 }
