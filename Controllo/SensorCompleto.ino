@@ -38,16 +38,16 @@ const int echoPinU = 23;
 const int trigPinUR = 24;
 const int echoPinUR = 25; 
 //frontale sinistro
-//const int trigPinUL = 26;
-//const int echoPinUL = 27; 
+const int trigPinUL = 26;
+const int echoPinUL = 27; 
 
 
 //posteriore
 const int trigPinD = 28;
 const int echoPinD = 29; 
 //posteriore destro
-const int trigPinDR = 30;
-const int echoPinDR = 31; 
+//const int trigPinDR = 30;
+//const int echoPinDR = 31; 
 //posteriore sinistro
 //const int trigPinDL = 32;
 //const int echoPinDL = 33; 
@@ -66,9 +66,9 @@ const int sensoriMancanti = 4;
 NewPing sonar[SENSORS_NOMBER-sensoriMancanti] = {   // Sensor object array.
   NewPing(trigPinU, echoPinU, MAX_DISTANCE),
   NewPing(trigPinUR, echoPinUR, MAX_DISTANCE),
-  //NewPing(trigPinUL, echoPinUL, MAX_DISTANCE),
+  NewPing(trigPinUL, echoPinUL, MAX_DISTANCE),
   NewPing(trigPinD, echoPinD, MAX_DISTANCE),
-  NewPing(trigPinDR, echoPinDR, MAX_DISTANCE)
+  //NewPing(trigPinDR, echoPinDR, MAX_DISTANCE)
   //NewPing(trigPinDL, echoPinDL, MAX_DISTANCE)
 };
 
@@ -85,9 +85,14 @@ double measureDistance(int sonarNum) {
 
 }
 String printDistance(double distance) { 
-  Serial.print("\n");
-  
-  return  String("Dist: " + (String)distance +"cm     ");
+  if(alarm == true) Serial.print("E/");
+  if(sensorIndex == 0) Serial.print("U");
+    else if(sensorIndex == 1) Serial.print("UR");
+    else if(sensorIndex == 2) Serial.print("UL");
+    else if(sensorIndex == 3) Serial.print("D");
+    else if(sensorIndex == 4) Serial.print("DR");
+    else if(sensorIndex == 4) Serial.print("DL");
+  return String("Dis: " + (String)distance +"cm ");
 
 }
 
@@ -102,9 +107,8 @@ void distanceManagement() {
       distance = measureDistance(sensorIndex);
 
       Serial.print(printDistance(distance));
-      Serial.print(" E");
       setLcd ='E';
-      //lcdManagement(distance,setLcd);  //lcd.print(printDistance(distance));
+      lcdManagement(distance,setLcd); 
       
 
       if (distance > 30) {
@@ -117,12 +121,7 @@ void distanceManagement() {
 
       //stato normale
       distance = measureDistance(sensorIndex);
-
       Serial.print(printDistance(distance));
-      // setLcd ='N';
-      // lcdManagement(distance,setLcd);
-      
-
 
       if(distance < 20) {
 
@@ -137,10 +136,10 @@ void distanceManagement() {
 
   if(alarm == false) {
     sensorIndex = 0;
-    distance = 0;
+    //distance = 0;
   }
 
-  delay(500);
+  delay(50);
 }
 
 //funzioni gestione Temperatura
@@ -234,8 +233,6 @@ void loop() {
   distanceManagement();
   delay(30);
 
-   setLcd ='N';
-      lcdManagement(distance,setLcd);
   if( alarm == false){
     if (millis() - t0 > fiveSeconds ) {
       //aggiorna e stampa LCD
@@ -244,6 +241,7 @@ void loop() {
     }   
   }
 
+  
   if (millis() - t0 > fiveMinutes ) {
     Serial.print(printVoltmeters());
 
@@ -253,18 +251,18 @@ void loop() {
     t0 = millis();
   }
   
-  if(millis() - t0 >  tenMinutes == 0) {
-  Serial.print(printTemperature());
-  Serial.print(printHumidity());
+  if(millis() - t0 >  tenMinutes) {
+    Serial.print(printTemperature());
+    Serial.print(printHumidity());
 
-  //aggiorna e stampa LCD
-  setLcd='T';
-  lcdManagement(0,setLcd);
+    //aggiorna e stampa LCD
+    setLcd='T';
+    lcdManagement(0,setLcd);
 
-  setLcd='H';
-  lcdManagement(0,setLcd);
-  t0 = millis();
-  }
+    setLcd='H';
+    lcdManagement(0,setLcd);
+    t0 = millis();
+    }
 
   
 }
