@@ -34,7 +34,6 @@ const int ECHO_PIN_DL = 33;
 double distance = 0;
 bool alarm = false;
 int sensorIndex = 0;
-
 const int sensoriMancanti = 2;
 
 

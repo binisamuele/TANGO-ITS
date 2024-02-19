@@ -56,6 +56,23 @@ bool emergency = true;
 
 String serialString = "";
 
+//variabili di supporto
+double distance = 0;
+bool alarm = false;
+int sensorIndex = 0;
+const int sensoriMancanti = 2;
+
+
+//Array inizializzazione sensori
+NewPing sonar[SENSORS_NOMBER - sensoriMancanti] = {   
+  NewPing(TRIG_PIN_U, ECHO_PIN_U, MAX_DISTANCE),      //sensore frontale
+  NewPing(TRIG_PIN_UR, ECHO_PIN_UR, MAX_DISTANCE),    //sensore frontale destro
+  NewPing(TRIG_PIN_UL, ECHO_PIN_UL, MAX_DISTANCE),    //sensore frontale sinistro
+  NewPing(TRIG_PIN_D, ECHO_PIN_D, MAX_DISTANCE)       //sensore posteriore 
+  //NewPing(TRIG_PIN_DR, ECHO_PIN_DR, MAX_DISTANCE)   //sensore posteriore destro
+  //NewPing(TRIG_PIN_DL, ECHO_PIN_DL, MAX_DISTANCE)   //sensore posteriore sinistro
+};
+
 
 void setup() {
     Serial1.begin(9600);    // collegamento all'arduino di comunicazione
