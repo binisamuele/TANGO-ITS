@@ -1,7 +1,7 @@
 #include <NewPing.h>
 
 //costanti globali 
-#define SENSORS_NOMBER 6
+#define SENSORS_NUMBER 6
 #define MAX_DISTANCE 200
 #define SPEED_OF_SOUND 0.0343
 #define EMERGENCY_PIN 1
@@ -14,7 +14,7 @@ const int bumpers = 3;              // pin dei bumpers
 const int buttons = 2;              // pin dei bottoni
 const int arduinoEmergencies = 8;   // pin per le emergenze degli altri Arduino
 
-const int key = 40;                 // pin della chiave
+const int key = 9;                 // pin della chiave
 const int startFromApp;             // pin collegato all'app per l'accensione
 const int emergencyPin;             // pin per inviare messaggi di emergenza
 const int communicationPin;         // pin per la rispota ai messaggi
@@ -65,7 +65,7 @@ const int SONAR_INTERVAL = 50;
 
 
 //Array inizializzazione sensori di prossimità
-NewPing sonar[SENSORS_NOMBER - sensoriMancanti] = {   
+NewPing sonar[SENSORS_NUMBER - sensoriMancanti] = {   
   NewPing(TRIG_PIN_U, ECHO_PIN_U, MAX_DISTANCE),      //sensore frontale
   NewPing(TRIG_PIN_UR, ECHO_PIN_UR, MAX_DISTANCE),    //sensore frontale destro
   NewPing(TRIG_PIN_UL, ECHO_PIN_UL, MAX_DISTANCE),    //sensore frontale sinistro
@@ -110,7 +110,7 @@ void loop() {
     }
 
     readSerial();
-
+    distanceManagement();
     movement();
 }
 
@@ -322,20 +322,23 @@ void decelerate(){
         startTime = currentTime;
 
         if (speed < 0) {
-            speed += speedGain;
+            if(speed < -60) speed -= speedGain*5;
+            else speed += speedGain;
             speedControl();
             driveMotor(dxBackward, sxBackward, speed);
             return;
         }
 
         if (speed > 0) {
-            speed -= speedGain;
+            if(speed > 60) speed -= speedGain*5;
+            else speed -= speedGain;
             speedControl();
             driveMotor(dxForward, sxForward, speed);
             return;
         }
     }
 }
+
 
 
 // MISURA DISTANZA           
@@ -360,7 +363,7 @@ void distanceManagement() {
     //ciclo non bloccante ogni 50 ms
     if (currentTime - startTime >= SONAR_INTERVAL){
 
-        if(sensorIndex < SENSORS_NOMBER) {
+        if(sensorIndex < SENSORS_NUMBER) {
 
             if(alarm == true) {
 
