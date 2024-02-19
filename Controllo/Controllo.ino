@@ -95,14 +95,9 @@ void setup() {
 
     pinMode(key, INPUT_PULLUP);
 
-    pinMode(buttons, INPUT_PULLUP);     // emergenza bottoni
+    pinMode(buttons, INPUT);     // emergenza bottoni
     pinMode(bumpers, INPUT_PULLUP);     // emergenza bumper
     pinMode(arduinoEmergencies, INPUT);  //emergenza arduino
-
-
-    // attachInterrupt(0, emergencyState, FALLING);                            // Pin 2 per emergenza pulsanti
-    // attachInterrupt(1, emergencyState, RISING);                             // Pin 3 per emergenza bumper
-    // attachInterrupt(2, emergencyState, RISING);                             // Pin 21 per emergenze arduino (hardware deve utilizzare un diodo)
 }
 
 
