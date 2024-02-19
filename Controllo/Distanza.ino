@@ -15,8 +15,8 @@ const int echoPinU = 23;
 const int trigPinUR = 24;
 const int echoPinUR = 25; 
 //frontale sinistro
-//const int trigPinUL = 26;
-//const int echoPinUL = 27; 
+const int trigPinUL = 26;
+const int echoPinUL = 27; 
 
 
 //posteriore
@@ -26,8 +26,8 @@ const int echoPinD = 29;
 const int trigPinDR = 30;
 const int echoPinDR = 31; 
 //posteriore sinistro
-//const int trigPinDL = 32;
-//const int echoPinDL = 33; 
+const int trigPinDL = 32;
+const int echoPinDL = 33; 
 
 
 //variabili di supporto per misura distanza
@@ -39,12 +39,12 @@ const int sensoriMancanti = 2;
 
 
 //Inizializzazione sensori
-NewPing sonar[SENSORS_NOMBER] = {   
+NewPing sonar[SENSORS_NOMBER - sensoriMancanti] = {   
   NewPing(trigPinU, echoPinU, MAX_DISTANCE),      //sensore frontale
   NewPing(trigPinUR, echoPinUR, MAX_DISTANCE),    //sensore frontale destro
-  //NewPing(trigPinUL, echoPinUL, MAX_DISTANCE),  //sensore frontale sinistro
-  NewPing(trigPinD, echoPinD, MAX_DISTANCE),      //sensore posteriore 
-  NewPing(trigPinDR, echoPinDR, MAX_DISTANCE)     //sensore posteriore destro
+  NewPing(trigPinUL, echoPinUL, MAX_DISTANCE),    //sensore frontale sinistro
+  NewPing(trigPinD, echoPinD, MAX_DISTANCE)       //sensore posteriore 
+  //NewPing(trigPinDR, echoPinDR, MAX_DISTANCE)   //sensore posteriore destro
   //NewPing(trigPinDL, echoPinDL, MAX_DISTANCE)   //sensore posteriore sinistro
 };
 
@@ -54,10 +54,12 @@ double measureDistance(int sonarNum) {
 }
 String printDistance(double distance) { 
 
-    if(alarm == true) Serial.print("E");
-    if(sensorIndex == 0) Serial.print("U");
-    if(sensorIndex == 1) Serial.print("UR");
-    return String("\nDistanza: " + (String)distance +"cm ");
+    if(alarm == true) Serial.print("\n E ");
+    if(sensorIndex == 0) Serial.print("\n S0 ");
+    if(sensorIndex == 1) Serial.print("\n S1 ");
+    if(sensorIndex == 2) Serial.print("\n S2 ");
+    if(sensorIndex == 3) Serial.print("\n S3 ");
+    return String("Distanza: " + (String)distance +"cm");
         
 }
 
@@ -115,5 +117,5 @@ void setup() {
 void loop() {
 
   distanceManagement();
-
+  delay(500);
 }
