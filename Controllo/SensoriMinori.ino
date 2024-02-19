@@ -19,6 +19,9 @@ long t0 = millis();
 //funzione per sensore Temperatura e Umidità
 DHT11 dht11(2);
 
+//pin sensori voltimetri
+const int voltmeter1Pin = A0;
+
 //funzioni gestione Temperatura
 int measureTemperature() {
   return dht11.readTemperature();
@@ -53,7 +56,7 @@ String printVoltmeters() {
   float voltage1=measureVoltmeters();
   
   //      voltage1/12=x/100
-  voltage1 =(2*100)/(voltage1-10)
+  voltage1 =(2*100)/(voltage1-10);
 
   sprintf(buffer, "Batteria:%d.%d %%", (int)voltage1, ((int)(voltage1*10) % 10));
   Serial.println(buffer);
@@ -101,19 +104,19 @@ void lcdManagement(char set) {
 
 void loop() {
   
-  if( Serial.digitalWrite() == "EMERGENZA"){
-      lcdManagement(E);
+ if( Serial.read() == "EMERGENZA"){
+    lcdManagement(E);
   }   
-
+  
   if(millis() - t0 >  tenMinutes) {
     Serial.print(printVoltmeters());
     Serial.print(printTemperature());
     Serial.print(printHumidity());
 
     //aggiorna e stampa LCD
-    lcdManagement(V);
-    lcdManagement(T);
-    lcdManagement(H);
+    lcdManagement('V');
+    lcdManagement('T');
+    lcdManagement('H');
     t0 = millis();
     }
 
