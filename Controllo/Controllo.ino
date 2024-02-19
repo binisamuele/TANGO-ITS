@@ -1,3 +1,11 @@
+#include <NewPing.h>
+
+//costanti globali 
+#define SENSORS_NOMBER 6
+#define MAX_DISTANCE 200
+#define SPEED_OF_SOUND 0.0343
+#define EMERGENCY_PIN 1
+
 // PINS
 const int dxForward = 5, dxBackward = 4, dxForwardEn = 27, dxBackwardEn = 26;   // Motore DX
 const int sxForward = 7, sxBackward = 6, sxForwardEn = 22, sxBackwardEn = 23;   // Motore SX
