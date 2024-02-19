@@ -2,10 +2,14 @@
 const int dxForward = 5, dxBackward = 4, dxForwardEn = 27, dxBackwardEn = 26;   // Motore DX
 const int sxForward = 7, sxBackward = 6, sxForwardEn = 22, sxBackwardEn = 23;   // Motore SX
 
-const int key = 40;             // pin della chiave
-const int startFromApp;         // pin collegato all'app per l'accensione
-const int emergencyPin;         // pin per inviare messaggi di emergenza
-const int communicationPin;     // pin per la rispota ai messaggi
+const int bumpers = 3;              // pin dei bumpers
+const int buttons = 2;              // pin dei bottoni
+const int arduinoEmergencies = 8;   // pin per le emergenze degli altri Arduino
+
+const int key = 40;                 // pin della chiave
+const int startFromApp;             // pin collegato all'app per l'accensione
+const int emergencyPin;             // pin per inviare messaggi di emergenza
+const int communicationPin;         // pin per la rispota ai messaggi
 
 // VARIABILI
 unsigned long startTime;
@@ -23,10 +27,9 @@ bool emergency = true;
 
 String serialString = "";
 
+
 void setup() {
     Serial1.begin(9600);    // collegamento all'arduino di comunicazione
-    Serial2.begin(9600);    // collegamento all'arduino dei sensori a ultrasuoni
-    Serial3.begin(9600);    // collegamento all'arduino degli altri sensori
 
     startTime = millis();
 
@@ -41,28 +44,32 @@ void setup() {
     pinMode(sxBackwardEn, OUTPUT);
 
     pinMode(emergencyPin, OUTPUT);
-
     pinMode(communicationPin, OUTPUT);
 
-    pinMode(key, INPUT_PULLUP); // necessario per far funzionare la chiave -- fare attenzione alle interferenze nel caso in cui il motore non venga messo a 0
-    pinMode(2, INPUT_PULLUP);   // necessario per fare funzionare i bottoni
+    pinMode(key, INPUT_PULLUP);
 
-    attachInterrupt(0, emergencyState, FALLING);                            // Pin 2 per emergenza pulsanti
-    attachInterrupt(1, emergencyState, RISING);                             // Pin 3 per emergenza bumper
-    attachInterrupt(2, emergencyState, RISING);                             // Pin 21 per emergenze arduino (hardware deve utilizzare un diodo)
+    pinMode(buttons, INPUT_PULLUP);     // emergenza bottoni
+    pinMode(bumpers, INPUT_PULLUP);     // emergenza bumper
+    pinMode(arduinoEmergencies, INPUT);  //emergenza arduino
+
+
+    // attachInterrupt(0, emergencyState, FALLING);                            // Pin 2 per emergenza pulsanti
+    // attachInterrupt(1, emergencyState, RISING);                             // Pin 3 per emergenza bumper
+    // attachInterrupt(2, emergencyState, RISING);                             // Pin 21 per emergenze arduino (hardware deve utilizzare un diodo)
 }
+
 
 void loop() {
     currentTime = millis();
 
-    if (!Serial1 || !Serial2 || !Serial3 || emergency || digitalRead(2)) {        // controllo della comunicazione seriale
+    if (!Serial1 || emergency || digitalRead(buttons) || digitalRead(bumpers) || digitalRead(arduinoEmergencies)) {
         emergencyState();
         return;
     }
 
     readSerial();
 
-    movement(); // switch del movimento
+    movement();
 }
 
 // funzione stato emergenza
@@ -91,7 +98,7 @@ void emergencyComm(){
     digitalWrite(emergencyPin, LOW);
 }   
 
-// segnale di arresto del motore (potrebbe essere non necessaria)
+// arresto di emergenza del motore
 void emergencyStop() {
     stopMotor();
     resetVariables();
@@ -103,7 +110,7 @@ void resetVariables() {
     movementInt = 0;
 }
 
-// lettura dei 3 arduino
+// lettura dell'arduino di comunicazione
 void readSerial(){
     if(Serial1.available()) {
         serialString = Serial1.readStringUntil('\r\n');
@@ -220,8 +227,6 @@ void rotationCheck(){
     if (isRotating){
         stopMotor();
         isRotating = false;
-        
-        delay(1000); // da testare
     }
 }
 
@@ -233,7 +238,7 @@ void stopMotor(){
     analogWrite(sxForward, 0);
     analogWrite(sxBackward, 0);
 
-    delay(1000); // da testare
+    currentTime = startTime;
 }
 
 // funzione per muoversi avanti o indietro

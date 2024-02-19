@@ -8,6 +8,7 @@ const int maxSpeed = 150;
 const int minSpeed = -50;
 bool emergency = false;
 bool isRotating = false;
+const int buttons = 2;              // pin dei bottoni
 
 void setup() {
     Serial.begin(9600);
@@ -29,9 +30,9 @@ void setup() {
 
     pinMode(key, INPUT_PULLUP); // necessario per far funzionare la chiave -- fare attenzione alle interferenze nel caso in cui il motore non venga messo a 0
 
-    pinMode(2, INPUT_PULLUP); // necessario per fare funzionare i bottoni
+    pinMode(buttons, INPUT_PULLUP);     // emergenza bottoni
 
-    attachInterrupt(0, toDelete, FALLING);    // Pin 2 per emergenza pulsanti
+    //attachInterrupt(0, toDelete, FALLING);    // Pin 2 per emergenza pulsanti
 }
 
 void toDelete(){                        //DEBUG 
@@ -40,7 +41,7 @@ void toDelete(){                        //DEBUG
 
 void loop() {
 	// controllo della comunicazione seriale (anche gli altri arduino devono fare il controllo del seriale)
-	if (emergency) {
+	if (emergency || digitalRead(buttons) || digitalRead(bumpers) || digitalRead(arduinoEmergencies)) {
         emergencyState();
         return;
     }
@@ -76,8 +77,6 @@ void emergencyState() {
 void emergencyStop() {
     stopMotor();
     resetVariables();
-
-    delay(1000);
 }
 
 // reset delle variabili
@@ -116,7 +115,6 @@ void movement(){
             rotationCheck();
 
             decelerate();
-            decelerate();
             break;
         // nessun comando di movimento
         default:
@@ -148,7 +146,7 @@ void stopMotor(){
     analogWrite(sxForward, 0);
     analogWrite(sxBackward, 0);
 
-    delay(1000); // da testare
+    currentTime = startTime;
 }
 
 // funzione per muoversi avanti o indietro
@@ -157,42 +155,50 @@ void driveMotor(int motor1, int motor2, int spd) {
 
     analogWrite(motor1, spd);
     analogWrite(motor2, spd);
-
-    delay(1000); // da testare
 }
 
 // funzione per accelerare
 void accelerate(){
-    if (speed >= 0) {
-        if (speed >= maxSpeed) return;      // se la velocità è al massimo, non fare niente
+    if (currentTime - startTime >= interval){
 
-        speed += speedGain;
-        driveMotor(dxForward, sxForward, speed);
-        return;
-    }
+        startTime = currentTime;
 
-    if (speed <= 0) {
-        if (speed <= minSpeed) return;      // se la velocità è al minimo, non fare niente
+        if (speed >= 0) {
+            if (speed >= maxSpeed) return;      // se la velocità è al massimo, non fare niente
 
-        speed -= speedGain;
-        driveMotor(dxBackward, sxBackward, speed);
-        return;
+            speed += speedGain;
+            driveMotor(dxForward, sxForward, speed);
+            return;
+        }
+
+        if (speed <= 0) {
+            if (speed <= minSpeed) return;      // se la velocità è al minimo, non fare niente
+
+            speed -= speedGain;
+            driveMotor(dxBackward, sxBackward, speed);
+            return;
+        }
     }
 }
 
 // funzione per decelerare e lentamente fermarsi
 void decelerate(){
-    if (speed < 0) {
-        speed += speedGain;
-        speedControl();
-        driveMotor(dxBackward, sxBackward, speed);
-        return;
-    }
+    if (currentTime - startTime >= interval){
 
-    if (speed > 0) {
-        speed -= speedGain;
-        speedControl();
-        driveMotor(dxForward, sxForward, speed);
-        return;
+        startTime = currentTime;
+
+        if (speed < 0) {
+            speed += speedGain;
+            speedControl();
+            driveMotor(dxBackward, sxBackward, speed);
+            return;
+        }
+
+        if (speed > 0) {
+            speed -= speedGain;
+            speedControl();
+            driveMotor(dxForward, sxForward, speed);
+            return;
+        }
     }
 }
