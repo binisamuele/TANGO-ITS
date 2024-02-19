@@ -6,7 +6,7 @@
 #define SPEED_OF_SOUND 0.0343
 #define EMERGENCY_PIN 1
 
-// PINS
+// COSTANTI PINS
 const int dxForward = 5, dxBackward = 4, dxForwardEn = 27, dxBackwardEn = 26;   // Motore DX
 const int sxForward = 7, sxBackward = 6, sxForwardEn = 22, sxBackwardEn = 23;   // Motore SX
 
@@ -18,6 +18,27 @@ const int key = 40;                 // pin della chiave
 const int startFromApp;             // pin collegato all'app per l'accensione
 const int emergencyPin;             // pin per inviare messaggi di emergenza
 const int communicationPin;         // pin per la rispota ai messaggi
+
+//Pin sensori prossimità
+//frontale
+//const int TRIG_PIN_U = 22;        //da modificare per conflitto motori
+//const int ECHO_PIN_U = 23;        //da modificare per conflitto motori 
+//frontale destro
+const int TRIG_PIN_UR = 24;
+const int ECHO_PIN_UR = 25; 
+//frontale sinistro
+//const int TRIG_PIN_UL = 26;        //da modificare per conflitto motori
+//const int ECHO_PIN_UL = 27;        //da modificare per conflitto motori
+
+//posteriore
+const int TRIG_PIN_D = 28;
+const int ECHO_PIN_D = 29; 
+//posteriore destro
+const int TRIG_PIN_DR = 30;
+const int ECHO_PIN_DR = 31; 
+//posteriore sinistro
+const int TRIG_PIN_DL = 32;
+const int ECHO_PIN_DL = 33; 
 
 // VARIABILI
 unsigned long startTime;
