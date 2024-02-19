@@ -10,8 +10,13 @@ bool emergency = false;
 bool isRotating = false;
 const int buttons = 2;              // pin dei bottoni
 
+unsigned long startTime;
+unsigned long currentTime;
+const long interval = 1000;
+
 void setup() {
     Serial.begin(9600);
+    startTime = millis();
 
     pinMode(dxForward, OUTPUT);
     pinMode(dxBackward, OUTPUT);
@@ -30,9 +35,7 @@ void setup() {
 
     pinMode(key, INPUT_PULLUP); // necessario per far funzionare la chiave -- fare attenzione alle interferenze nel caso in cui il motore non venga messo a 0
 
-    pinMode(buttons, INPUT_PULLUP);     // emergenza bottoni
-
-    //attachInterrupt(0, toDelete, FALLING);    // Pin 2 per emergenza pulsanti
+    pinMode(buttons, INPUT);     // emergenza bottoni
 }
 
 void toDelete(){                        //DEBUG 
@@ -40,19 +43,23 @@ void toDelete(){                        //DEBUG
 }
 
 void loop() {
+    currentTime = millis();
+    
+    if(!digitalRead(buttons))toDelete();
 	// controllo della comunicazione seriale (anche gli altri arduino devono fare il controllo del seriale)
-	if (emergency || digitalRead(buttons) || digitalRead(bumpers) || digitalRead(arduinoEmergencies)) {
+	if (emergency) {
         emergencyState();
         return;
     }
 
 	if (speed == 0){
-        movementInt = 1;
+        movementInt = 0;
     }
-	// if (speed < maxSpeed){
-    //     Serial.println("velocità: ");
-    //     Serial.println(speed);
-    // }
+
+	 if (speed == maxSpeed){
+        Serial.println("decelerate");
+         movementInt= 2;
+     }
 
     movement(); // switch del movimento
 
@@ -162,7 +169,7 @@ void accelerate(){
     if (currentTime - startTime >= interval){
 
         startTime = currentTime;
-
+        Serial.println(speed);
         if (speed >= 0) {
             if (speed >= maxSpeed) return;      // se la velocità è al massimo, non fare niente
 
@@ -186,7 +193,7 @@ void decelerate(){
     if (currentTime - startTime >= interval){
 
         startTime = currentTime;
-
+        Serial.println(speed);
         if (speed < 0) {
             speed += speedGain;
             speedControl();
