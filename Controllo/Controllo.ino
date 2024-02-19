@@ -56,7 +56,7 @@ bool emergency = true;
 
 String serialString = "";
 
-//variabili di supporto
+//variabili di supporto sensori di prossimità
 double distance = 0;
 bool alarm = false;
 int sensorIndex = 0;
@@ -64,7 +64,7 @@ const int sensoriMancanti = 2;
 const int SONAR_INTERVAL = 50;
 
 
-//Array inizializzazione sensori
+//Array inizializzazione sensori di prossimità
 NewPing sonar[SENSORS_NOMBER - sensoriMancanti] = {   
   NewPing(TRIG_PIN_U, ECHO_PIN_U, MAX_DISTANCE),      //sensore frontale
   NewPing(TRIG_PIN_UR, ECHO_PIN_UR, MAX_DISTANCE),    //sensore frontale destro
