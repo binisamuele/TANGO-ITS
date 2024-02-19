@@ -374,7 +374,7 @@ void distanceManagement() {
             Serial.print(printDistance(distance));
 
 
-            if (distance > 30) {
+            if (distance > 60) {
                 alarm = false;
                 Serial.print("FINE EMERGENZA \n");
             }
@@ -386,7 +386,7 @@ void distanceManagement() {
             Serial.print(printDistance(distance));
 
 
-            if(distance < 20) {
+            if(distance < 40) {
                 //digitalWrite(EMERGENCY_PIN, HIGH);
                 alarm = true;
                 Serial.print("EMERGENZA \n");
