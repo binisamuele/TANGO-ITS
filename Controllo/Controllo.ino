@@ -114,7 +114,7 @@ void setup() {
 void loop() {
     currentTime = millis();
 
-    if (!Serial1 || emergency || digitalRead(BUTTONS) || digitalRead(BUMPERS) || digitalRead(ARDUINO_EMERGENCIES)) {
+    if (!Serial1 || emergency || digitalRead(BUTTONS) || digitalRead(BUMPERS) || digitalRead(ARDUINO_EMERGENCIES) || digitalRead(KEY)) {
         emergencyState();
         return;
     }
