@@ -13,29 +13,29 @@ const int KEY = 9;                      // pin della chiave
 const int START_FROM_APP;               // pin collegato all'app per l'accensione
 const int COMMUNICATION_PIN;            // pin per la rispota ai messaggi
 
-//SENSORI PROSSIMITA'
-//frontale
+// SENSORI PROSSIMITA'
+// frontale
 const int TRIG_PIN_U = 32;     
 const int ECHO_PIN_U = 33;
 const int SENSOR_U_INDEX = 0;     
-//frontale destro
+// frontale destro
 const int TRIG_PIN_UR = 34;
 const int ECHO_PIN_UR = 35;
 const int SENSOR_UR_INDEX = 1;    
-//frontale sinistro
+// frontale sinistro
 const int TRIG_PIN_UL = 36;  
 const int ECHO_PIN_UL = 37;
 const int SENSOR_UL_INDEX = 2;     
 
-//posteriore
+// posteriore
 const int TRIG_PIN_D = 38;
 const int ECHO_PIN_D = 39;
 const int SENSOR_D_INDEX = 3;    
-//posteriore destro
+// posteriore destro
 const int TRIG_PIN_DR = 40;
 const int ECHO_PIN_DR = 41;
 const int SENSOR_DR_INDEX = 4;    
-//posteriore sinistro
+// posteriore sinistro
 const int TRIG_PIN_DL = 42;
 const int ECHO_PIN_DL = 43;
 const int SENSOR_DL_INDEX = 5;    
@@ -64,14 +64,14 @@ bool isRotating = false;
 
 String serialString = "";
 
-//Array inizializzazione sensori di prossimità
+// Array inizializzazione sensori di prossimità
 NewPing sonar[SENSORS_NUMBER] = {   
-    NewPing(TRIG_PIN_U, ECHO_PIN_U, MAX_DISTANCE),      //sensore frontale
-    NewPing(TRIG_PIN_UR, ECHO_PIN_UR, MAX_DISTANCE),    //sensore frontale destro
-    NewPing(TRIG_PIN_UL, ECHO_PIN_UL, MAX_DISTANCE),    //sensore frontale sinistro
-    NewPing(TRIG_PIN_D, ECHO_PIN_D, MAX_DISTANCE),      //sensore posteriore 
-    NewPing(TRIG_PIN_DR, ECHO_PIN_DR, MAX_DISTANCE),    //sensore posteriore destro
-    NewPing(TRIG_PIN_DL, ECHO_PIN_DL, MAX_DISTANCE)     //sensore posteriore sinistro
+    NewPing(TRIG_PIN_U, ECHO_PIN_U, MAX_DISTANCE),      // sensore frontale
+    NewPing(TRIG_PIN_UR, ECHO_PIN_UR, MAX_DISTANCE),    // sensore frontale destro
+    NewPing(TRIG_PIN_UL, ECHO_PIN_UL, MAX_DISTANCE),    // sensore frontale sinistro
+    NewPing(TRIG_PIN_D, ECHO_PIN_D, MAX_DISTANCE),      // sensore posteriore 
+    NewPing(TRIG_PIN_DR, ECHO_PIN_DR, MAX_DISTANCE),    // sensore posteriore destro
+    NewPing(TRIG_PIN_DL, ECHO_PIN_DL, MAX_DISTANCE)     // sensore posteriore sinistro
 }
 
 
@@ -97,7 +97,7 @@ void setup() {
 
     pinMode(BUTTONS, INPUT_PULLUP);         // emergenza bottoni
     pinMode(BUMPERS, INPUT_PULLUP);         // emergenza bumper
-    pinMode(ARDUINO_EMERGENCIES, INPUT);    //emergenza arduino
+    pinMode(ARDUINO_EMERGENCIES, INPUT);    // emergenza arduino
 
     pinMode(TRIG_PIN_U, OUTPUT);
     pinMode(ECHO_PIN_U, INPUT);
@@ -275,7 +275,7 @@ void movement(){
         default:
             rotationCheck();
             brakingTime = 1;
-            
+
             brake();
             break;
     }
@@ -366,7 +366,7 @@ void brake(){
 
 // MISURA DISTANZA           
 ///////////////////////////////////////////////////////////////////////////////
-//funzioni per la gestione della distanza
+// funzioni per la gestione della distanza
 double measureDistance(int sonarNum) {
     return (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
 }
@@ -383,14 +383,14 @@ String printDistance(double distance) {
 
 void distanceManagement() {
 
-    //ciclo non bloccante ogni 50 ms
+    // ciclo non bloccante ogni 50 ms
     if (currentTime - startTime >= SONAR_INTERVAL){
 
         if(sensorIndex < SENSORS_NUMBER) {
 
             if(emergency == true) {
 
-                //stato di emergenza
+                // stato di emergenza
                 distance = measureDistance(sensorIndex);
                 Serial.print(printDistance(distance));
 
@@ -401,7 +401,7 @@ void distanceManagement() {
 
             } else {
 
-                //stato normale
+                // stato normale
                 distance = measureDistance(sensorIndex);
                 Serial.print(printDistance(distance));
 
