@@ -126,6 +126,8 @@ void loop() {
     movement();
 }
 
+// GESTIONE EMERGENZA           
+///////////////////////////////////////////////////////////////////////////////
 // funzione stato emergenza
 void emergencyState() {
     if (!emergency){            // ferma la macchina e manda un messaggio di emergenza agli altri arduino
@@ -160,6 +162,8 @@ void emergencyStop() {
     movementInt = 0;
 }
 
+// GESTIONE COMUNICAZIONE          
+///////////////////////////////////////////////////////////////////////////////
 // lettura dell'arduino di comunicazione
 void readSerial(){
     if(Serial1.available()) {
@@ -205,6 +209,8 @@ void mapping(String serialString) {
     }
 }
 
+// FUNZIONI DI MOVIMENTO          
+///////////////////////////////////////////////////////////////////////////////
 // funzione con le opzioni di movimento
 void movement(){
     switch (movementInt) {
