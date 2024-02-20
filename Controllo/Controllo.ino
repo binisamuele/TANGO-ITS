@@ -4,20 +4,19 @@
 #define SENSORS_NUMBER 6
 #define MAX_DISTANCE 200
 #define SPEED_OF_SOUND 0.0343
-#define EMERGENCY_PIN 1
 
 // COSTANTI PINS
-const int dxForward = 5, dxBackward = 4, dxForwardEn = 27, dxBackwardEn = 26;   // Motore DX
-const int sxForward = 7, sxBackward = 6, sxForwardEn = 22, sxBackwardEn = 23;   // Motore SX
+const int DX_FORWARD = 5, DX_BACKWARD = 4, DX_FORWARD_EN = 27, DX_BACKWARD_EN = 26;   // Motore DX
+const int SX_FORWARD = 7, SX_BACKWARD = 6, SX_FORWARD_EN = 22, SX_BACKWARD_EN = 23;   // Motore SX
 
-const int bumpers = 3;              // pin dei bumpers
-const int buttons = 2;              // pin dei bottoni
-const int arduinoEmergencies = 8;   // pin per le emergenze degli altri Arduino
+const int BUMPERS = 3;                  // pin dei bumpers
+const int BUTTONS = 2;                  // pin dei bottoni
+const int EMERGENCY_PIN;                // pin di emergenza
+const int ARDUINO_EMERGENCIES = 8;      // pin per le emergenze degli altri Arduino
 
-const int key = 9;                 // pin della chiave
-const int startFromApp;             // pin collegato all'app per l'accensione
-const int emergencyPin;             // pin per inviare messaggi di emergenza
-const int communicationPin;         // pin per la rispota ai messaggi
+const int KEY = 9;                      // pin della chiave
+const int START_FROM_APP;               // pin collegato all'app per l'accensione
+const int COMMUNICATION_PIN;            // pin per la rispota ai messaggi
 
 //Pin sensori prossimità
 //frontale
@@ -43,12 +42,12 @@ const int ECHO_PIN_DL = 43;
 // VARIABILI
 unsigned long startTime;
 unsigned long currentTime;
-const long interval = 1000;
+const long INTERVAL = 1000;
 
-const int speedGain = 2;    // da testare
-const int maxSpeed = 100;    // da testare
-const int minSpeed = -50;   // da testare
-int speed = 0;              // Valore del PWM tra 0 (spento) e 255 (massima velocità)
+const int SPEED_GAIN = 2;       // da testare
+const int MAX_SPEED = 100;      // da testare
+const int MIN_SPEED = -50;      // da testare
+int speed = 0;                  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
 int movementInt = 0;
 
 bool isRotating = false;
@@ -58,7 +57,6 @@ String serialString = "";
 
 //variabili di supporto sensori di prossimità
 double distance = 0;
-bool alarm = false;
 int sensorIndex = 0;
 const int sensoriMancanti = 2;
 const int SONAR_INTERVAL = 50;
@@ -66,12 +64,12 @@ const int SONAR_INTERVAL = 50;
 
 //Array inizializzazione sensori di prossimità
 NewPing sonar[SENSORS_NUMBER - sensoriMancanti] = {   
-  NewPing(TRIG_PIN_U, ECHO_PIN_U, MAX_DISTANCE),      //sensore frontale
-  NewPing(TRIG_PIN_UR, ECHO_PIN_UR, MAX_DISTANCE),    //sensore frontale destro
-  NewPing(TRIG_PIN_UL, ECHO_PIN_UL, MAX_DISTANCE),    //sensore frontale sinistro
-  NewPing(TRIG_PIN_D, ECHO_PIN_D, MAX_DISTANCE)       //sensore posteriore 
-  //NewPing(TRIG_PIN_DR, ECHO_PIN_DR, MAX_DISTANCE)   //sensore posteriore destro
-  //NewPing(TRIG_PIN_DL, ECHO_PIN_DL, MAX_DISTANCE)   //sensore posteriore sinistro
+    NewPing(TRIG_PIN_U, ECHO_PIN_U, MAX_DISTANCE),      //sensore frontale
+    NewPing(TRIG_PIN_UR, ECHO_PIN_UR, MAX_DISTANCE),    //sensore frontale destro
+    NewPing(TRIG_PIN_UL, ECHO_PIN_UL, MAX_DISTANCE),    //sensore frontale sinistro
+    NewPing(TRIG_PIN_D, ECHO_PIN_D, MAX_DISTANCE)       //sensore posteriore 
+    //NewPing(TRIG_PIN_DR, ECHO_PIN_DR, MAX_DISTANCE)   //sensore posteriore destro
+    //NewPing(TRIG_PIN_DL, ECHO_PIN_DL, MAX_DISTANCE)   //sensore posteriore sinistro
 };
 
 
@@ -80,24 +78,24 @@ void setup() {
 
     startTime = millis();
 
-    pinMode(dxForward, OUTPUT);
-    pinMode(dxBackward, OUTPUT);
-    pinMode(dxForwardEn, OUTPUT);
-    pinMode(dxBackwardEn, OUTPUT);
+    pinMode(DX_FORWARD, OUTPUT);
+    pinMode(DX_BACKWARD, OUTPUT);
+    pinMode(DX_FORWARD_EN, OUTPUT);
+    pinMode(DX_BACKWARD_EN, OUTPUT);
 
-    pinMode(sxForward, OUTPUT);
-    pinMode(sxBackward, OUTPUT);
-    pinMode(sxForwardEn, OUTPUT);
-    pinMode(sxBackwardEn, OUTPUT);
+    pinMode(SX_FORWARD, OUTPUT);
+    pinMode(SX_BACKWARD, OUTPUT);
+    pinMode(SX_FORWARD_EN, OUTPUT);
+    pinMode(SX_BACKWARD_EN, OUTPUT);
 
-    pinMode(emergencyPin, OUTPUT);
-    pinMode(communicationPin, OUTPUT);
+    pinMode(EMERGENCY_PIN, OUTPUT);
+    pinMode(COMMUNICATION_PIN, OUTPUT);
 
-    pinMode(key, INPUT_PULLUP);
+    pinMode(KEY, INPUT_PULLUP);
 
-    pinMode(buttons, INPUT);     // emergenza bottoni
-    pinMode(bumpers, INPUT_PULLUP);     // emergenza bumper
-    pinMode(arduinoEmergencies, INPUT);  //emergenza arduino
+    pinMode(BUTTONS, INPUT);     // emergenza bottoni
+    pinMode(BUMPERS, INPUT_PULLUP);     // emergenza bumper
+    pinMode(ARDUINO_EMERGENCIES, INPUT);  //emergenza arduino
 
     pinMode(TRIG_PIN_U, OUTPUT);
     pinMode(ECHO_PIN_U, INPUT);
@@ -116,7 +114,7 @@ void setup() {
 void loop() {
     currentTime = millis();
 
-    if (!Serial1 || emergency || digitalRead(buttons) || digitalRead(bumpers) || digitalRead(arduinoEmergencies)) {
+    if (!Serial1 || emergency || digitalRead(BUTTONS) || digitalRead(BUMPERS) || digitalRead(ARDUINO_EMERGENCIES)) {
         emergencyState();
         return;
     }
@@ -136,9 +134,9 @@ void emergencyState() {
         emergencyComm();        // segnale di emergenza agli altri arduino
     }
 
-    while (emergency || !digitalRead(key))      // rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
+    while (emergency || !digitalRead(KEY))      // rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
     {
-        if (!digitalRead(key) || digitalRead(startFromApp)) emergency = false;
+        if (!digitalRead(KEY) || digitalRead(START_FROM_APP)) emergency = false;
     }
 
     emergencyComm();            // segnale di fine emergenza agli altri arduino
@@ -147,11 +145,11 @@ void emergencyState() {
 // funzione di comunicazioni di emergenza
 void emergencyComm(){
     if (emergency){
-        digitalWrite(emergencyPin, HIGH);
+        digitalWrite(EMERGENCY_PIN, HIGH);
         return;
     }
 
-    digitalWrite(emergencyPin, LOW);
+    digitalWrite(EMERGENCY_PIN, LOW);
 }   
 
 // arresto di emergenza del motore
@@ -172,9 +170,9 @@ void resetVariables() {
 void readSerial(){
     if(Serial1.available()) {
         serialString = Serial1.readStringUntil('\r\n');
-        digitalWrite(communicationPin, HIGH);
+        digitalWrite(COMMUNICATION_PIN, HIGH);
         delay(50); // da testare
-        digitalWrite(communicationPin, LOW);
+        digitalWrite(COMMUNICATION_PIN, LOW);
         mapping(serialString);
     }
 }
@@ -247,7 +245,7 @@ void movement(){
                 break;
             }
 
-            driveMotor(sxForward, dxBackward, 20);
+            driveMotor(SX_FORWARD, DX_BACKWARD, 20);
 
             isRotating = true;
             break;
@@ -258,7 +256,7 @@ void movement(){
                 break;
             }
 
-            driveMotor(dxForward, sxBackward, 20);
+            driveMotor(DX_FORWARD, SX_BACKWARD, 20);
 
             isRotating = true;
             break;
@@ -279,7 +277,7 @@ void movement(){
 
 // controllo della velocità vicino a zero
 void speedControl(){
-    if (speed < speedGain && speed > -speedGain) speed = 0;
+    if (speed < SPEED_GAIN && speed > -SPEED_GAIN) speed = 0;
 }
 
 // controllo della rotazione
@@ -292,11 +290,11 @@ void rotationCheck(){
 
 // funzione per fermare i motori
 void stopMotor(){
-    analogWrite(dxForward, 0);
-    analogWrite(dxBackward, 0);
+    analogWrite(DX_FORWARD, 0);
+    analogWrite(DX_BACKWARD, 0);
 
-    analogWrite(sxForward, 0);
-    analogWrite(sxBackward, 0);
+    analogWrite(SX_FORWARD, 0);
+    analogWrite(SX_BACKWARD, 0);
 
     currentTime = startTime;
 }
@@ -311,23 +309,23 @@ void driveMotor(int motor1, int motor2, int spd) {
 
 // funzione per accelerare
 void accelerate(){
-    if (currentTime - startTime >= interval){
+    if (currentTime - startTime >= INTERVAL){
 
         startTime = currentTime;
 
         if (speed >= 0) {
-            if (speed >= maxSpeed) return;      // se la velocità è al massimo, non fare niente
+            if (speed >= MAX_SPEED) return;      // se la velocità è al massimo, non fare niente
 
-            speed += speedGain;
-            driveMotor(dxForward, sxForward, speed);
+            speed += SPEED_GAIN;
+            driveMotor(DX_FORWARD, SX_FORWARD, speed);
             return;
         }
 
         if (speed <= 0) {
-            if (speed <= minSpeed) return;      // se la velocità è al minimo, non fare niente
+            if (speed <= MIN_SPEED) return;      // se la velocità è al minimo, non fare niente
 
-            speed -= speedGain;
-            driveMotor(dxBackward, sxBackward, speed);
+            speed -= SPEED_GAIN;
+            driveMotor(DX_BACKWARD, SX_BACKWARD, speed);
             return;
         }
     }
@@ -335,34 +333,33 @@ void accelerate(){
 
 // funzione per decelerare e lentamente fermarsi
 void decelerate(){
-    if (currentTime - startTime >= interval){
+    if (currentTime - startTime >= INTERVAL){
 
         startTime = currentTime;
 
         if (speed < 0) {
-            if(speed < -60) speed -= speedGain*5;
-            else speed += speedGain;
+            if(speed < -60) speed += SPEED_GAIN*5;
+            else speed += SPEED_GAIN;
             speedControl();
-            driveMotor(dxBackward, sxBackward, speed);
+            driveMotor(DX_BACKWARD, SX_BACKWARD, speed);
             return;
         }
 
         if (speed > 0) {
-            if(speed > 60) speed -= speedGain*5;
-            else speed -= speedGain;
+            if(speed > 60) speed -= SPEED_GAIN*5;
+            else speed -= SPEED_GAIN;
             speedControl();
-            driveMotor(dxForward, sxForward, speed);
+            driveMotor(DX_FORWARD, SX_FORWARD, speed);
             return;
         }
     }
 }
 
-
 // MISURA DISTANZA           
 ///////////////////////////////////////////////////////////////////////////////
 //funzioni per la gestione della distanza
 double measureDistance(int sonarNum) {
-  return (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
+    return (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
 }
 String printDistance(double distance) { 
 
@@ -382,32 +379,30 @@ void distanceManagement() {
 
         if(sensorIndex < SENSORS_NUMBER) {
 
-            if(alarm == true) {
+            if(emergency == true) {
 
-            //stato di emergenza
-            distance = measureDistance(sensorIndex);
-            Serial.print(printDistance(distance));
+                //stato di emergenza
+                distance = measureDistance(sensorIndex);
+                Serial.print(printDistance(distance));
 
-
-            if (distance > 60) {
-                alarm = false;
-                Serial.print("FINE EMERGENZA \n");
-            }
+                if (distance > 60) {
+                    emergency = false;
+                    Serial.print("FINE EMERGENZA \n");
+                }
 
             } else {
 
-            //stato normale
-            distance = measureDistance(sensorIndex);
-            Serial.print(printDistance(distance));
+                //stato normale
+                distance = measureDistance(sensorIndex);
+                Serial.print(printDistance(distance));
 
-
-            if(distance < 40) {
-                //digitalWrite(EMERGENCY_PIN, HIGH);
-                alarm = true;
-                Serial.print("EMERGENZA \n");
-            } else {
-                sensorIndex++;
-            }
+                if(distance < 40) {
+                    //digitalWrite(EMERGENCY_PIN, HIGH);
+                    emergency = true;
+                    Serial.print("EMERGENZA \n");
+                } else {
+                    sensorIndex++;
+                }
 
             }
         } else {
@@ -415,5 +410,4 @@ void distanceManagement() {
             distance = 0;
         }
     }
-
 }
