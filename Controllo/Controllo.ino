@@ -396,20 +396,21 @@ void distanceManagement() {
     // ciclo non bloccante ogni 50 ms
     if (currentTime - startTime >= SONAR_INTERVAL){
 
-        if (sensorIndex < SENSORS_NUMBER) {
-
-            if (emergency == true) {
+        if(sensorIndex < SENSORS_NUMBER) {
+            /*
+            if(emergency == true) { //da cancellare(non necessaria)
 
                 // stato di emergenza
                 distance = measureDistance(sensorIndex);
                 Serial.print(printDistance(distance));
 
+                //if da controllare (forse superfluo)
                 if (distance > SECURITY_DISTANCE + TANGO_SIZE) {
                     emergency = false;
                     Serial.print("FINE EMERGENZA \n");
                 }
 
-            } else {
+            } else { */
 
                 // stato normale
                 distance = measureDistance(sensorIndex);
@@ -423,7 +424,7 @@ void distanceManagement() {
                     sensorIndex++;
                 }
 
-            }
+            //}
         } else {
             sensorIndex = 0;
             distance = 0;
