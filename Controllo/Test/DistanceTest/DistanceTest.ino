@@ -1,23 +1,26 @@
 #include <NewPing.h>
 
 //costanti globali 
-#define SENSORS_NUMBER 6
+#define SENSORS_NUMBER 1
 #define MAX_DISTANCE 200
 #define SPEED_OF_SOUND 0.0343
 #define EMERGENCY_PIN 1
 
-// COSTANTI PINS
-const int dxForward = 5, dxBackward = 4, dxForwardEn = 27, dxBackwardEn = 26;   // Motore DX
-const int sxForward = 7, sxBackward = 6, sxForwardEn = 22, sxBackwardEn = 23;   // Motore SX
-
-const int bumpers = 3;              // pin dei bumpers
+const int dxForward = 5, dxBackward = 4, dxForwardEn = 27, dxBackwardEn = 26;   // Motore DX, pin da modificare
+const int sxForward = 7, sxBackward = 6, sxForwardEn = 22, sxBackwardEn = 23;   // Motore SX, pin da modificare
+int movementInt = 0;
+int speed = 0;  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
+int key = 40; // pin della chiave
+const int speedGain = 3;
+const int maxSpeed = 150;
+const int minSpeed = -50;
+bool emergency = false;
+bool isRotating = false;
 const int buttons = 2;              // pin dei bottoni
-const int arduinoEmergencies = 8;   // pin per le emergenze degli altri Arduino
 
-const int key = 9;                 // pin della chiave
-const int startFromApp;             // pin collegato all'app per l'accensione
-const int emergencyPin;             // pin per inviare messaggi di emergenza
-const int communicationPin;         // pin per la rispota ai messaggi
+unsigned long startTime;
+unsigned long currentTime;
+const long interval = 1000;
 
 //Pin sensori prossimità
 //frontale
@@ -40,44 +43,26 @@ const int ECHO_PIN_DR = 41;
 const int TRIG_PIN_DL = 42;
 const int ECHO_PIN_DL = 43; 
 
-// VARIABILI
-unsigned long startTime;
-unsigned long currentTime;
-const long interval = 1000;
-
-const int speedGain = 2;    // da testare
-const int maxSpeed = 100;    // da testare
-const int minSpeed = -50;   // da testare
-int speed = 0;              // Valore del PWM tra 0 (spento) e 255 (massima velocità)
-int movementInt = 0;
-
-bool isRotating = false;
-bool emergency = true;
-
-String serialString = "";
-
 //variabili di supporto sensori di prossimità
 double distance = 0;
 bool alarm = false;
 int sensorIndex = 0;
-const int sensoriMancanti = 2;
 const int SONAR_INTERVAL = 50;
+//const int SONAR_INTERVAL = 1000;
 
 
 //Array inizializzazione sensori di prossimità
-NewPing sonar[SENSORS_NUMBER - sensoriMancanti] = {   
-  NewPing(TRIG_PIN_U, ECHO_PIN_U, MAX_DISTANCE),      //sensore frontale
-  NewPing(TRIG_PIN_UR, ECHO_PIN_UR, MAX_DISTANCE),    //sensore frontale destro
-  NewPing(TRIG_PIN_UL, ECHO_PIN_UL, MAX_DISTANCE),    //sensore frontale sinistro
-  NewPing(TRIG_PIN_D, ECHO_PIN_D, MAX_DISTANCE)       //sensore posteriore 
+NewPing sonar[SENSORS_NUMBER] = {   
+  NewPing(TRIG_PIN_U, ECHO_PIN_U, MAX_DISTANCE)      //sensore frontale
+  //NewPing(TRIG_PIN_UR, ECHO_PIN_UR, MAX_DISTANCE),    //sensore frontale destro
+  //NewPing(TRIG_PIN_UL, ECHO_PIN_UL, MAX_DISTANCE)     //sensore frontale sinistro
+  //NewPing(TRIG_PIN_D, ECHO_PIN_D, MAX_DISTANCE)       //sensore posteriore 
   //NewPing(TRIG_PIN_DR, ECHO_PIN_DR, MAX_DISTANCE)   //sensore posteriore destro
   //NewPing(TRIG_PIN_DL, ECHO_PIN_DL, MAX_DISTANCE)   //sensore posteriore sinistro
 };
 
-
 void setup() {
-    Serial1.begin(9600);    // collegamento all'arduino di comunicazione
-
+    Serial.begin(9600);
     startTime = millis();
 
     pinMode(dxForward, OUTPUT);
@@ -90,14 +75,14 @@ void setup() {
     pinMode(sxForwardEn, OUTPUT);
     pinMode(sxBackwardEn, OUTPUT);
 
-    pinMode(emergencyPin, OUTPUT);
-    pinMode(communicationPin, OUTPUT);
+    digitalWrite(dxForwardEn, HIGH);
+    digitalWrite(sxForwardEn, HIGH);
+    digitalWrite(dxBackwardEn, HIGH);
+    digitalWrite(sxBackwardEn, HIGH);
 
-    pinMode(key, INPUT_PULLUP);
+    pinMode(key, INPUT_PULLUP); // necessario per far funzionare la chiave -- fare attenzione alle interferenze nel caso in cui il motore non venga messo a 0
 
     pinMode(buttons, INPUT);     // emergenza bottoni
-    pinMode(bumpers, INPUT_PULLUP);     // emergenza bumper
-    pinMode(arduinoEmergencies, INPUT);  //emergenza arduino
 
     pinMode(TRIG_PIN_U, OUTPUT);
     pinMode(ECHO_PIN_U, INPUT);
@@ -112,49 +97,47 @@ void setup() {
     pinMode(ECHO_PIN_D, INPUT);
 }
 
+void toDelete(){                        //DEBUG 
+  Serial.println("Button Pressed");
+}
+
 
 void loop() {
-    currentTime = millis();
 
-    if (!Serial1 || emergency || digitalRead(buttons) || digitalRead(bumpers) || digitalRead(arduinoEmergencies)) {
+    currentTime = millis();
+    
+    //if(!digitalRead(buttons))toDelete();
+	// controllo della comunicazione seriale (anche gli altri arduino devono fare il controllo del seriale)
+	if (emergency) {
         emergencyState();
         return;
     }
 
-    readSerial();
+	if (speed == 0){
+        movementInt = 0;
+    }
+
     distanceManagement();
-    movement();
+   
+
 }
 
-// GESTIONE EMERGENZA           
-///////////////////////////////////////////////////////////////////////////////
 // funzione stato emergenza
 void emergencyState() {
     if (!emergency){            // ferma la macchina e manda un messaggio di emergenza agli altri arduino
         emergency = true;
         emergencyStop();
-        emergencyComm();        // segnale di emergenza agli altri arduino
     }
 
-    while (emergency || !digitalRead(key))      // rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
+    while (emergency || !digitalRead(key))      		// rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
     {
-        if (!digitalRead(key) || digitalRead(startFromApp)) emergency = false;
+        if (!digitalRead(key)){
+            emergency = false;
+        }
     }
-
-    emergencyComm();            // segnale di fine emergenza agli altri arduino
 }
 
-// funzione di comunicazioni di emergenza
-void emergencyComm(){
-    if (emergency){
-        digitalWrite(emergencyPin, HIGH);
-        return;
-    }
-
-    digitalWrite(emergencyPin, LOW);
-}   
-
-// arresto di emergenza del motore
+// segnale di arresto del motore (potrebbe essere non necessaria)
 void emergencyStop() {
     stopMotor();
     resetVariables();
@@ -166,55 +149,6 @@ void resetVariables() {
     movementInt = 0;
 }
 
-// GESTIONE COMUNICAZIONE          
-///////////////////////////////////////////////////////////////////////////////
-// lettura dell'arduino di comunicazione
-void readSerial(){
-    if(Serial1.available()) {
-        serialString = Serial1.readStringUntil('\r\n');
-        digitalWrite(communicationPin, HIGH);
-        delay(50); // da testare
-        digitalWrite(communicationPin, LOW);
-        mapping(serialString);
-    }
-}
-
-// mapping dei messaggi
-void mapping(String serialString) {
-    int index = serialString.lastIndexOf(':');
-    int length = serialString.length();
-    String topic = serialString.substring(0, index);
-    String serialVal = serialString.substring(index+1, length);
-
-    if (topic == "movimento") {
-
-        if (serialVal == "up"){
-            movementInt = 1;
-            return;
-        }
-        if (serialVal == "down"){
-            movementInt = 2;
-            return;
-        }
-        if (serialVal == "right"){ // ruotare a destra
-            movementInt = 3;
-            return;
-        }
-        if (serialVal == "left"){ // ruotare a sinistra
-            movementInt = 4;
-            return;
-        }
-        if (serialVal == "emergencyStop"){
-            movementInt = 5;
-            return;
-        }
-        movementInt = 0;
-        return;
-    }
-}
-
-// FUNZIONI DI MOVIMENTO          
-///////////////////////////////////////////////////////////////////////////////
 // funzione con le opzioni di movimento
 void movement(){
     switch (movementInt) {
@@ -240,29 +174,7 @@ void movement(){
 
             accelerate();
             break;
-        // rotazione in senso orario
-        case 3:
-            if (speed != 0){
-                decelerate();
-                break;
-            }
-
-            driveMotor(sxForward, dxBackward, 20);
-
-            isRotating = true;
-            break;
-        // rotazione in senso antiorario
-        case 4:
-            if (speed != 0){
-                decelerate();
-                break;
-            }
-
-            driveMotor(dxForward, sxBackward, 20);
-
-            isRotating = true;
-            break;
-        // frenata
+		// frenata
         case 5:
             rotationCheck();
 
@@ -314,7 +226,7 @@ void accelerate(){
     if (currentTime - startTime >= interval){
 
         startTime = currentTime;
-
+        Serial.println(speed);
         if (speed >= 0) {
             if (speed >= maxSpeed) return;      // se la velocità è al massimo, non fare niente
 
@@ -338,18 +250,16 @@ void decelerate(){
     if (currentTime - startTime >= interval){
 
         startTime = currentTime;
-
+        Serial.println(speed);
         if (speed < 0) {
-            if(speed < -60) speed -= speedGain*5;
-            else speed += speedGain;
+            speed += speedGain;
             speedControl();
             driveMotor(dxBackward, sxBackward, speed);
             return;
         }
 
         if (speed > 0) {
-            if(speed > 60) speed -= speedGain*5;
-            else speed -= speedGain;
+            speed -= speedGain;
             speedControl();
             driveMotor(dxForward, sxForward, speed);
             return;
@@ -380,6 +290,8 @@ void distanceManagement() {
     //ciclo non bloccante ogni 50 ms
     if (currentTime - startTime >= SONAR_INTERVAL){
 
+      delay(1000);
+
         if(sensorIndex < SENSORS_NUMBER) {
 
             if(alarm == true) {
@@ -389,7 +301,7 @@ void distanceManagement() {
             Serial.print(printDistance(distance));
 
 
-            if (distance > 60) {
+            if (distance > 50) {
                 alarm = false;
                 Serial.print("FINE EMERGENZA \n");
             }
@@ -401,12 +313,13 @@ void distanceManagement() {
             Serial.print(printDistance(distance));
 
 
-            if(distance < 40) {
+            if(distance < 20) {
                 //digitalWrite(EMERGENCY_PIN, HIGH);
                 alarm = true;
-                Serial.print("EMERGENZA \n");
+                Serial.print("EMERGENZA Sensore: ");
+                Serial.println(sensorIndex);
             } else {
-                sensorIndex++;
+                //sensorIndex++;
             }
 
             }
