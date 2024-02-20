@@ -1,10 +1,5 @@
 #include <NewPing.h>
 
-//costanti globali 
-#define SENSORS_NUMBER 6
-#define MAX_DISTANCE 200
-#define SPEED_OF_SOUND 0.0343
-
 // COSTANTI PINS
 const int DX_FORWARD = 5, DX_BACKWARD = 4, DX_FORWARD_EN = 27, DX_BACKWARD_EN = 26;   // Motore DX
 const int SX_FORWARD = 7, SX_BACKWARD = 6, SX_FORWARD_EN = 22, SX_BACKWARD_EN = 23;   // Motore SX
@@ -18,59 +13,66 @@ const int KEY = 9;                      // pin della chiave
 const int START_FROM_APP;               // pin collegato all'app per l'accensione
 const int COMMUNICATION_PIN;            // pin per la rispota ai messaggi
 
-//Pin sensori prossimità
+//SENSORI PROSSIMITA'
 //frontale
 const int TRIG_PIN_U = 32;     
-const int ECHO_PIN_U = 33;     
+const int ECHO_PIN_U = 33;
+const int SENSOR_U_INDEX = 0;     
 //frontale destro
 const int TRIG_PIN_UR = 34;
-const int ECHO_PIN_UR = 35; 
+const int ECHO_PIN_UR = 35;
+const int SENSOR_UR_INDEX = 1;    
 //frontale sinistro
 const int TRIG_PIN_UL = 36;  
-const int ECHO_PIN_UL = 37;  
+const int ECHO_PIN_UL = 37;
+const int SENSOR_UL_INDEX = 2;     
 
 //posteriore
 const int TRIG_PIN_D = 38;
-const int ECHO_PIN_D = 39; 
+const int ECHO_PIN_D = 39;
+const int SENSOR_D_INDEX = 3;    
 //posteriore destro
 const int TRIG_PIN_DR = 40;
-const int ECHO_PIN_DR = 41; 
+const int ECHO_PIN_DR = 41;
+const int SENSOR_DR_INDEX = 4;    
 //posteriore sinistro
 const int TRIG_PIN_DL = 42;
-const int ECHO_PIN_DL = 43; 
+const int ECHO_PIN_DL = 43;
+const int SENSOR_DL_INDEX = 5;    
+
+// COSTANTI
+const int SENSORS_NUMBER = 6;
+const int MAX_DISTANCE = 200;
+const int MAX_SPEED = 150;
+const int MIN_SPEED = -100;
+const int SPEED_GAIN = 2;
+const float SPEED_OF_SOUND = 0.0343;
 
 // VARIABILI
 unsigned long startTime;
 unsigned long currentTime;
-const long INTERVAL = 1000;
 
-const int SPEED_GAIN = 2;       // da testare
-const int MAX_SPEED = 100;      // da testare
-const int MIN_SPEED = -50;      // da testare
-int speed = 0;                  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
+int speed = 0;
 int movementInt = 0;
+int brakingTime = 0;
+int sensorIndex = 0;
+double distance = 0;
 
-bool isRotating = false;
 bool emergency = true;
+bool forwardDir = true;
+bool isRotating = false;
 
 String serialString = "";
 
-//variabili di supporto sensori di prossimità
-double distance = 0;
-int sensorIndex = 0;
-const int sensoriMancanti = 2;
-const int SONAR_INTERVAL = 50;
-
-
 //Array inizializzazione sensori di prossimità
-NewPing sonar[SENSORS_NUMBER - sensoriMancanti] = {   
+NewPing sonar[SENSORS_NUMBER] = {   
     NewPing(TRIG_PIN_U, ECHO_PIN_U, MAX_DISTANCE),      //sensore frontale
     NewPing(TRIG_PIN_UR, ECHO_PIN_UR, MAX_DISTANCE),    //sensore frontale destro
     NewPing(TRIG_PIN_UL, ECHO_PIN_UL, MAX_DISTANCE),    //sensore frontale sinistro
-    NewPing(TRIG_PIN_D, ECHO_PIN_D, MAX_DISTANCE)       //sensore posteriore 
-    //NewPing(TRIG_PIN_DR, ECHO_PIN_DR, MAX_DISTANCE)   //sensore posteriore destro
-    //NewPing(TRIG_PIN_DL, ECHO_PIN_DL, MAX_DISTANCE)   //sensore posteriore sinistro
-};
+    NewPing(TRIG_PIN_D, ECHO_PIN_D, MAX_DISTANCE),      //sensore posteriore 
+    NewPing(TRIG_PIN_DR, ECHO_PIN_DR, MAX_DISTANCE),    //sensore posteriore destro
+    NewPing(TRIG_PIN_DL, ECHO_PIN_DL, MAX_DISTANCE)     //sensore posteriore sinistro
+}
 
 
 void setup() {
@@ -93,9 +95,9 @@ void setup() {
 
     pinMode(KEY, INPUT_PULLUP);
 
-    pinMode(BUTTONS, INPUT);     // emergenza bottoni
-    pinMode(BUMPERS, INPUT_PULLUP);     // emergenza bumper
-    pinMode(ARDUINO_EMERGENCIES, INPUT);  //emergenza arduino
+    pinMode(BUTTONS, INPUT_PULLUP);         // emergenza bottoni
+    pinMode(BUMPERS, INPUT_PULLUP);         // emergenza bumper
+    pinMode(ARDUINO_EMERGENCIES, INPUT);    //emergenza arduino
 
     pinMode(TRIG_PIN_U, OUTPUT);
     pinMode(ECHO_PIN_U, INPUT);
@@ -124,6 +126,8 @@ void loop() {
     movement();
 }
 
+// GESTIONE EMERGENZA           
+///////////////////////////////////////////////////////////////////////////////
 // funzione stato emergenza
 void emergencyState() {
     if (!emergency){            // ferma la macchina e manda un messaggio di emergenza agli altri arduino
@@ -153,15 +157,13 @@ void emergencyComm(){
 // arresto di emergenza del motore
 void emergencyStop() {
     stopMotor();
-    resetVariables();
-}
 
-// reset delle variabili
-void resetVariables() {
     speed = 0;
     movementInt = 0;
 }
 
+// GESTIONE COMUNICAZIONE          
+///////////////////////////////////////////////////////////////////////////////
 // lettura dell'arduino di comunicazione
 void readSerial(){
     if(Serial1.available()) {
@@ -207,15 +209,19 @@ void mapping(String serialString) {
     }
 }
 
+// FUNZIONI DI MOVIMENTO          
+///////////////////////////////////////////////////////////////////////////////
 // funzione con le opzioni di movimento
 void movement(){
     switch (movementInt) {
         // andare avanti
         case 1:
             rotationCheck();
+            forwardDir = true;
 
             if (speed < 0) {                                   // se la velocità era negativa, rallentiamo i motori
-                decelerate();
+                brakingTime = 5;
+                brake();
                 break;
             }
 
@@ -224,9 +230,11 @@ void movement(){
         // andare indietro
         case 2:
             rotationCheck();
+            forwardDir = false;
 
             if (speed > 0) {                                   // se la velocità era positiva, rallentiamo i motori
-                decelerate();
+                brakingTime = 5;
+                brake();
                 break;
             }
 
@@ -235,7 +243,8 @@ void movement(){
         // rotazione in senso orario
         case 3:
             if (speed != 0){
-                decelerate();
+                brakingTime = 5;
+                brake();
                 break;
             }
 
@@ -246,7 +255,8 @@ void movement(){
         // rotazione in senso antiorario
         case 4:
             if (speed != 0){
-                decelerate();
+                brakingTime = 5;
+                brake();
                 break;
             }
 
@@ -257,14 +267,16 @@ void movement(){
         // frenata
         case 5:
             rotationCheck();
+            brakingTime = 5;
 
-            decelerate();
+            brake();
             break;
         // nessun comando di movimento
         default:
             rotationCheck();
-
-            decelerate();
+            brakingTime = 1;
+            
+            brake();
             break;
     }
 }
@@ -307,18 +319,23 @@ void accelerate(){
 
         startTime = currentTime;
 
-        if (speed >= 0) {
+        if (forwardDir) {
             if (speed >= MAX_SPEED) return;      // se la velocità è al massimo, non fare niente
 
             speed += SPEED_GAIN;
+            if (speed > 50) speed += SPEED_GAIN;
+            if (speed > 100) speed += SPEED_GAIN;
+
             driveMotor(DX_FORWARD, SX_FORWARD, speed);
             return;
         }
 
-        if (speed <= 0) {
+        if (!forwardDir) {
             if (speed <= MIN_SPEED) return;      // se la velocità è al minimo, non fare niente
 
             speed -= SPEED_GAIN;
+            if(speed < -50) speed -= SPEED_GAIN;
+
             driveMotor(DX_BACKWARD, SX_BACKWARD, speed);
             return;
         }
@@ -326,13 +343,12 @@ void accelerate(){
 }
 
 // funzione per decelerare e lentamente fermarsi
-void decelerate(){
-    if (currentTime - startTime >= INTERVAL){
+void brake(){
+    if (currentTime - startTime >= INTERVAL / brakingTime){
 
         startTime = currentTime;
 
         if (speed < 0) {
-            if(speed < -60) speed += SPEED_GAIN*5;
             else speed += SPEED_GAIN;
             speedControl();
             driveMotor(DX_BACKWARD, SX_BACKWARD, speed);
@@ -340,7 +356,6 @@ void decelerate(){
         }
 
         if (speed > 0) {
-            if(speed > 60) speed -= SPEED_GAIN*5;
             else speed -= SPEED_GAIN;
             speedControl();
             driveMotor(DX_FORWARD, SX_FORWARD, speed);
