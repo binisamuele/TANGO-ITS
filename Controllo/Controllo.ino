@@ -43,10 +43,14 @@ const int SENSOR_DL_INDEX = 5;
 // COSTANTI
 const int SENSORS_NUMBER = 6;
 const int MAX_DISTANCE = 200;
+const int INTERVAL = 1000;
+const int SONAR_INTERVAL = 50;
+
 const int MAX_SPEED = 150;
 const int MIN_SPEED = -100;
 const int SPEED_GAIN = 2;
 const int LOW_SPEED = 35;   //da testare
+
 const int TANGO_SIZE = 20;
 const int EMERGENCY_DISTANCE = 40;
 const int SECURITY_DISTANCE = 60;
@@ -353,14 +357,14 @@ void brake(){
         startTime = currentTime;
 
         if (speed < 0) {
-            else speed += SPEED_GAIN;
+            speed += SPEED_GAIN;
             speedControl();
             driveMotor(DX_BACKWARD, SX_BACKWARD, speed);
             return;
         }
 
         if (speed > 0) {
-            else speed -= SPEED_GAIN;
+            speed -= SPEED_GAIN;
             speedControl();
             driveMotor(DX_FORWARD, SX_FORWARD, speed);
             return;
@@ -378,9 +382,11 @@ String printDistance(double distance) {
 
     if(emer == true) Serial.print("\n E ");
     if(sensorIndex == SENSOR_U_INDEX) Serial.print("\n S ");
-    if(sensorIndex == 1) Serial.print("\n S1 ");
-    if(sensorIndex == 2) Serial.print("\n S2 ");
-    if(sensorIndex == 3) Serial.print("\n S3 ");
+    if(sensorIndex == SENSOR_UR_INDEX) Serial.print("\n S1 ");
+    if(sensorIndex == SENSOR_UL_INDEX) Serial.print("\n S2 ");
+    if(sensorIndex == SENSOR_D_INDEX) Serial.print("\n S3 ");
+    if(sensorIndex == SENSOR_DR_INDEX) Serial.print("\n S4 ");
+    if(sensorIndex == SENSOR_DL_INDEX) Serial.print("\n S5 ");
     return String("Distanza: " + (String)distance +"cm");
         
 }
@@ -390,15 +396,15 @@ void distanceManagement() {
     // ciclo non bloccante ogni 50 ms
     if (currentTime - startTime >= SONAR_INTERVAL){
 
-        if(sensorIndex < SENSORS_NUMBER) {
+        if (sensorIndex < SENSORS_NUMBER) {
 
-            if(emergency == true) {
+            if (emergency == true) {
 
                 // stato di emergenza
                 distance = measureDistance(sensorIndex);
                 Serial.print(printDistance(distance));
 
-                if (distance > SECURITY_DISTANCE - TANGO_SIZE) {
+                if (distance > SECURITY_DISTANCE + TANGO_SIZE) {
                     emergency = false;
                     Serial.print("FINE EMERGENZA \n");
                 }
@@ -409,7 +415,7 @@ void distanceManagement() {
                 distance = measureDistance(sensorIndex);
                 Serial.print(printDistance(distance));
 
-                if(distance < (EMERGENCY_DISTANCE - TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) {
+                if(distance < (EMERGENCY_DISTANCE + TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) {
 
                     emergency = true;
                     Serial.print("EMERGENZA \n");
