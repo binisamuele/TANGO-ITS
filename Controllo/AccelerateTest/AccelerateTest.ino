@@ -2,7 +2,7 @@ const int dxForward = 5, dxBackward = 4, dxForwardEn = 27, dxBackwardEn = 26;   
 const int sxForward = 7, sxBackward = 6, sxForwardEn = 22, sxBackwardEn = 23;   // Motore SX, pin da modificare
 int movementInt = 0;
 int speed = 0;  // Valore del PWM tra 0 (spento) e 255 (massima velocità)
-int key = 40; // pin della chiave
+int key = 9; // pin della chiave
 const int speedGain = 3;
 const int maxSpeed = 150;
 const int minSpeed = -50;
@@ -35,7 +35,7 @@ void setup() {
 
     pinMode(key, INPUT_PULLUP); // necessario per far funzionare la chiave -- fare attenzione alle interferenze nel caso in cui il motore non venga messo a 0
 
-    pinMode(buttons, INPUT);     // emergenza bottoni
+    pinMode(buttons, INPUT_PULLUP);     // emergenza bottoni
 }
 
 void toDelete(){                        //DEBUG 
@@ -44,9 +44,9 @@ void toDelete(){                        //DEBUG
 
 void loop() {
     currentTime = millis();
-    
-    if(!digitalRead(buttons))toDelete();
-	// controllo della comunicazione seriale (anche gli altri arduino devono fare il controllo del seriale)
+    Serial.println(digitalRead(buttons));
+    delay(1000);
+    if(digitalRead(buttons))toDelete();
 	if (emergency) {
         emergencyState();
         return;

@@ -46,6 +46,10 @@ const int MAX_DISTANCE = 200;
 const int MAX_SPEED = 150;
 const int MIN_SPEED = -100;
 const int SPEED_GAIN = 2;
+const int LOW_SPEED = 35;   //da testare
+const int TANGO_SIZE = 20;
+const int EMERGENCY_DISTANCE = 40;
+const int SECURITY_DISTANCE = 60;
 const float SPEED_OF_SOUND = 0.0343;
 
 // VARIABILI
@@ -116,7 +120,7 @@ void setup() {
 void loop() {
     currentTime = millis();
 
-    if (!Serial1 || emergency || digitalRead(BUTTONS) || digitalRead(BUMPERS) || digitalRead(ARDUINO_EMERGENCIES)) {
+    if (!Serial1 || emergency || digitalRead(BUTTONS) || digitalRead(BUMPERS) || digitalRead(ARDUINO_EMERGENCIES) || digitalRead(KEY)) {
         emergencyState();
         return;
     }
@@ -248,7 +252,7 @@ void movement(){
                 break;
             }
 
-            driveMotor(SX_FORWARD, DX_BACKWARD, 20);
+            driveMotor(SX_FORWARD, DX_BACKWARD, LOW_SPEED);
 
             isRotating = true;
             break;
@@ -260,7 +264,7 @@ void movement(){
                 break;
             }
 
-            driveMotor(DX_FORWARD, SX_BACKWARD, 20);
+            driveMotor(DX_FORWARD, SX_BACKWARD, LOW_SPEED);
 
             isRotating = true;
             break;
@@ -372,8 +376,8 @@ double measureDistance(int sonarNum) {
 }
 String printDistance(double distance) { 
 
-    if(alarm == true) Serial.print("\n E ");
-    if(sensorIndex == 0) Serial.print("\n S0 ");
+    if(emer == true) Serial.print("\n E ");
+    if(sensorIndex == SENSOR_U_INDEX) Serial.print("\n S ");
     if(sensorIndex == 1) Serial.print("\n S1 ");
     if(sensorIndex == 2) Serial.print("\n S2 ");
     if(sensorIndex == 3) Serial.print("\n S3 ");
@@ -394,7 +398,7 @@ void distanceManagement() {
                 distance = measureDistance(sensorIndex);
                 Serial.print(printDistance(distance));
 
-                if (distance > 60) {
+                if (distance > SECURITY_DISTANCE - TANGO_SIZE) {
                     emergency = false;
                     Serial.print("FINE EMERGENZA \n");
                 }
@@ -405,8 +409,8 @@ void distanceManagement() {
                 distance = measureDistance(sensorIndex);
                 Serial.print(printDistance(distance));
 
-                if(distance < 40) {
-                    //digitalWrite(EMERGENCY_PIN, HIGH);
+                if(distance < (EMERGENCY_DISTANCE - TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) {
+
                     emergency = true;
                     Serial.print("EMERGENZA \n");
                 } else {
