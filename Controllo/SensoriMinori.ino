@@ -44,7 +44,7 @@ String printHumidity() {
   char buffer[40];
   int umid=measureHumidity();
   sprintf(buffer, "U : %d%%", umid);
-  sprintf(umidita, "Temperatura:%d", umid);
+  sprintf(umidita, "Umidita:%d", umid);
   return buffer;
 }
 
@@ -64,7 +64,7 @@ String printVoltmeters() {
   voltage1 =(2*100)/(voltage1-10);
 
   sprintf(buffer, "Batteria:%d.%d %%", (int)voltage1, ((int)(voltage1*10) % 10));
-  sprintf(batteria, "Batteria:%d.%d", (int)voltage1, ((int)(voltage1*10) % 10));
+  sprintf(batteria, "Batteria:%d", (int)voltage1 );
   return buffer;
 }
 
@@ -121,9 +121,9 @@ void loop() {
     lcdManagement('T');
     lcdManagement('H');
     // manda in seriale
-    Serial.print(temperatura);
-    Serial.print(umidita);
-    Serial.print(temperatura);
+    Serial.println(temperatura);
+    Serial.println(umidita);
+    Serial.println(batteria);
 
     t0 = millis();
     }
@@ -133,6 +133,11 @@ void loop() {
     lcdManagement('V');
     lcdManagement('T');
     lcdManagement('H');
+
+    Serial.println(temperatura);
+    Serial.println(umidita);
+    Serial.println(batteria);
+
   }
 
 }
