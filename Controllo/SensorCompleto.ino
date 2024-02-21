@@ -180,8 +180,6 @@ String printVoltmeters() {
 }
 
 
-
-
 void setup() {
 
   Serial.begin(9600);       // Inizializza la comunicazione seriale a 9600 bps
@@ -250,7 +248,7 @@ void loop() {
     lcdManagement(0,setLcd);
     t0 = millis();
   }
-  
+
   if(millis() - t0 >  tenMinutes) {
     Serial.print(printTemperature());
     Serial.print(printHumidity());
@@ -262,7 +260,5 @@ void loop() {
     setLcd='H';
     lcdManagement(0,setLcd);
     t0 = millis();
-    }
-
-  
+    } 
 }

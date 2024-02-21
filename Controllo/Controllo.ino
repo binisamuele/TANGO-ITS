@@ -64,7 +64,7 @@ int speed = 0;
 int movementInt = 0;
 int brakingTime = 0;
 int sensorIndex = 0;
-double distance = 0;
+float distance = 0;
 
 bool emergency = true;
 bool forwardDir = true;
@@ -214,6 +214,10 @@ void mapping(String serialString) {
         }
         movementInt = 0;
         return;
+    }
+
+    if (topic == "velocità"){
+        Serial1.write(speed/MAX_SPEED*100);
     }
 }
 
@@ -375,12 +379,12 @@ void brake(){
 // MISURA DISTANZA           
 ///////////////////////////////////////////////////////////////////////////////
 // funzioni per la gestione della distanza
-double measureDistance(int sonarNum) {
+float measureDistance(int sonarNum) {
     return (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
 }
-String printDistance(double distance) { 
+String printDistance(float distance) { 
 
-    if(emer == true) Serial.print("\n E ");
+    if(emergenza == true) Serial.print("\n E ");
     if(sensorIndex == SENSOR_U_INDEX) Serial.print("\n S ");
     if(sensorIndex == SENSOR_UR_INDEX) Serial.print("\n S1 ");
     if(sensorIndex == SENSOR_UL_INDEX) Serial.print("\n S2 ");
@@ -396,38 +400,88 @@ void distanceManagement() {
     // ciclo non bloccante ogni 50 ms
     if (currentTime - startTime >= SONAR_INTERVAL){
 
-        if(sensorIndex < SENSORS_NUMBER) {
-            /*
-            if(emergency == true) { //da cancellare(non necessaria)
+        // rotazione su se stesso
+        if(isRotating) {
 
-                // stato di emergenza
+            if(sensorIndex < SENSORS_NUMBER) {
+
                 distance = measureDistance(sensorIndex);
-                Serial.print(printDistance(distance));
-
-                //if da controllare (forse superfluo)
-                if (distance > SECURITY_DISTANCE + TANGO_SIZE) {
-                    emergency = false;
-                    Serial.print("FINE EMERGENZA \n");
-                }
-
-            } else { */
-
-                // stato normale
-                distance = measureDistance(sensorIndex);
-                Serial.print(printDistance(distance));
+                /*DEBUG*/ Serial.print(printDistance(distance));
 
                 if(distance < (EMERGENCY_DISTANCE + TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) {
 
                     emergency = true;
-                    Serial.print("EMERGENZA \n");
+                    
                 } else {
                     sensorIndex++;
                 }
 
-            //}
-        } else {
-            sensorIndex = 0;
-            distance = 0;
+            } else {
+                sensorIndex = 0;
+                distance = 0;
+            }
+        // movimento in avanti
+        } else if(forwardDir) {
+
+            switch (sensorIndex)
+            {
+            case SENSOR_U_INDEX:
+
+                distance = measureDistance(sensorIndex);
+                sensorIndex = SENSOR_UR_INDEX;
+                break;
+
+            case SENSOR_UR_INDEX:
+
+                distance = measureDistance(sensorIndex);
+                sensorIndex = SENSOR_UL_INDEX;
+                break;
+            
+            case SENSOR_UL_INDEX:
+
+                distance = measureDistance(sensorIndex);
+                sensorIndex = SENSOR_U_INDEX;
+                break;
+            
+            default:
+                sensorIndex = SENSOR_U_INDEX;
+                break;
+            }
+
+            if(distance < (EMERGENCY_DISTANCE + TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) {
+                emergency = true;
+            }
+
+        } else if(!forwardDir) {
+            
+            switch (sensorIndex)
+            {
+            case SENSOR_D_INDEX:
+
+                distance = measureDistance(sensorIndex);
+                sensorIndex = SENSOR_DR_INDEX;
+                break;
+
+            case SENSOR_DR_INDEX:
+
+                distance = measureDistance(sensorIndex);
+                sensorIndex = SENSOR_DL_INDEX;
+                break;
+            
+            case SENSOR_DL_INDEX:
+
+                distance = measureDistance(sensorIndex);
+                sensorIndex = SENSOR_D_INDEX;
+                break;
+            
+            default:
+                sensorIndex = SENSOR_D_INDEX;
+                break;
+            }
+
+            if(distance < (EMERGENCY_DISTANCE + TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) {
+                emergency = true;
+            }
         }
     }
 }
