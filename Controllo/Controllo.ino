@@ -64,7 +64,7 @@ int speed = 0;
 int movementInt = 0;
 int brakingTime = 0;
 int sensorIndex = 0;
-double distance = 0;
+float distance = 0;
 
 bool emergency = true;
 bool forwardDir = true;
@@ -214,6 +214,10 @@ void mapping(String serialString) {
         }
         movementInt = 0;
         return;
+    }
+
+    if (topic == "velocità"){
+        Serial1.write(speed/MAX_SPEED*100);
     }
 }
 
@@ -375,7 +379,7 @@ void brake(){
 // MISURA DISTANZA           
 ///////////////////////////////////////////////////////////////////////////////
 // funzioni per la gestione della distanza
-double measureDistance(int sonarNum) {
+float measureDistance(int sonarNum) {
     return (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
 }
 String printDistance(double distance) { 
