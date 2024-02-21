@@ -382,7 +382,7 @@ void brake(){
 float measureDistance(int sonarNum) {
     return (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
 }
-String printDistance(double distance) { 
+String printDistance(float distance) { 
 
     if(emergenza == true) Serial.print("\n E ");
     if(sensorIndex == SENSOR_U_INDEX) Serial.print("\n S ");
@@ -406,7 +406,7 @@ void distanceManagement() {
             if(sensorIndex < SENSORS_NUMBER) {
 
                 distance = measureDistance(sensorIndex);
-                Serial.print(printDistance(distance));
+                /*DEBUG*/ Serial.print(printDistance(distance));
 
                 if(distance < (EMERGENCY_DISTANCE + TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) {
 
