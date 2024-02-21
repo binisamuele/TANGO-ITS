@@ -1,8 +1,6 @@
 #include <DHT11.h>
 #include <LiquidCrystal.h>
 
-//costanti globali 
-#define EMERGENCY_PIN 1
 
 
 //setup pin lcd
@@ -10,14 +8,18 @@ LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
 //constanti gestione millis
 
-const long fiveSeconds = 3000 + millis();
-const long fiveMinutes = 3000 + millis();
-const long tenMinutes = 6000 + millis();
+const long twoMinutes = 120000;
+bool inizio = true; 
 long t0 = millis();
+
+//  da passare alla comunicazione
+char umidita[40];
+char temperatura[40];
+char batteria[40];
 
 
 //funzione per sensore Temperatura e Umidità
-DHT11 dht11(2);
+DHT11 dht11(50);
 
 //pin sensori voltimetri
 const int voltmeter1Pin = A0;
@@ -28,8 +30,9 @@ int measureTemperature() {
 }
 String printTemperature() {
   char buffer[40];
-  int tempValCalc =(int) 1.0/(log(1023.0/(float)measureTemperature()-1.0)/4275+1/298.15)-273.15;
+  int tempValCalc =(int) measureTemperature();
   sprintf(buffer, "        T : %d C", tempValCalc);
+  sprintf(temperatura, "Temperatura:%d", tempValCalc);
   return buffer;
 }
 
@@ -39,7 +42,9 @@ int measureHumidity() {
 }
 String printHumidity() {
   char buffer[40];
-  sprintf(buffer, "U : %d%% ", measureHumidity());
+  int umid=measureHumidity();
+  sprintf(buffer, "U : %d%%", umid);
+  sprintf(umidita, "Temperatura:%d", umid);
   return buffer;
 }
 
@@ -59,7 +64,7 @@ String printVoltmeters() {
   voltage1 =(2*100)/(voltage1-10);
 
   sprintf(buffer, "Batteria:%d.%d %%", (int)voltage1, ((int)(voltage1*10) % 10));
-  Serial.println(buffer);
+  sprintf(batteria, "Batteria:%d.%d", (int)voltage1, ((int)(voltage1*10) % 10));
   return buffer;
 }
 
@@ -68,9 +73,11 @@ String printVoltmeters() {
 
 void setup() {
 
+  
   Serial.begin(9600);       // Inizializza la comunicazione seriale a 9600 bps
   lcd.begin(16, 2);         // Inizializza il display LCD
   lcd.setCursor(0,0);
+
 }
 
 void lcdManagement(char set) {
@@ -105,20 +112,27 @@ void lcdManagement(char set) {
 void loop() {
   
  if( Serial.read() == "EMERGENZA"){
-    lcdManagement(E);
+    lcdManagement('E');
   }   
-  
-  if(millis() - t0 >  tenMinutes) {
-    Serial.print(printVoltmeters());
-    Serial.print(printTemperature());
-    Serial.print(printHumidity());
 
+  if(millis() - t0 >  twoMinutes) {
     //aggiorna e stampa LCD
     lcdManagement('V');
     lcdManagement('T');
     lcdManagement('H');
+    // manda in seriale
+    Serial.print(temperatura);
+    Serial.print(umidita);
+    Serial.print(temperatura);
+
     t0 = millis();
     }
 
-  
+  if(inizio){
+    inizio= false;
+    lcdManagement('V');
+    lcdManagement('T');
+    lcdManagement('H');
+  }
+
 }
