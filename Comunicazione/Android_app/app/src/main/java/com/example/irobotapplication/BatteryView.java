@@ -14,6 +14,7 @@ import android.view.View;
 
 public class BatteryView extends View {
     private float radius = 0f;
+    private float textSize = 0f;
     private boolean isCharging = false;
 
     private PaintDrawable topPaint = new PaintDrawable(Color.WHITE);
@@ -61,6 +62,7 @@ public class BatteryView extends View {
         try {
             percent = ta.getInt(R.styleable.BatteryView_bv_percent, 0);
             isCharging = ta.getBoolean(R.styleable.BatteryView_bv_charging, false);
+            textSize = ta.getDimension(R.styleable.BatteryView_bv_textSize, 30);
             // Added to initialize percentage text
             percentageText = percent + "%";
         } finally {
@@ -154,7 +156,7 @@ public class BatteryView extends View {
 
     private void drawPercentageText(Canvas canvas) {
         textPaint.setColor(Color.WHITE);
-        textPaint.setTextSize(50);
+        textPaint.setTextSize(textSize);
         textPaint.setTextAlign(Paint.Align.CENTER);
         float textX = getWidth() / 2f;
         float textY = getHeight() / 2f - ((textPaint.descent() + textPaint.ascent()) / 2f);
