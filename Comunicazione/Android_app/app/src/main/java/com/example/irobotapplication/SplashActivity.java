@@ -20,7 +20,10 @@ public class SplashActivity extends AppCompatActivity {
         // Utilizza un Handler per avviare l'Intent dopo un ritardo
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
-            public void run() { //cambiare mainactivity con loading activity
+            public void run() {
+
+                //TODO cambiare MainActivity con LoadingActivity
+
                 startActivity(new Intent(SplashActivity.this, MainActivity.class));
                 finish(); // Chiudi la SplashActivity per evitare di tornarci con il tasto indietro
             }

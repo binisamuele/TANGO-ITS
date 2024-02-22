@@ -113,6 +113,7 @@ public class ControllerFragment extends Fragment {
             return false;
         });
 
+        // TODO postToServer delle luci, però per ora non sono state montate
         buttonLights.setOnClickListener(new View.OnClickListener() {
             boolean lights_status = false; // Stato iniziale
             @Override
@@ -269,7 +270,8 @@ public class ControllerFragment extends Fragment {
         queue.add(stringRequest);
     }
 
-    //TODO (bisogna richiamare il metodo, dove?)
+    //TODO (bisogna richiamare il metodo in modo continuo per aggiornare la velocità.
+    // la si chiama tramite i button forward e backwards o ????)
 
     private void updateSpeed(int currentSpeed) {
 
