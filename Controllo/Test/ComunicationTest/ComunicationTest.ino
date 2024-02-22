@@ -45,6 +45,7 @@ String serialString = "";
 
 void setup() {
     Serial1.begin(9600);    // collegamento all'arduino di comunicazione
+	  Serial.begin(9600);
 
     startTime = millis();
 
@@ -58,10 +59,10 @@ void setup() {
     pinMode(SX_FORWARD_EN, OUTPUT);
     pinMode(SX_BACKWARD_EN, OUTPUT);
 
-	digitalWrite(dxForwardEn, HIGH);
-    digitalWrite(sxForwardEn, HIGH);
-    digitalWrite(dxBackwardEn, HIGH);
-    digitalWrite(sxBackwardEn, HIGH);
+	  digitalWrite(DX_FORWARD_EN, HIGH);
+    digitalWrite(SX_FORWARD_EN, HIGH);
+    digitalWrite(DX_BACKWARD_EN, HIGH);
+    digitalWrite(SX_BACKWARD_EN, HIGH);
 
     pinMode(EMERGENCY_PIN, OUTPUT);
     pinMode(COMMUNICATION_PIN, OUTPUT);
@@ -72,27 +73,19 @@ void setup() {
     pinMode(BUMPERS, INPUT_PULLUP);         // emergenza bumper
     pinMode(ARDUINO_EMERGENCIES, INPUT);    // emergenza arduino
 
-    pinMode(TRIG_PIN_U, OUTPUT);
-    pinMode(ECHO_PIN_U, INPUT);
-
-    pinMode(TRIG_PIN_UR, OUTPUT);
-    pinMode(ECHO_PIN_UR, INPUT);
-
-    pinMode(TRIG_PIN_UL, OUTPUT);
-    pinMode(ECHO_PIN_UL, INPUT);
-
-    pinMode(TRIG_PIN_D, OUTPUT);
-    pinMode(ECHO_PIN_D, INPUT);
 }
 
 void loop() {
     currentTime = millis();
 
-	readSerial();
+	  readSerial();
 
-	Serial.println(movementInt);
+    if (currentTime - startTime >= INTERVAL){
+	      Serial.println(movementInt);
+        startTime = currentTime;
+    }
 
-	//movement();
+	  //movement();
 
 }
 
@@ -117,23 +110,23 @@ void mapping(String serialString) {
     String topic = serialString.substring(0, index);
     String serialVal = serialString.substring(index+1, length);
 	*/
-	if (serialVal == "up"){
+	if (serialString == "up"){
 		movementInt = 1;
 		return;
 	}
-	if (serialVal == "down"){
+	if (serialString == "down"){
 		movementInt = 2;
 		return;
 	}
-	if (serialVal == "right"){ // ruotare a destra
+	if (serialString == "right"){ // ruotare a destra
 		movementInt = 3;
 		return;
 	}
-	if (serialVal == "left"){ // ruotare a sinistra
+	if (serialString == "left"){ // ruotare a sinistra
 		movementInt = 4;
 		return;
 	}
-	if (serialVal == "emergencyStop"){
+	if (serialString == "emergencyStop"){
 		movementInt = 5;
 		return;
 	}
