@@ -44,19 +44,19 @@
 
         <ImageView
             android:layout_width="68dp"
-        android:layout_height="68dp"
-        android:layout_gravity="center"
-        android:rotation="-90"
-        android:src="@drawable/baseline_device_thermostat_24" />
+            android:layout_height="68dp"
+            android:layout_gravity="center"
+            android:rotation="-90"
+            android:src="@drawable/baseline_device_thermostat_24" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="50dp"
-        android:text="25°C"
-        android:textColor="@android:color/white"
-        android:textSize="18sp" />
+            android:text="25°C"
+            android:textColor="@android:color/white"
+            android:textSize="18sp" />
 
     </FrameLayout>
 
@@ -116,6 +116,7 @@
                 android:src="@drawable/ic_chargeing"
                 app:bv_charging="false"
                 app:bv_percent="80"
+                app:bv_textSize="25sp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

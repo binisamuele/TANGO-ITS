@@ -1,11 +1,8 @@
 package com.example.irobotapplication;
 
-import static android.view.View.MeasureSpec.getMode;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -20,6 +17,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -90,7 +88,7 @@ public class ControllerFragment extends Fragment {
         AppCompatImageButton buttonRotDx = requireView().findViewById(R.id.btnRotDX);
         Switch switchOnOff = requireView().findViewById(R.id.switch_OnOff);
         AppCompatImageButton btnStop = requireView().findViewById(R.id.btnStop);
-        switchOnOff.setChecked(true);
+        switchOnOff.setChecked(false);
 
         check = new ConnectivityCheck(requireActivity().getApplicationContext());
         check.startSending();
@@ -116,17 +114,17 @@ public class ControllerFragment extends Fragment {
         });
 
         buttonLights.setOnClickListener(new View.OnClickListener() {
-            boolean lights_state = false; // Stato iniziale
+            boolean lights_status = false; // Stato iniziale
             @Override
             public void onClick(View v) {
-                if (!lights_state) {
+                if (!lights_status) {
                     // Se le luci sono spente, accendile
                     buttonLights.setImageResource(R.drawable.lights_on);
-                    lights_state = true;
+                    lights_status = true;
                 } else {
                     // Se le luci sono accese, spegnile
                     buttonLights.setImageResource(R.drawable.lights_off);
-                    lights_state = false;
+                    lights_status = false;
                 }
             }
         });
@@ -192,11 +190,21 @@ public class ControllerFragment extends Fragment {
                 check.startSending();
             }
         });
-        
+
+        AtomicBoolean stopClicked = new AtomicBoolean(false);
         btnStop.setOnClickListener(v -> {
-            postToServer(getString(R.string.conn_string) + "control", "emergencyStop");
-            switchOnOff.setChecked(false);
-            check.stopSending();
+            if(!stopClicked.get()){
+                // se il bottone viene cliccato e stopclicked = false cambia immagine e stopclicked = true
+                postToServer(getString(R.string.conn_string) + "control", "emergencyStop");
+                switchOnOff.setChecked(false);
+                check.stopSending();
+                btnStop.setImageResource(R.drawable.stop_button_clicked);
+                stopClicked.set(true);
+            }
+            else{
+                btnStop.setImageResource(R.drawable.stop_button_default);
+                stopClicked.set(false);
+            }
         });
     }
 
@@ -208,7 +216,6 @@ public class ControllerFragment extends Fragment {
         if (actionBar != null) {
             actionBar.show();
         }
-
         check.stopSending();
         postToServer(getString(R.string.conn_string) + "control", "commStop");
     }
@@ -260,5 +267,28 @@ public class ControllerFragment extends Fragment {
             }
         };
         queue.add(stringRequest);
+    }
+
+    //TODO (bisogna richiamare il metodo, dove?)
+
+    private void updateSpeed(int currentSpeed) {
+
+        //Aggiornamento della velocità
+        TextView speedTextView = requireView().findViewById(R.id.Speed);
+        speedTextView.setText(currentSpeed);
+
+        //Cambio colori in base alla velocità
+        if(currentSpeed == 0){
+            speedTextView.setTextColor(getResources().getColor(R.color.Panna));
+        }
+        else if (currentSpeed > 0 && currentSpeed <= 15) {
+            speedTextView.setTextColor(getResources().getColor(R.color.Green));
+        }
+        else if (currentSpeed > 15 && currentSpeed <= 35) {
+            speedTextView.setTextColor(getResources().getColor(R.color.Yellow));
+        }
+        else {
+            speedTextView.setTextColor(getResources().getColor(R.color.red));
+        }
     }
 }

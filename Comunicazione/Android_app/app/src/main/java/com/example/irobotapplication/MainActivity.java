@@ -65,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
                     drawerLayout.closeDrawer(GravityCompat.START);
                     handleMenuItemSelection(item);
                 }
-
                 return true;
             }
 
@@ -169,6 +168,4 @@ public class MainActivity extends AppCompatActivity {
             window.setStatusBarColor(color);
         }
     }
-
-
 }
