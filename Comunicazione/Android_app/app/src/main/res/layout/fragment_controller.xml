@@ -31,14 +31,14 @@
                 android:id="@+id/imageView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:contentDescription="TODO"
                 android:src="@drawable/contenitorebottoni_grigio__removebg_preview"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintHorizontal_bias="0.516"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.496"
-                android:contentDescription="TODO" />
+                app:layout_constraintVertical_bias="0.284" />
 
             <ImageButton
                 android:id="@+id/btnDown"
@@ -89,71 +89,81 @@
             android:layout_height="match_parent"
             tools:context=".ControllerFragment">
 
-            <ImageView
-                android:id="@+id/Display"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:contentDescription="display"
-                android:src="@drawable/display"
-                app:layout_constraintBottom_toTopOf="@id/switch_OnOff"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
             <ImageButton
                 android:id="@+id/btnStop"
-                android:layout_width="142dp"
-                android:layout_height="129dp"
+                android:layout_width="130dp"
+                android:layout_height="128dp"
+                android:layout_marginBottom="30dp"
                 android:background="#00FFFFFF"
+                android:backgroundTint="#00FFFFFF"
                 android:contentDescription="stop"
                 android:scaleType="fitCenter"
-                android:src="@drawable/stopbutton"
+                android:src="@drawable/stop_button_default"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.495"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/switch_OnOff" />
+                app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
 
-            <TextView
-                android:id="@+id/Velocita"
-                android:layout_width="213dp"
-                android:layout_height="21dp"
-                android:text="Velocità:    30    Km/h"
-                android:textColor="#F4F4F4"
-                app:layout_constraintBottom_toTopOf="@+id/Batteria"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintLayout"
+                android:layout_width="233dp"
+                android:layout_height="218dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintBottom_toTopOf="@+id/btnStop"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/Display" />
+                app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/Batteria"
-                android:layout_width="213dp"
-                android:layout_height="21dp"
-                android:text="Batteria: 100%"
-                android:textColor="#F4F4F4"
-                app:layout_constraintBottom_toBottomOf="@+id/Display"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/Velocita" />
+                <com.example.irobotapplication.BatteryView
+                    android:id="@+id/battery_view"
+                    android:layout_width="30dp"
+                    android:layout_height="65dp"
+                    android:src="@drawable/ic_chargeing"
+                    app:bv_charging="false"
+                    app:bv_percent="80"
+                    app:bv_textSize="10sp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.921"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.097" />
 
-            <Switch
-                android:id="@+id/switch_OnOff"
-                android:layout_width="54dp"
-                android:layout_height="24dp"
-                android:layout_marginBottom="20dp"
-                android:checked="false"
-                android:enabled="true"
-                android:scaleX="2"
-                android:scaleY="2"
-                android:thumb="@drawable/ic_thumb"
-                android:track="@drawable/bg_track"
-                app:layout_constraintBottom_toTopOf="@id/btnStop"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.497"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/Display" />
+                <TextView
+                    android:id="@+id/Speed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="140dp"
+                    android:layout_marginBottom="5dp"
+                    android:fontFamily="serif"
+                    android:text="0"
+                    android:textAlignment="center"
+                    android:textColor="#BDBDBD"
+                    android:textSize="48sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toTopOf="@+id/unita_misura"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/unita_misura"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="100dp"
+                    android:fontFamily="serif"
+                    android:text="Km/h"
+                    android:textAlignment="center"
+                    android:textColor="#BDBDBD"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/Speed" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -179,7 +189,7 @@
                 android:id="@+id/btnSX"
                 android:layout_width="104dp"
                 android:layout_height="95dp"
-                android:layout_marginBottom="50dp"
+                android:layout_marginBottom="84dp"
                 android:background="#00FFFFFF"
                 android:contentDescription="sx"
                 android:rotation="90"
@@ -193,7 +203,7 @@
                 android:id="@+id/btnRotDX"
                 android:layout_width="104dp"
                 android:layout_height="95dp"
-                android:layout_marginTop="50dp"
+                android:layout_marginTop="16dp"
                 android:background="#00FFFFFF"
                 android:contentDescription="rotDx"
                 android:scaleType="fitCenter"
@@ -206,7 +216,7 @@
                 android:id="@+id/btnRotSX"
                 android:layout_width="104dp"
                 android:layout_height="95dp"
-                android:layout_marginTop="50dp"
+                android:layout_marginTop="16dp"
                 android:background="#00FFFFFF"
                 android:contentDescription="rotSx"
                 android:scaleType="fitCenter"
@@ -219,7 +229,7 @@
                 android:id="@+id/btnDX"
                 android:layout_width="104dp"
                 android:layout_height="95dp"
-                android:layout_marginBottom="50dp"
+                android:layout_marginBottom="84dp"
                 android:background="#00FFFFFF"
                 android:contentDescription="dx"
                 android:rotation="-90"
@@ -234,13 +244,30 @@
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:backgroundTint="#00FFFFFF"
+                android:contentDescription="TODO"
                 android:scaleType="centerInside"
                 android:src="@drawable/lights_off"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.497"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                android:contentDescription="TODO" />
+                app:layout_constraintVertical_bias="0.378" />
+
+            <Switch
+                android:id="@+id/switch_OnOff"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="false"
+                android:enabled="true"
+                android:scaleX="2"
+                android:scaleY="2"
+                android:thumb="@drawable/ic_thumb"
+                android:track="@drawable/bg_track"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/btnSX" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

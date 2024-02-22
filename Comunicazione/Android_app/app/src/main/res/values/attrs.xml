@@ -3,5 +3,6 @@
     <declare-styleable name="BatteryView">
         <attr name="bv_percent" format="integer" />
         <attr name="bv_charging" format="boolean" />
+        <attr name="bv_textSize" format="dimension"/>
     </declare-styleable>
 </resources>
