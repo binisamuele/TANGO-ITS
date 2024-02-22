@@ -37,7 +37,7 @@ int brakingTime = 0;
 int sensorIndex = 0;
 float distance = 0;
 
-bool emergency = true;
+bool emergency = false;
 bool forwardDir = true;
 bool isRotating = false;
 
@@ -77,16 +77,47 @@ void setup() {
 
 void loop() {
     currentTime = millis();
-
+    /*
+    if (!Serial1 || digitalRead(BUTTONS)) {   // questa parte di codice non è stata testata, è la prima da testare
+        emergencyState();
+        return;
+    }
+*/
 	  readSerial();
 
     if (currentTime - startTime >= INTERVAL){
 	      Serial.println(movementInt);
         startTime = currentTime;
+        if (movementInt == 5) emergencyState();
     }
 
-	  //movement();
+	  //movement();   // questa parte di codice è da testare
 
+}
+
+// GESTIONE EMERGENZA           
+///////////////////////////////////////////////////////////////////////////////
+// funzione stato emergenza
+void emergencyState() {
+    if (!emergency){            // ferma la macchina e manda un messaggio di emergenza agli altri arduino
+        emergency = true;
+        emergencyStop();
+    }
+
+    int start = 0;
+    while (emergency)      // rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
+    {
+        start = Serial.parseInt(); // DEBUG per far ripartire il codice scrivendo 9 nel monitor serial
+        if (start == 9) emergency = false;
+    }
+}
+
+// arresto di emergenza del motore
+void emergencyStop() {
+    stopMotor();
+
+    speed = 0;
+    movementInt = 0;
 }
 
 // GESTIONE COMUNICAZIONE          
@@ -95,7 +126,7 @@ void loop() {
 void readSerial(){
     if(Serial1.available()) {
         serialString = Serial1.readStringUntil('\r\n');
-        //digitalWrite(COMMUNICATION_PIN, HIGH);
+        //digitalWrite(COMMUNICATION_PIN, HIGH);        // completamente da testare
         //delay(50); // da testare
         //digitalWrite(COMMUNICATION_PIN, LOW);
         mapping(serialString);
@@ -105,7 +136,7 @@ void readSerial(){
 // mapping dei messaggi
 void mapping(String serialString) {
 	/*
-    int index = serialString.lastIndexOf(':');
+    int index = serialString.lastIndexOf(':');        // potrebbe non essere più necessaria
     int length = serialString.length();
     String topic = serialString.substring(0, index);
     String serialVal = serialString.substring(index+1, length);

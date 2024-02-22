@@ -217,7 +217,7 @@ void mapping(String serialString) {
     }
 
     if (topic == "velocità"){
-        Serial1.write(speed/MAX_SPEED*100);
+        Serial1.println(speed*5/255);
     }
 }
 
