@@ -1,70 +1,141 @@
-// PINS
-const int dxForward = 5, dxBackward = 4, dxForwardEn = 27, dxBackwardEn = 26;   // Motore DX
-const int sxForward = 7, sxBackward = 6, sxForwardEn = 22, sxBackwardEn = 23;   // Motore SX
+#include <NewPing.h>
 
-const int key = 40;             // pin della chiave
-const int startFromApp;         // pin collegato all'app per l'accensione
-const int emergencyPin;         // pin per inviare messaggi di emergenza
-const int communicationPin;     // pin per la rispota ai messaggi
+// COSTANTI PINS
+const int DX_FORWARD = 5, DX_BACKWARD = 4, DX_FORWARD_EN = 27, DX_BACKWARD_EN = 26;   // Motore DX
+const int SX_FORWARD = 7, SX_BACKWARD = 6, SX_FORWARD_EN = 22, SX_BACKWARD_EN = 23;   // Motore SX
+
+const int BUMPERS = 3;                  // pin dei bumpers
+const int BUTTONS = 2;                  // pin dei bottoni
+const int EMERGENCY_PIN;                // pin di emergenza
+const int ARDUINO_EMERGENCIES = 8;      // pin per le emergenze degli altri Arduino
+
+const int KEY = 9;                      // pin della chiave
+const int START_FROM_APP;               // pin collegato all'app per l'accensione
+const int COMMUNICATION_PIN;            // pin per la rispota ai messaggi
+
+// SENSORI PROSSIMITA'
+// frontale
+const int TRIG_PIN_U = 32;     
+const int ECHO_PIN_U = 33;
+const int SENSOR_U_INDEX = 0;     
+// frontale destro
+const int TRIG_PIN_UR = 34;
+const int ECHO_PIN_UR = 35;
+const int SENSOR_UR_INDEX = 1;    
+// frontale sinistro
+const int TRIG_PIN_UL = 36;  
+const int ECHO_PIN_UL = 37;
+const int SENSOR_UL_INDEX = 2;     
+
+// posteriore
+const int TRIG_PIN_D = 38;
+const int ECHO_PIN_D = 39;
+const int SENSOR_D_INDEX = 3;    
+// posteriore destro
+const int TRIG_PIN_DR = 40;
+const int ECHO_PIN_DR = 41;
+const int SENSOR_DR_INDEX = 4;    
+// posteriore sinistro
+const int TRIG_PIN_DL = 42;
+const int ECHO_PIN_DL = 43;
+const int SENSOR_DL_INDEX = 5;    
+
+// COSTANTI
+const int SENSORS_NUMBER = 6;
+const int MAX_DISTANCE = 200;
+const int INTERVAL = 1000;
+const int SONAR_INTERVAL = 50;
+
+const int MAX_SPEED = 150;
+const int MIN_SPEED = -100;
+const int SPEED_GAIN = 2;
+const int LOW_SPEED = 35;   //da testare
+
+const int TANGO_SIZE = 20;
+const int EMERGENCY_DISTANCE = 40;
+const int SECURITY_DISTANCE = 60;
+const float SPEED_OF_SOUND = 0.0343;
 
 // VARIABILI
 unsigned long startTime;
 unsigned long currentTime;
-const long interval = 1000;
 
-const int speedGain = 2;    // da testare
-const int maxSpeed = 100;    // da testare
-const int minSpeed = -50;   // da testare
-int speed = 0;              // Valore del PWM tra 0 (spento) e 255 (massima velocità)
+int speed = 0;
 int movementInt = 0;
+int brakingTime = 0;
+int sensorIndex = 0;
+float distance = 0;
 
-bool isRotating = false;
 bool emergency = true;
+bool forwardDir = true;
+bool isRotating = false;
 
 String serialString = "";
 
+// Array inizializzazione sensori di prossimità
+NewPing sonar[SENSORS_NUMBER] = {   
+    NewPing(TRIG_PIN_U, ECHO_PIN_U, MAX_DISTANCE),      // sensore frontale
+    NewPing(TRIG_PIN_UR, ECHO_PIN_UR, MAX_DISTANCE),    // sensore frontale destro
+    NewPing(TRIG_PIN_UL, ECHO_PIN_UL, MAX_DISTANCE),    // sensore frontale sinistro
+    NewPing(TRIG_PIN_D, ECHO_PIN_D, MAX_DISTANCE),      // sensore posteriore 
+    NewPing(TRIG_PIN_DR, ECHO_PIN_DR, MAX_DISTANCE),    // sensore posteriore destro
+    NewPing(TRIG_PIN_DL, ECHO_PIN_DL, MAX_DISTANCE)     // sensore posteriore sinistro
+}
+
+
 void setup() {
     Serial1.begin(9600);    // collegamento all'arduino di comunicazione
-    Serial2.begin(9600);    // collegamento all'arduino dei sensori a ultrasuoni
-    Serial3.begin(9600);    // collegamento all'arduino degli altri sensori
 
     startTime = millis();
 
-    pinMode(dxForward, OUTPUT);
-    pinMode(dxBackward, OUTPUT);
-    pinMode(dxForwardEn, OUTPUT);
-    pinMode(dxBackwardEn, OUTPUT);
+    pinMode(DX_FORWARD, OUTPUT);
+    pinMode(DX_BACKWARD, OUTPUT);
+    pinMode(DX_FORWARD_EN, OUTPUT);
+    pinMode(DX_BACKWARD_EN, OUTPUT);
 
-    pinMode(sxForward, OUTPUT);
-    pinMode(sxBackward, OUTPUT);
-    pinMode(sxForwardEn, OUTPUT);
-    pinMode(sxBackwardEn, OUTPUT);
+    pinMode(SX_FORWARD, OUTPUT);
+    pinMode(SX_BACKWARD, OUTPUT);
+    pinMode(SX_FORWARD_EN, OUTPUT);
+    pinMode(SX_BACKWARD_EN, OUTPUT);
 
-    pinMode(emergencyPin, OUTPUT);
+    pinMode(EMERGENCY_PIN, OUTPUT);
+    pinMode(COMMUNICATION_PIN, OUTPUT);
 
-    pinMode(communicationPin, OUTPUT);
+    pinMode(KEY, INPUT_PULLUP);
 
-    pinMode(key, INPUT_PULLUP); // necessario per far funzionare la chiave -- fare attenzione alle interferenze nel caso in cui il motore non venga messo a 0
-    pinMode(2, INPUT_PULLUP);   // necessario per fare funzionare i bottoni
+    pinMode(BUTTONS, INPUT_PULLUP);         // emergenza bottoni
+    pinMode(BUMPERS, INPUT_PULLUP);         // emergenza bumper
+    pinMode(ARDUINO_EMERGENCIES, INPUT);    // emergenza arduino
 
-    attachInterrupt(0, emergencyState, FALLING);                            // Pin 2 per emergenza pulsanti
-    attachInterrupt(1, emergencyState, RISING);                             // Pin 3 per emergenza bumper
-    attachInterrupt(2, emergencyState, RISING);                             // Pin 21 per emergenze arduino (hardware deve utilizzare un diodo)
+    pinMode(TRIG_PIN_U, OUTPUT);
+    pinMode(ECHO_PIN_U, INPUT);
+
+    pinMode(TRIG_PIN_UR, OUTPUT);
+    pinMode(ECHO_PIN_UR, INPUT);
+
+    pinMode(TRIG_PIN_UL, OUTPUT);
+    pinMode(ECHO_PIN_UL, INPUT);
+
+    pinMode(TRIG_PIN_D, OUTPUT);
+    pinMode(ECHO_PIN_D, INPUT);
 }
+
 
 void loop() {
     currentTime = millis();
 
-    if (!Serial1 || !Serial2 || !Serial3 || emergency || digitalRead(2)) {        // controllo della comunicazione seriale
+    if (!Serial1 || emergency || digitalRead(BUTTONS) || digitalRead(BUMPERS) || digitalRead(ARDUINO_EMERGENCIES) || digitalRead(KEY)) {
         emergencyState();
         return;
     }
 
     readSerial();
-
-    movement(); // switch del movimento
+    distanceManagement();
+    movement();
 }
 
+// GESTIONE EMERGENZA           
+///////////////////////////////////////////////////////////////////////////////
 // funzione stato emergenza
 void emergencyState() {
     if (!emergency){            // ferma la macchina e manda un messaggio di emergenza agli altri arduino
@@ -73,9 +144,9 @@ void emergencyState() {
         emergencyComm();        // segnale di emergenza agli altri arduino
     }
 
-    while (emergency || !digitalRead(key))      // rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
+    while (emergency || !digitalRead(KEY))      // rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
     {
-        if (!digitalRead(key) || digitalRead(startFromApp)) emergency = false;
+        if (!digitalRead(KEY) || digitalRead(START_FROM_APP)) emergency = false;
     }
 
     emergencyComm();            // segnale di fine emergenza agli altri arduino
@@ -84,32 +155,30 @@ void emergencyState() {
 // funzione di comunicazioni di emergenza
 void emergencyComm(){
     if (emergency){
-        digitalWrite(emergencyPin, HIGH);
+        digitalWrite(EMERGENCY_PIN, HIGH);
         return;
     }
 
-    digitalWrite(emergencyPin, LOW);
+    digitalWrite(EMERGENCY_PIN, LOW);
 }   
 
-// segnale di arresto del motore (potrebbe essere non necessaria)
+// arresto di emergenza del motore
 void emergencyStop() {
     stopMotor();
-    resetVariables();
-}
 
-// reset delle variabili
-void resetVariables() {
     speed = 0;
     movementInt = 0;
 }
 
-// lettura dei 3 arduino
+// GESTIONE COMUNICAZIONE          
+///////////////////////////////////////////////////////////////////////////////
+// lettura dell'arduino di comunicazione
 void readSerial(){
     if(Serial1.available()) {
         serialString = Serial1.readStringUntil('\r\n');
-        digitalWrite(communicationPin, HIGH);
+        digitalWrite(COMMUNICATION_PIN, HIGH);
         delay(50); // da testare
-        digitalWrite(communicationPin, LOW);
+        digitalWrite(COMMUNICATION_PIN, LOW);
         mapping(serialString);
     }
 }
@@ -146,17 +215,25 @@ void mapping(String serialString) {
         movementInt = 0;
         return;
     }
+
+    if (topic == "velocità"){
+        Serial1.write(speed/MAX_SPEED*100);
+    }
 }
 
+// FUNZIONI DI MOVIMENTO          
+///////////////////////////////////////////////////////////////////////////////
 // funzione con le opzioni di movimento
 void movement(){
     switch (movementInt) {
         // andare avanti
         case 1:
             rotationCheck();
+            forwardDir = true;
 
             if (speed < 0) {                                   // se la velocità era negativa, rallentiamo i motori
-                decelerate();
+                brakingTime = 5;
+                brake();
                 break;
             }
 
@@ -165,9 +242,11 @@ void movement(){
         // andare indietro
         case 2:
             rotationCheck();
+            forwardDir = false;
 
             if (speed > 0) {                                   // se la velocità era positiva, rallentiamo i motori
-                decelerate();
+                brakingTime = 5;
+                brake();
                 break;
             }
 
@@ -176,43 +255,47 @@ void movement(){
         // rotazione in senso orario
         case 3:
             if (speed != 0){
-                decelerate();
+                brakingTime = 5;
+                brake();
                 break;
             }
 
-            driveMotor(sxForward, dxBackward, 20);
+            driveMotor(SX_FORWARD, DX_BACKWARD, LOW_SPEED);
 
             isRotating = true;
             break;
         // rotazione in senso antiorario
         case 4:
             if (speed != 0){
-                decelerate();
+                brakingTime = 5;
+                brake();
                 break;
             }
 
-            driveMotor(dxForward, sxBackward, 20);
+            driveMotor(DX_FORWARD, SX_BACKWARD, LOW_SPEED);
 
             isRotating = true;
             break;
         // frenata
         case 5:
             rotationCheck();
+            brakingTime = 5;
 
-            decelerate();
+            brake();
             break;
         // nessun comando di movimento
         default:
             rotationCheck();
+            brakingTime = 1;
 
-            decelerate();
+            brake();
             break;
     }
 }
 
 // controllo della velocità vicino a zero
 void speedControl(){
-    if (speed < speedGain && speed > -speedGain) speed = 0;
+    if (speed < SPEED_GAIN && speed > -SPEED_GAIN) speed = 0;
 }
 
 // controllo della rotazione
@@ -220,20 +303,18 @@ void rotationCheck(){
     if (isRotating){
         stopMotor();
         isRotating = false;
-        
-        delay(1000); // da testare
     }
 }
 
 // funzione per fermare i motori
 void stopMotor(){
-    analogWrite(dxForward, 0);
-    analogWrite(dxBackward, 0);
+    analogWrite(DX_FORWARD, 0);
+    analogWrite(DX_BACKWARD, 0);
 
-    analogWrite(sxForward, 0);
-    analogWrite(sxBackward, 0);
+    analogWrite(SX_FORWARD, 0);
+    analogWrite(SX_BACKWARD, 0);
 
-    delay(1000); // da testare
+    currentTime = startTime;
 }
 
 // funzione per muoversi avanti o indietro
@@ -246,46 +327,161 @@ void driveMotor(int motor1, int motor2, int spd) {
 
 // funzione per accelerare
 void accelerate(){
-    if (currentTime - startTime >= interval){
+    if (currentTime - startTime >= INTERVAL){
 
         startTime = currentTime;
 
-        if (speed >= 0) {
-            if (speed >= maxSpeed) return;      // se la velocità è al massimo, non fare niente
+        if (forwardDir) {
+            if (speed >= MAX_SPEED) return;      // se la velocità è al massimo, non fare niente
 
-            speed += speedGain;
-            driveMotor(dxForward, sxForward, speed);
+            speed += SPEED_GAIN;
+            if (speed > 50) speed += SPEED_GAIN;
+            if (speed > 100) speed += SPEED_GAIN;
+
+            driveMotor(DX_FORWARD, SX_FORWARD, speed);
             return;
         }
 
-        if (speed <= 0) {
-            if (speed <= minSpeed) return;      // se la velocità è al minimo, non fare niente
+        if (!forwardDir) {
+            if (speed <= MIN_SPEED) return;      // se la velocità è al minimo, non fare niente
 
-            speed -= speedGain;
-            driveMotor(dxBackward, sxBackward, speed);
+            speed -= SPEED_GAIN;
+            if(speed < -50) speed -= SPEED_GAIN;
+
+            driveMotor(DX_BACKWARD, SX_BACKWARD, speed);
             return;
         }
     }
 }
 
 // funzione per decelerare e lentamente fermarsi
-void decelerate(){
-    if (currentTime - startTime >= interval){
+void brake(){
+    if (currentTime - startTime >= INTERVAL / brakingTime){
 
         startTime = currentTime;
 
         if (speed < 0) {
-            speed += speedGain;
+            speed += SPEED_GAIN;
             speedControl();
-            driveMotor(dxBackward, sxBackward, speed);
+            driveMotor(DX_BACKWARD, SX_BACKWARD, speed);
             return;
         }
 
         if (speed > 0) {
-            speed -= speedGain;
+            speed -= SPEED_GAIN;
             speedControl();
-            driveMotor(dxForward, sxForward, speed);
+            driveMotor(DX_FORWARD, SX_FORWARD, speed);
             return;
+        }
+    }
+}
+
+// MISURA DISTANZA           
+///////////////////////////////////////////////////////////////////////////////
+// funzioni per la gestione della distanza
+float measureDistance(int sonarNum) {
+    return (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
+}
+String printDistance(float distance) { 
+
+    if(emergenza == true) Serial.print("\n E ");
+    if(sensorIndex == SENSOR_U_INDEX) Serial.print("\n S ");
+    if(sensorIndex == SENSOR_UR_INDEX) Serial.print("\n S1 ");
+    if(sensorIndex == SENSOR_UL_INDEX) Serial.print("\n S2 ");
+    if(sensorIndex == SENSOR_D_INDEX) Serial.print("\n S3 ");
+    if(sensorIndex == SENSOR_DR_INDEX) Serial.print("\n S4 ");
+    if(sensorIndex == SENSOR_DL_INDEX) Serial.print("\n S5 ");
+    return String("Distanza: " + (String)distance +"cm");
+        
+}
+
+void distanceManagement() {
+
+    // ciclo non bloccante ogni 50 ms
+    if (currentTime - startTime >= SONAR_INTERVAL){
+
+        // rotazione su se stesso
+        if(isRotating) {
+
+            if(sensorIndex < SENSORS_NUMBER) {
+
+                distance = measureDistance(sensorIndex);
+                /*DEBUG*/ Serial.print(printDistance(distance));
+
+                if(distance < (EMERGENCY_DISTANCE + TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) {
+
+                    emergency = true;
+                    
+                } else {
+                    sensorIndex++;
+                }
+
+            } else {
+                sensorIndex = 0;
+                distance = 0;
+            }
+        // movimento in avanti
+        } else if(forwardDir) {
+
+            switch (sensorIndex)
+            {
+            case SENSOR_U_INDEX:
+
+                distance = measureDistance(sensorIndex);
+                sensorIndex = SENSOR_UR_INDEX;
+                break;
+
+            case SENSOR_UR_INDEX:
+
+                distance = measureDistance(sensorIndex);
+                sensorIndex = SENSOR_UL_INDEX;
+                break;
+            
+            case SENSOR_UL_INDEX:
+
+                distance = measureDistance(sensorIndex);
+                sensorIndex = SENSOR_U_INDEX;
+                break;
+            
+            default:
+                sensorIndex = SENSOR_U_INDEX;
+                break;
+            }
+
+            if(distance < (EMERGENCY_DISTANCE + TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) {
+                emergency = true;
+            }
+
+        } else if(!forwardDir) {
+            
+            switch (sensorIndex)
+            {
+            case SENSOR_D_INDEX:
+
+                distance = measureDistance(sensorIndex);
+                sensorIndex = SENSOR_DR_INDEX;
+                break;
+
+            case SENSOR_DR_INDEX:
+
+                distance = measureDistance(sensorIndex);
+                sensorIndex = SENSOR_DL_INDEX;
+                break;
+            
+            case SENSOR_DL_INDEX:
+
+                distance = measureDistance(sensorIndex);
+                sensorIndex = SENSOR_D_INDEX;
+                break;
+            
+            default:
+                sensorIndex = SENSOR_D_INDEX;
+                break;
+            }
+
+            if(distance < (EMERGENCY_DISTANCE + TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) {
+                emergency = true;
+            }
         }
     }
 }

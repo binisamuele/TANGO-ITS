@@ -242,3 +242,38 @@ void decelerate(){
         return;
     }
 }
+
+
+
+void brake(){
+    if (currentTime - startTime >= INTERVAL / brakingTime){
+
+        startTime = currentTime;
+        Serial.println(speed);
+        if (!forwardDir) {
+            if (speed >= MAX_SPEED) return;      // se la velocità è al massimo, non fare niente
+
+            speed -= SPEED_GAIN;
+            if (speed < -50) speed -= SPEED_GAIN;
+            if (speed < -100) speed -= SPEED_GAIN;
+
+            driveMotor(DX_FORWARD, SX_FORWARD, speed);
+            return;
+        }
+        if (!forwardDir) {
+            if (speed <= MIN_SPEED) return;      // se la velocità è al minimo, non fare niente
+
+            speed -= SPEED_GAIN;
+            if(speed < -50) speed -= SPEED_GAIN;
+
+            driveMotor(DX_BACKWARD, SX_BACKWARD, speed);
+            return;
+        }
+
+        if (speed > 0) {
+            speed -= SPEED_GAIN;
+            speedControl();
+            driveMotor(DX_FORWARD, SX_FORWARD, speed);
+            return;
+        }
+    }
