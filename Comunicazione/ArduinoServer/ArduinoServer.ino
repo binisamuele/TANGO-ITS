@@ -10,7 +10,9 @@ int emergency = 13;
 // Connection Variables
 int UDP_PORT = 8888;
 EthernetUDP udp;
-IPAddress androidIP = nullptr;
+IPAddress defaultIP(23, 23, 23, 23);
+IPAddress androidIP = defaultIP;
+IPAddress broadcastIP(192, 168, 0, 255);
 
 // Connection checks variables
 unsigned long startTime;
@@ -25,7 +27,7 @@ int arduinoPort = 80;
 
 // Network Settings
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };  // MAC address
-IPAddress ip(192, 168, 1, 4); // IP address
+IPAddress ip(192, 168, 0, 4); // IP address
 
 EthernetClient client;
 EthernetServer server(80);
@@ -49,7 +51,8 @@ void setup() {
     Serial.println("Ethernet cable is now connected!");
   }
 
-  udp.begin(UDP_PORT);
+  Serial.println("Connecting to Android...");
+  udp.begin(8888);
   connectToAndroidApp();    //possible issue: i may have passed variable by value insted of reference
 
   // ----  START ARDUINO SERVER  -----
@@ -57,7 +60,7 @@ void setup() {
   // -- Arduino As A Server AAAS ;) -- 
   server.begin();
 
-  if (server){
+  if (server) {
     /*DEBUG: */Serial.print(">> Server is listening at ");
     /*DEBUG: */Serial.println(Ethernet.localIP());
   } else {
@@ -154,9 +157,11 @@ void loop() {
 }
 
 void connectToAndroidApp(){
-  while (androidIP == nullptr){
+  Serial.println(androidIP);
+  while (androidIP == defaultIP){
     int packetSize = udp.parsePacket();
     if (packetSize) {
+      Serial.println("Datagram Received");
       // Read the packet
       char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
       udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
@@ -167,10 +172,19 @@ void connectToAndroidApp(){
 
       // Storing androidIP address and using it to send Arduino's IP
       androidIP = udp.remoteIP();
-      udp.beginPacket(androidIP, UDP_PORT);
-      udp.write(Ethernet.localIP());
-      udp.endPacket();
-    }
+      //DEBUG START
+      Serial.print("Android IP: ");
+      Serial.println(androidIP);
+      //DEBUG END
+
+      // Send Arduino's IP to Android until it's received
+      do{
+        udp.beginPacket(broadcastIP, UDP_PORT);
+        udp.write("ciao");
+        udp.endPacket();
+        delay(3000);
+      } while (true);
+    } 
   }
 }
 
