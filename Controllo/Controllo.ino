@@ -65,7 +65,6 @@ int speed = 0;
 int movementInt = 0;
 int brakingTime = 0;
 int sensorIndex = 0;
-float distance = 0;
 
 bool emergency = true;
 bool forwardDir = true;
@@ -378,12 +377,19 @@ void brake(){
 // MISURA DISTANZA           
 ///////////////////////////////////////////////////////////////////////////////
 // funzioni per la gestione della distanza
-float measureDistance(int sonarNum) {
-    return (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
-}
-String printDistance(float distance) {  //funzione di debug
+void measureDistance(int sonarNum) {
 
-    if (emergenza == true) Serial.print("\n E ");
+    float distance = (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
+    serial.print(printDistance(distance)); //DEBUG da cancellare
+
+    if (distance < TANGO_SIZE) return;
+
+    if (distance < (EMERGENCY_DISTANCE + TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) emergency = true;
+    
+}
+
+//funzione di debug
+String printDistance(float distance) {  
     
     if (sensorIndex == SENSOR_U_INDEX)  Serial.print("\n S ");
     if (sensorIndex == SENSOR_UR_INDEX) Serial.print("\n S1 ");
@@ -396,6 +402,7 @@ String printDistance(float distance) {  //funzione di debug
         
 }
 
+//founzione per la gestione dei sensori a ultrasuoni
 void distanceManagement() {
 
     // ciclo non bloccante ogni 50 ms
@@ -406,20 +413,11 @@ void distanceManagement() {
 
             if (sensorIndex < SENSORS_NUMBER) {
 
-                distance = measureDistance(sensorIndex);
-                /*DEBUG*/ Serial.print(printDistance(distance));
-
-                if (distance < (EMERGENCY_DISTANCE + TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) {
-
-                    emergency = true;
-                    
-                } else {
-                    sensorIndex++;
-                }
-
+                measureDistance(sensorIndex);
+                sensorIndex++;
+            
             } else {
                 sensorIndex = 0;
-                distance = 0;
             }
         // movimento in avanti
         } else if (forwardDir) {
@@ -428,19 +426,19 @@ void distanceManagement() {
             {
             case SENSOR_U_INDEX:
 
-                distance = measureDistance(sensorIndex);
+                measureDistance(sensorIndex);
                 sensorIndex = SENSOR_UR_INDEX;
                 break;
 
             case SENSOR_UR_INDEX:
 
-                distance = measureDistance(sensorIndex);
+                measureDistance(sensorIndex);
                 sensorIndex = SENSOR_UL_INDEX;
                 break;
             
             case SENSOR_UL_INDEX:
 
-                distance = measureDistance(sensorIndex);
+                measureDistance(sensorIndex);
                 sensorIndex = SENSOR_U_INDEX;
                 break;
             
@@ -448,40 +446,32 @@ void distanceManagement() {
                 sensorIndex = SENSOR_U_INDEX;
                 break;
             }
-
-            if (distance < (EMERGENCY_DISTANCE + TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) {
-                emergency = true;
-            }
-
+        // retromarcia
         } else if (!forwardDir) {
             
             switch (sensorIndex)
             {
             case SENSOR_D_INDEX:
 
-                distance = measureDistance(sensorIndex);
+                measureDistance(sensorIndex);
                 sensorIndex = SENSOR_DR_INDEX;
                 break;
 
             case SENSOR_DR_INDEX:
 
-                distance = measureDistance(sensorIndex);
+                measureDistance(sensorIndex);
                 sensorIndex = SENSOR_DL_INDEX;
                 break;
             
             case SENSOR_DL_INDEX:
 
-                distance = measureDistance(sensorIndex);
+                measureDistance(sensorIndex);
                 sensorIndex = SENSOR_D_INDEX;
                 break;
             
             default:
                 sensorIndex = SENSOR_D_INDEX;
                 break;
-            }
-
-            if (distance < (EMERGENCY_DISTANCE + TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) {
-                emergency = true;
             }
         }
 

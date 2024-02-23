@@ -6,7 +6,11 @@ The project was completed by a team of 12 members.
 
 ## How it works
 The Code is splitted between tree specific topic, each one managed by a different Arduino mega, named specifically: 
-  - Comunicazione(Communication)
+  - Communication: /* LINK AL README SPECIFICO */
+  - Control: /* LINK AL README SPECIFICO */
+  - Sensoris: /* LINK AL README SPECIFICO */
+
+
 
 
 ## How we made it 
@@ -28,10 +32,10 @@ We split in different team:
   - Application Team (Gionata - Francesco)
   - Documentation Team (Samuele Z. - Paola - Laura - Emir - Riccardo)
   - Communication Team (Samuele B.)
-  - Sensors (Daniele - Davide)
+  - Sensors Team (Daniele - Davide)
   - Design Team (Gabriele - Florin - Michael)
   - Control/Emergency Team (Fabrizio - Gennaro - Loris - Federico)
-  - Hardware Team(Lorenzo - Matteo - Edoardo - Diego - Andrea)
+  - Hardware Team (Lorenzo - Matteo - Edoardo - Diego - Andrea)
 
 
 ## Hardware Setup
