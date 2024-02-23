@@ -385,12 +385,14 @@ float measureDistance(int sonarNum) {
 String printDistance(float distance) {  //funzione di debug
 
     if (emergenza == true) Serial.print("\n E ");
+    
     if (sensorIndex == SENSOR_U_INDEX)  Serial.print("\n S ");
     if (sensorIndex == SENSOR_UR_INDEX) Serial.print("\n S1 ");
     if (sensorIndex == SENSOR_UL_INDEX) Serial.print("\n S2 ");
     if (sensorIndex == SENSOR_D_INDEX)  Serial.print("\n S3 ");
     if (sensorIndex == SENSOR_DR_INDEX) Serial.print("\n S4 ");
     if (sensorIndex == SENSOR_DL_INDEX) Serial.print("\n S5 ");
+
     return String("Distanza: " + (String)distance +"cm");
         
 }
