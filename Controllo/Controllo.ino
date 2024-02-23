@@ -484,4 +484,6 @@ void distanceManagement() {
             }
         }
     }
+
+    startTime = currentTime;  //da testare
 }
