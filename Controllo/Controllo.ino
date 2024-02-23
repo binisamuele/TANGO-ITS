@@ -382,15 +382,15 @@ void brake(){
 float measureDistance(int sonarNum) {
     return (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
 }
-String printDistance(float distance) { 
+String printDistance(float distance) {  //funzione di debug
 
-    if(emergenza == true) Serial.print("\n E ");
-    if(sensorIndex == SENSOR_U_INDEX) Serial.print("\n S ");
-    if(sensorIndex == SENSOR_UR_INDEX) Serial.print("\n S1 ");
-    if(sensorIndex == SENSOR_UL_INDEX) Serial.print("\n S2 ");
-    if(sensorIndex == SENSOR_D_INDEX) Serial.print("\n S3 ");
-    if(sensorIndex == SENSOR_DR_INDEX) Serial.print("\n S4 ");
-    if(sensorIndex == SENSOR_DL_INDEX) Serial.print("\n S5 ");
+    if (emergenza == true) Serial.print("\n E ");
+    if (sensorIndex == SENSOR_U_INDEX)  Serial.print("\n S ");
+    if (sensorIndex == SENSOR_UR_INDEX) Serial.print("\n S1 ");
+    if (sensorIndex == SENSOR_UL_INDEX) Serial.print("\n S2 ");
+    if (sensorIndex == SENSOR_D_INDEX)  Serial.print("\n S3 ");
+    if (sensorIndex == SENSOR_DR_INDEX) Serial.print("\n S4 ");
+    if (sensorIndex == SENSOR_DL_INDEX) Serial.print("\n S5 ");
     return String("Distanza: " + (String)distance +"cm");
         
 }
@@ -401,9 +401,9 @@ void distanceManagement() {
     if (currentTime - startTime >= SONAR_INTERVAL){
 
         // rotazione su se stesso
-        if(isRotating) {
+        if (isRotating) {
 
-            if(sensorIndex < SENSORS_NUMBER) {
+            if (sensorIndex < SENSORS_NUMBER) {
 
                 distance = measureDistance(sensorIndex);
                 /*DEBUG*/ Serial.print(printDistance(distance));
@@ -421,7 +421,7 @@ void distanceManagement() {
                 distance = 0;
             }
         // movimento in avanti
-        } else if(forwardDir) {
+        } else if (forwardDir) {
 
             switch (sensorIndex)
             {
@@ -448,11 +448,11 @@ void distanceManagement() {
                 break;
             }
 
-            if(distance < (EMERGENCY_DISTANCE + TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) {
+            if (distance < (EMERGENCY_DISTANCE + TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) {
                 emergency = true;
             }
 
-        } else if(!forwardDir) {
+        } else if (!forwardDir) {
             
             switch (sensorIndex)
             {
@@ -479,9 +479,11 @@ void distanceManagement() {
                 break;
             }
 
-            if(distance < (EMERGENCY_DISTANCE + TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) {
+            if (distance < (EMERGENCY_DISTANCE + TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) {
                 emergency = true;
             }
         }
-    }
+
+        startTime = currentTime;    //set del tempo per ciclo successivo
+    } 
 }
