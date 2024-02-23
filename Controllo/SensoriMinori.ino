@@ -8,7 +8,7 @@ LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
 //constanti gestione millis
 
-const long twoMinutes = 120000;
+const long twoMinutes = 2200;
 bool inizio = true; 
 long t0 = millis();
 
@@ -22,7 +22,7 @@ char batteria[40];
 DHT11 dht11(50);
 
 //pin sensori voltimetri
-const int voltmeter1Pin = A0;
+const int voltmeter1Pin = A8;
 
 //funzioni gestione Temperatura
 int measureTemperature() {
@@ -53,7 +53,10 @@ String printHumidity() {
 float measureVoltmeters() {
   // Misura tensione da voltmeter1Pin
    
-  return analogRead(voltmeter1Pin) /40.92;
+  float letturaValore= analogRead(voltmeter1Pin);
+  // lettura/1023=x/5
+  return letturaValore*5/1023;
+
 }
 
 String printVoltmeters() {
@@ -61,10 +64,16 @@ String printVoltmeters() {
   float voltage1=measureVoltmeters();
   
   //      voltage1/12=x/100
-  voltage1 =(2*100)/(voltage1-10);
+  float test = voltage1; 
+  float voltCarico=28;
+  float voltScarico=23.8;
+  float delta= voltCarico-voltScarico;
+  voltage1 = ((voltage1-voltScarico)*100)/delta;
 
-  sprintf(buffer, "Batteria:%d.%d %%", (int)voltage1, ((int)(voltage1*10) % 10));
-  sprintf(batteria, "Batteria:%d", (int)voltage1 );
+  if(voltage1<0) voltage1=0;
+
+  sprintf(buffer, "Batteria:%d.%d %%     ", (int)voltage1, ((int)(voltage1*10) % 10));
+  sprintf(batteria, "Batteria:%d misura:%d.%d", (int)voltage1,(int)test, ((int)(test*1000) % 1000));
   return buffer;
 }
 

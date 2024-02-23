@@ -59,12 +59,12 @@ const float SPEED_OF_SOUND = 0.0343;
 // VARIABILI
 unsigned long startTime;
 unsigned long currentTime;
+unsigned long commTime;
 
 int speed = 0;
 int movementInt = 0;
 int brakingTime = 0;
 int sensorIndex = 0;
-float distance = 0;
 
 bool emergency = true;
 bool forwardDir = true;
@@ -174,51 +174,49 @@ void emergencyStop() {
 ///////////////////////////////////////////////////////////////////////////////
 // lettura dell'arduino di comunicazione
 void readSerial(){
-    if(Serial1.available()) {
+    if (Serial1.available()) {
         serialString = Serial1.readStringUntil('\r\n');
         digitalWrite(COMMUNICATION_PIN, HIGH);
-        delay(50); // da testare
-        digitalWrite(COMMUNICATION_PIN, LOW);
+        commTime = millis();
         mapping(serialString);
+    }
+
+    if (currentTime - commTime >= INTERVAL){
+        digitalWrite(COMMUNICATION_PIN, LOW);
+        commTime = currentTime;
     }
 }
 
 // mapping dei messaggi
 void mapping(String serialString) {
-    int index = serialString.lastIndexOf(':');
-    int length = serialString.length();
-    String topic = serialString.substring(0, index);
-    String serialVal = serialString.substring(index+1, length);
 
-    if (topic == "movimento") {
-
-        if (serialVal == "up"){
-            movementInt = 1;
-            return;
-        }
-        if (serialVal == "down"){
-            movementInt = 2;
-            return;
-        }
-        if (serialVal == "right"){ // ruotare a destra
-            movementInt = 3;
-            return;
-        }
-        if (serialVal == "left"){ // ruotare a sinistra
-            movementInt = 4;
-            return;
-        }
-        if (serialVal == "emergencyStop"){
-            movementInt = 5;
-            return;
-        }
-        movementInt = 0;
+    if (serialString == "up"){
+        movementInt = 1;
         return;
     }
-
-    if (topic == "velocità"){
-        Serial1.println(speed*5/255);
+    if (serialString == "down"){
+        movementInt = 2;
+        return;
     }
+    if (serialString == "right"){ // ruotare a destra
+        movementInt = 3;
+        return;
+    }
+    if (serialString == "left"){ // ruotare a sinistra
+        movementInt = 4;
+        return;
+    }
+    if (serialString == "emergencyStop"){
+        movementInt = 5;
+        return;
+    }
+    movementInt = 0;
+}
+
+// funzione di invio velocità //da testare
+void sendSpeed(){
+    float spd = speed*5/255;
+    Serial1.println(spd);
 }
 
 // FUNZIONI DI MOVIMENTO          
@@ -379,67 +377,68 @@ void brake(){
 // MISURA DISTANZA           
 ///////////////////////////////////////////////////////////////////////////////
 // funzioni per la gestione della distanza
-float measureDistance(int sonarNum) {
-    return (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
-}
-String printDistance(float distance) { 
+void measureDistance(int sonarNum) {
 
-    if(emergenza == true) Serial.print("\n E ");
-    if(sensorIndex == SENSOR_U_INDEX) Serial.print("\n S ");
-    if(sensorIndex == SENSOR_UR_INDEX) Serial.print("\n S1 ");
-    if(sensorIndex == SENSOR_UL_INDEX) Serial.print("\n S2 ");
-    if(sensorIndex == SENSOR_D_INDEX) Serial.print("\n S3 ");
-    if(sensorIndex == SENSOR_DR_INDEX) Serial.print("\n S4 ");
-    if(sensorIndex == SENSOR_DL_INDEX) Serial.print("\n S5 ");
+    float distance = (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
+    serial.print(printDistance(distance)); //DEBUG da cancellare
+
+    if (distance < TANGO_SIZE) return;
+
+    if (distance < (EMERGENCY_DISTANCE + TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) emergency = true;
+    
+}
+
+//funzione di debug
+String printDistance(float distance) {  
+    
+    if (sensorIndex == SENSOR_U_INDEX)  Serial.print("\n S ");
+    if (sensorIndex == SENSOR_UR_INDEX) Serial.print("\n S1 ");
+    if (sensorIndex == SENSOR_UL_INDEX) Serial.print("\n S2 ");
+    if (sensorIndex == SENSOR_D_INDEX)  Serial.print("\n S3 ");
+    if (sensorIndex == SENSOR_DR_INDEX) Serial.print("\n S4 ");
+    if (sensorIndex == SENSOR_DL_INDEX) Serial.print("\n S5 ");
+
     return String("Distanza: " + (String)distance +"cm");
         
 }
 
+//founzione per la gestione dei sensori a ultrasuoni
 void distanceManagement() {
 
     // ciclo non bloccante ogni 50 ms
     if (currentTime - startTime >= SONAR_INTERVAL){
 
         // rotazione su se stesso
-        if(isRotating) {
+        if (isRotating) {
 
-            if(sensorIndex < SENSORS_NUMBER) {
+            if (sensorIndex < SENSORS_NUMBER) {
 
-                distance = measureDistance(sensorIndex);
-                /*DEBUG*/ Serial.print(printDistance(distance));
-
-                if(distance < (EMERGENCY_DISTANCE + TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) {
-
-                    emergency = true;
-                    
-                } else {
-                    sensorIndex++;
-                }
-
+                measureDistance(sensorIndex);
+                sensorIndex++;
+            
             } else {
                 sensorIndex = 0;
-                distance = 0;
             }
         // movimento in avanti
-        } else if(forwardDir) {
+        } else if (forwardDir) {
 
             switch (sensorIndex)
             {
             case SENSOR_U_INDEX:
 
-                distance = measureDistance(sensorIndex);
+                measureDistance(sensorIndex);
                 sensorIndex = SENSOR_UR_INDEX;
                 break;
 
             case SENSOR_UR_INDEX:
 
-                distance = measureDistance(sensorIndex);
+                measureDistance(sensorIndex);
                 sensorIndex = SENSOR_UL_INDEX;
                 break;
             
             case SENSOR_UL_INDEX:
 
-                distance = measureDistance(sensorIndex);
+                measureDistance(sensorIndex);
                 sensorIndex = SENSOR_U_INDEX;
                 break;
             
@@ -447,30 +446,26 @@ void distanceManagement() {
                 sensorIndex = SENSOR_U_INDEX;
                 break;
             }
-
-            if(distance < (EMERGENCY_DISTANCE + TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) {
-                emergency = true;
-            }
-
-        } else if(!forwardDir) {
+        // retromarcia
+        } else if (!forwardDir) {
             
             switch (sensorIndex)
             {
             case SENSOR_D_INDEX:
 
-                distance = measureDistance(sensorIndex);
+                measureDistance(sensorIndex);
                 sensorIndex = SENSOR_DR_INDEX;
                 break;
 
             case SENSOR_DR_INDEX:
 
-                distance = measureDistance(sensorIndex);
+                measureDistance(sensorIndex);
                 sensorIndex = SENSOR_DL_INDEX;
                 break;
             
             case SENSOR_DL_INDEX:
 
-                distance = measureDistance(sensorIndex);
+                measureDistance(sensorIndex);
                 sensorIndex = SENSOR_D_INDEX;
                 break;
             
@@ -478,12 +473,8 @@ void distanceManagement() {
                 sensorIndex = SENSOR_D_INDEX;
                 break;
             }
-
-            if(distance < (EMERGENCY_DISTANCE + TANGO_SIZE) && (speed > LOW_SPEED || speed < -LOW_SPEED)) {
-                emergency = true;
-            }
         }
-    }
 
-    startTime = currentTime;  //da testare
+        startTime = currentTime;    //set del tempo per ciclo successivo
+    } 
 }
