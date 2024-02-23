@@ -8,7 +8,7 @@ LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
 //constanti gestione millis
 
-const long twoMinutes = 2200;
+const long twoMinutes = 120000;
 bool inizio = true; 
 long t0 = millis();
 
@@ -70,7 +70,10 @@ String printVoltmeters() {
   float delta= voltCarico-voltScarico;
   voltage1 = ((voltage1-voltScarico)*100)/delta;
 
-  if(voltage1<0) voltage1=0;
+ String stato;//stato 3 fasi batteria
+  if (voltage1>90) stato=verde;
+  else if(voltage1>40) stato=giallo;
+  else if(voltage1<0) voltage1=0;
 
   sprintf(buffer, "Batteria:%d.%d %%     ", (int)voltage1, ((int)(voltage1*10) % 10));
   sprintf(batteria, "Batteria:%d misura:%d.%d", (int)voltage1,(int)test, ((int)(test*1000) % 1000));
