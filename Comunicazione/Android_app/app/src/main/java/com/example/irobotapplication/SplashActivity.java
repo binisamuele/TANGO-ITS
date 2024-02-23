@@ -24,7 +24,7 @@ public class SplashActivity extends AppCompatActivity {
 
                 //TODO cambiare MainActivity con LoadingActivity
 
-                startActivity(new Intent(SplashActivity.this, MainActivity.class));
+                startActivity(new Intent(SplashActivity.this, LoadingActivity.class));
                 finish(); // Chiudi la SplashActivity per evitare di tornarci con il tasto indietro
             }
         }, 3000);
