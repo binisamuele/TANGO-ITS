@@ -273,20 +273,20 @@ public class ControllerFragment extends Fragment {
     //TODO (bisogna richiamare il metodo in modo continuo per aggiornare la velocità.
     // la si chiama tramite i button forward e backwards o ????)
 
-    private void updateSpeed(int currentSpeed) {
 
+    private void updateSpeed(double currentSpeed) {
         //Aggiornamento della velocità
         TextView speedTextView = requireView().findViewById(R.id.Speed);
-        speedTextView.setText(currentSpeed);
+        speedTextView.setText(Double.toString(currentSpeed));
 
         //Cambio colori in base alla velocità
         if(currentSpeed == 0){
             speedTextView.setTextColor(getResources().getColor(R.color.Panna));
         }
-        else if (currentSpeed > 0 && currentSpeed <= 15) {
+        else if (currentSpeed > 0 && currentSpeed <= 2) {
             speedTextView.setTextColor(getResources().getColor(R.color.Green));
         }
-        else if (currentSpeed > 15 && currentSpeed <= 35) {
+        else if (currentSpeed > 2 && currentSpeed <= 4) {
             speedTextView.setTextColor(getResources().getColor(R.color.Yellow));
         }
         else {
