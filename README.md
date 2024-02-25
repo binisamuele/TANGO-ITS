@@ -6,7 +6,7 @@ The project was completed by a team of 12 members.
 
 ## How it works
 The Code is splitted between tree specific topic, each one managed by a different Arduino mega, named specifically: 
-  - Communication: [Link to Subdirectory README](Comunuicazione/README.md)
+  - Communication: [Link to Subdirectory README](Comunicazione/README.md)
   - Control: /* LINK AL README SPECIFICO */
   - Sensoris: /* LINK AL README SPECIFICO */
 
