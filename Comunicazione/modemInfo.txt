@@ -1,4 +1,4 @@
-Nome rete (SSID): InfostradaWiFi-50ba1
-
-
+SSID: InfostradaWiFi-50ba1
 Password (WPA/WPA2): 6b05b15fd23f2
+
+Router IP: 192.168.0.1
