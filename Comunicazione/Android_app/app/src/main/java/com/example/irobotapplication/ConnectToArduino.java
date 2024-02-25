@@ -9,52 +9,87 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
 public class ConnectToArduino {
-
-    private static final int SEND_PORT = 12345; // Change to your desired port for sending
-    private static final int RECEIVE_PORT = 8787; // Change to your desired port for receiving
+    private static final int RECEIVE_PORT = 8989;
+    private static final int SEND_PORT = 7979;
     private static final String BROADCAST_ADDRESS = "192.168.1.255"; // Broadcast address
 
     public void startBroadcasting() {
         new Thread(() -> {
+            DatagramSocket socket = null;
+            int threadFrequency;
             try {
-                DatagramSocket socket = new DatagramSocket();
                 while (true) {
-                    String message = "Hello";
-                    DatagramPacket packet = new DatagramPacket(message.getBytes(), message.length(),
-                            InetAddress.getByName(BROADCAST_ADDRESS), SEND_PORT);
+                    threadFrequency = 1000;
+                    socket = new DatagramSocket();
+                    String message = "Android IP";
+                    if (!GlobalVars.arduinoIP.equals("")) {
+                        message = "ok";   // Notify arduino that its IP has been received
+                        threadFrequency = 450;
+                    }
+                    DatagramPacket packet = new DatagramPacket(
+                        message.getBytes(),
+                        message.length(),
+                        InetAddress.getByName(BROADCAST_ADDRESS),
+                        SEND_PORT
+                    );
                     socket.send(packet);
-                    Thread.sleep(1000); // adjust the interval as needed
+                    Thread.sleep(threadFrequency);
+                    socket.close();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                if (socket != null) {
+                    socket.close();
+                }
             }
         }).start();
     }
 
     public void startListening() {
         new Thread(() -> {
+            int retries = 0;
             while (true){
-            try {
-                DatagramSocket socket = new DatagramSocket(8989);
-                socket.setSoTimeout(50000);
-                byte[] buffer = new byte[1024];
-                DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                socket.receive(packet);
-                String received = new String(packet.getData(), 0, packet.getLength());
-                Log.d("ConnectToArduino","Received: " + received);
-                GlobalVars.arduinoIP = received;
-                socket.close();
-                break;
-            } catch (Exception e) {
-                if (e instanceof SocketTimeoutException) {
-                    Log.d("ConnectToArduino", "Timeout occurred");
-                } else if (e instanceof SocketException) {
-                    Log.d("ConnectToArduino", "SocketException occurred");
-                } else {
-                    e.printStackTrace();
+                DatagramSocket socket = null;
+                if (retries > 5) {
+                    GlobalVars.isArduinoConnected = false;
+                    GlobalVars.arduinoIP = "";
+                    retries = 0;
                 }
+                try {
+                    socket = new DatagramSocket(RECEIVE_PORT);
+                    socket.setSoTimeout(1000);
+                    byte[] buffer = new byte[1024];
+                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                    socket.receive(packet);
+                    String received = new String(packet.getData(), 0, packet.getLength());
+                    //get the IP address of the arduino
+                    GlobalVars.arduinoIP = packet.getAddress().getHostAddress();
+                    if (received.contains("ok")){
+                        GlobalVars.isArduinoConnected = true;
+                    }
+                    if (GlobalVars.isArduinoConnected && !GlobalVars.arduinoIP.equals("") && !received.contains("ok")) {
+                        retries++;
+                    }
+                    socket.close();
+                } catch (Exception e) {
+                    if (e instanceof SocketTimeoutException) {
+                        Log.d("ConnectToArduino", "Timeout occurred");
+                        if (GlobalVars.isArduinoConnected && !GlobalVars.arduinoIP.equals("")) {
+                            retries++;
+                        }
+                    } else if (e instanceof SocketException) {
+                        Log.d("ConnectToArduino", "SocketException occurred");
+                    } else {
+                        e.printStackTrace();
+                    }
 
-            }
+                }
+                finally {
+                    if (socket != null) {
+                        socket.close();
+                    }
+                }
         }
         }).start();
     }

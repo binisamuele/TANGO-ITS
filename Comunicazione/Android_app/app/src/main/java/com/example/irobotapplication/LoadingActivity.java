@@ -27,7 +27,14 @@ public class LoadingActivity extends AppCompatActivity {
             @Override
             public void run() {
                 connect.startListening();
-                while (Objects.equals(GlobalVars.arduinoIP, ""));
+                connect.startBroadcasting();
+                while (Objects.equals(GlobalVars.arduinoIP, "") || !GlobalVars.isArduinoConnected) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
                 // Una volta che la connessione è stabilita, avvia MainActivity
                 startActivity(new Intent(LoadingActivity.this, MainActivity.class));
                 finish(); // Chiudi la LoadingActivity per evitare di tornarci con il tasto indietro
