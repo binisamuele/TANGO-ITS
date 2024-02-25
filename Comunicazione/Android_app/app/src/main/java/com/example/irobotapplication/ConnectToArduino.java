@@ -12,7 +12,7 @@ public class ConnectToArduino {
 
     private static final int SEND_PORT = 12345; // Change to your desired port for sending
     private static final int RECEIVE_PORT = 8787; // Change to your desired port for receiving
-    private static final String BROADCAST_ADDRESS = "255.255.255.255"; // Broadcast address
+    private static final String BROADCAST_ADDRESS = "192.168.1.255"; // Broadcast address
 
     public void startBroadcasting() {
         new Thread(() -> {
@@ -35,8 +35,8 @@ public class ConnectToArduino {
         new Thread(() -> {
             while (true){
             try {
-                DatagramSocket socket = new DatagramSocket(8787);
-                socket.setSoTimeout(30000);
+                DatagramSocket socket = new DatagramSocket(8989);
+                socket.setSoTimeout(50000);
                 byte[] buffer = new byte[1024];
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);
@@ -44,6 +44,7 @@ public class ConnectToArduino {
                 Log.d("ConnectToArduino","Received: " + received);
                 GlobalVars.arduinoIP = received;
                 socket.close();
+                break;
             } catch (Exception e) {
                 if (e instanceof SocketTimeoutException) {
                     Log.d("ConnectToArduino", "Timeout occurred");
