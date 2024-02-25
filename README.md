@@ -11,7 +11,7 @@ The Code is splitted between tree specific topic, each one managed by a differen
 
 [![Static Badge](https://img.shields.io/badge/Control-%23165e00?style=for-the-badge)](Controllo/README.md)
 
-[![Static Badge](https://img.shields.io/badge/Sensors-%23967041?style=for-the-badge)](Sensors/README.md)
+[![Static Badge](https://img.shields.io/badge/Sensors-%23967041?style=for-the-badge)](Sensori/README.md)
 
 
 
