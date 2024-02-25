@@ -70,6 +70,11 @@ public class ControllerFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        /* Test UpdateSpeed
+        float currentSpeed = 2.5f;
+        updateSpeed(currentSpeed);
+         */
+
         // Nasconde la toolbar nell'activity associata al fragment
         AppCompatActivity activity = (AppCompatActivity) getActivity();
         if (activity != null) {
@@ -273,24 +278,23 @@ public class ControllerFragment extends Fragment {
     //TODO (bisogna richiamare il metodo in modo continuo per aggiornare la velocità.
     // la si chiama tramite i button forward e backwards o ????)
 
-    private void updateSpeed(int currentSpeed) {
 
-        //Aggiornamento della velocità
+    private void updateSpeed(float currentSpeed) {
+        
+        // Aggiornamento della velocità
         TextView speedTextView = requireView().findViewById(R.id.Speed);
-        speedTextView.setText(currentSpeed);
+        speedTextView.setText(Float.toString(currentSpeed));
 
-        //Cambio colori in base alla velocità
-        if(currentSpeed == 0){
+        // Cambio colori in base alla velocità
+        if (currentSpeed == 0) {
             speedTextView.setTextColor(getResources().getColor(R.color.Panna));
-        }
-        else if (currentSpeed > 0 && currentSpeed <= 15) {
+        } else if (currentSpeed > 0 && currentSpeed <= 2) {
             speedTextView.setTextColor(getResources().getColor(R.color.Green));
-        }
-        else if (currentSpeed > 15 && currentSpeed <= 35) {
+        } else if (currentSpeed > 2 && currentSpeed <= 4) {
             speedTextView.setTextColor(getResources().getColor(R.color.Yellow));
-        }
-        else {
+        } else {
             speedTextView.setTextColor(getResources().getColor(R.color.red));
         }
     }
+
 }
