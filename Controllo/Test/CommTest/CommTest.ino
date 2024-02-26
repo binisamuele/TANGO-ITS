@@ -7,7 +7,7 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  if(Serial1.available()) {
+  if(Serial1) {
     Serial1.print("up");
     Serial.print("up");
     delay(5000);
