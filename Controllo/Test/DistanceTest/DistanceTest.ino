@@ -132,8 +132,13 @@ void loop() {
 
     currentTime = millis();
 
-    //measureDistance(0);
-    measureDistance(1);
+    Serial.print("\n 0 ");
+    measureDistance(0);
+    delay(1000);
+    //Serial.print("\n 1 ");
+    //measureDistance(1);
+    //delay(1000);
+    Serial.print("\n");
     /*
     for (int i = 0; i < 1; i++)
     {
@@ -141,7 +146,7 @@ void loop() {
     }
     */
     //distanceManagement();
-    delay(1000);
+    
 }
 
 // MISURA DISTANZA           
