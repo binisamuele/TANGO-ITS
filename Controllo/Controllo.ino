@@ -83,6 +83,7 @@ NewPing sonar[SENSORS_NUMBER] = {
 
 
 void setup() {
+    Serial.begin(9600);     // DEBUG
     Serial1.begin(9600);    // collegamento all'arduino di comunicazione
 
     startTime = millis();
@@ -133,7 +134,7 @@ void setup() {
 void loop() {
     currentTime = millis();
 
-    if (!Serial1 || emergency || digitalRead(BUTTONS) || digitalRead(BUMPER1) || digitalRead(BUMPER2) || digitalRead(ARDUINO_EMERGENCIES) || digitalRead(KEY)) {
+    if (!Serial1 || emergency || digitalRead(KEY) || digitalRead(BUTTONS)){// || digitalRead(BUMPER1) || digitalRead(BUMPER2) || digitalRead(ARDUINO_EMERGENCIES)) {
         emergencyState();
         return;
     }
@@ -152,10 +153,14 @@ void emergencyState() {
         emergencyStop();
     }
 
+    Serial.print("Emergenza"); // DEBUG
+
     while (emergency || !digitalRead(KEY))      // rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
     {
         if (!digitalRead(KEY)) emergency = false;
     }
+
+    Serial.print("Fine Emergenza"); // DEBUG
 }
 
 // arresto di emergenza del motore
