@@ -80,11 +80,12 @@ NewPing sonar[SENSORS_NUMBER] = {
     NewPing(TRIG_PIN_D, ECHO_PIN_D, MAX_DISTANCE),      // sensore posteriore 
     NewPing(TRIG_PIN_DR, ECHO_PIN_DR, MAX_DISTANCE),    // sensore posteriore destro
     NewPing(TRIG_PIN_DL, ECHO_PIN_DL, MAX_DISTANCE)     // sensore posteriore sinistro
-}
+};
 
 
 void setup() {
-    Serial1.begin(9600);    // collegamento all'arduino di comunicazione
+    Serial.begin(9600);
+    //Serial1.begin(9600);    // collegamento all'arduino di comunicazione
 
     startTime = millis();
     /*
@@ -131,8 +132,8 @@ void loop() {
 
     currentTime = millis();
 
-    measureDistance(0);
-    //measureDistance(1);
+    //measureDistance(0);
+    measureDistance(1);
     /*
     for (int i = 0; i < 1; i++)
     {
@@ -143,158 +144,13 @@ void loop() {
     delay(1000);
 }
 
-// funzione stato emergenza
-void emergencyState() {
-    if (!emergency){            // ferma la macchina e manda un messaggio di emergenza agli altri arduino
-        emergency = true;
-        emergencyStop();
-    }
-
-    while (emergency || !digitalRead(key))      		// rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
-    {
-        if (!digitalRead(key)){
-            emergency = false;
-        }
-    }
-}
-
-// segnale di arresto del motore (potrebbe essere non necessaria)
-void emergencyStop() {
-    stopMotor();
-    resetVariables();
-}
-
-// reset delle variabili
-void resetVariables() {
-    speed = 0;
-    movementInt = 0;
-}
-
-// funzione con le opzioni di movimento
-void movement(){
-    switch (movementInt) {
-        // andare avanti
-        case 1:
-            rotationCheck();
-
-            if (speed < 0) {                                   // se la velocità era negativa, rallentiamo i motori
-                decelerate();
-                break;
-            }
-
-            accelerate();
-            break;
-        // andare indietro
-        case 2:
-            rotationCheck();
-
-            if (speed > 0) {                                   // se la velocità era positiva, rallentiamo i motori
-                decelerate();
-                break;
-            }
-
-            accelerate();
-            break;
-		// frenata
-        case 5:
-            rotationCheck();
-
-            decelerate();
-            break;
-        // nessun comando di movimento
-        default:
-            rotationCheck();
-
-            decelerate();
-            break;
-    }
-}
-
-// controllo della velocità vicino a zero
-void speedControl(){
-    if (speed < speedGain && speed > -speedGain) speed = 0;
-}
-
-// controllo della rotazione
-void rotationCheck(){
-    if (isRotating){
-        stopMotor();
-        isRotating = false;
-    }
-}
-
-// funzione per fermare i motori
-void stopMotor(){
-    analogWrite(dxForward, 0);
-    analogWrite(dxBackward, 0);
-
-    analogWrite(sxForward, 0);
-    analogWrite(sxBackward, 0);
-
-    currentTime = startTime;
-}
-
-// funzione per muoversi avanti o indietro
-void driveMotor(int motor1, int motor2, int spd) {
-    if (spd < 0) spd = -spd;
-
-    analogWrite(motor1, spd);
-    analogWrite(motor2, spd);
-}
-
-// funzione per accelerare
-void accelerate(){
-    if (currentTime - startTime >= interval){
-
-        startTime = currentTime;
-        Serial.println(speed);
-        if (speed >= 0) {
-            if (speed >= maxSpeed) return;      // se la velocità è al massimo, non fare niente
-
-            speed += speedGain;
-            driveMotor(dxForward, sxForward, speed);
-            return;
-        }
-
-        if (speed <= 0) {
-            if (speed <= minSpeed) return;      // se la velocità è al minimo, non fare niente
-
-            speed -= speedGain;
-            driveMotor(dxBackward, sxBackward, speed);
-            return;
-        }
-    }
-}
-
-// funzione per decelerare e lentamente fermarsi
-void decelerate(){
-    if (currentTime - startTime >= interval){
-
-        startTime = currentTime;
-        Serial.println(speed);
-        if (speed < 0) {
-            speed += speedGain;
-            speedControl();
-            driveMotor(dxBackward, sxBackward, speed);
-            return;
-        }
-
-        if (speed > 0) {
-            speed -= speedGain;
-            speedControl();
-            driveMotor(dxForward, sxForward, speed);
-            return;
-        }
-    }
-}
-
 // MISURA DISTANZA           
 ///////////////////////////////////////////////////////////////////////////////
 // funzioni per la gestione della distanza
 void measureDistance(int sonarNum) {
 
     float distance = (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
-    serial.print(printDistance(distance)); //DEBUG da cancellare
+    Serial.print(printDistance(distance)); //DEBUG da cancellare
 
     if (distance < TANGO_SIZE) return;
 
@@ -305,12 +161,12 @@ void measureDistance(int sonarNum) {
 //funzione di debug
 String printDistance(float distance) {  
     
-    if (sensorIndex == SENSOR_U_INDEX)  Serial.print("\n S ");
-    if (sensorIndex == SENSOR_UR_INDEX) Serial.print("\n S1 ");
-    if (sensorIndex == SENSOR_UL_INDEX) Serial.print("\n S2 ");
-    if (sensorIndex == SENSOR_D_INDEX)  Serial.print("\n S3 ");
-    if (sensorIndex == SENSOR_DR_INDEX) Serial.print("\n S4 ");
-    if (sensorIndex == SENSOR_DL_INDEX) Serial.print("\n S5 ");
+    if (sensorIndex == SENSOR_U_INDEX)  Serial.print("\n U ");
+    if (sensorIndex == SENSOR_UR_INDEX) Serial.print("\n UR ");
+    if (sensorIndex == SENSOR_UL_INDEX) Serial.print("\n UL ");
+    if (sensorIndex == SENSOR_D_INDEX)  Serial.print("\n D ");
+    if (sensorIndex == SENSOR_DR_INDEX) Serial.print("\n DR ");
+    if (sensorIndex == SENSOR_DL_INDEX) Serial.print("\n DL ");
 
     return String("Distanza: " + (String)distance +"cm");
         
