@@ -140,6 +140,7 @@ void loop() {
     }
     */
     //distanceManagement();
+    delay(1000);
 }
 
 // funzione stato emergenza
