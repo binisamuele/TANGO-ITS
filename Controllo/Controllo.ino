@@ -117,7 +117,13 @@ void setup() {
     pinMode(ECHO_PIN_UL, INPUT);
 
     pinMode(TRIG_PIN_D, OUTPUT);
-    pinMode(ECHO_PIN_D, INPUT);
+    pinMode(ECHO_PIN_D, INPUT);    
+    
+    pinMode(TRIG_PIN_DR, OUTPUT);
+    pinMode(ECHO_PIN_DR, INPUT);
+    
+    pinMode(TRIG_PIN_DL, OUTPUT);
+    pinMode(ECHO_PIN_DL, INPUT);
 }
 
 
