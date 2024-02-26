@@ -4,14 +4,13 @@
 const int DX_FORWARD = 5, DX_BACKWARD = 4, DX_FORWARD_EN = 27, DX_BACKWARD_EN = 26;   // Motore DX
 const int SX_FORWARD = 7, SX_BACKWARD = 6, SX_FORWARD_EN = 22, SX_BACKWARD_EN = 23;   // Motore SX
 
-const int BUMPERS = 3;                  // pin dei bumpers
+const int BUMPER1 = 52;                 // pin dei bumpers
+const int BUMPER2 = 53;                 // pin dei bumpers
 const int BUTTONS = 2;                  // pin dei bottoni
-const int EMERGENCY_PIN;                // pin di emergenza
-const int ARDUINO_EMERGENCIES = 8;      // pin per le emergenze degli altri Arduino
+const int EMERGENCY_PIN = 12;           // pin di emergenza
+const int ARDUINO_EMERGENCIES = 13;     // pin per le emergenze degli altri Arduino
 
 const int KEY = 9;                      // pin della chiave
-const int START_FROM_APP;               // pin collegato all'app per l'accensione
-const int COMMUNICATION_PIN;            // pin per la rispota ai messaggi
 
 // SENSORI PROSSIMITA'
 // frontale
@@ -48,8 +47,8 @@ const int SONAR_INTERVAL = 50;
 
 const int MAX_SPEED = 150;
 const int MIN_SPEED = -100;
-const int SPEED_GAIN = 2;
-const int LOW_SPEED = 35;   //da testare
+const int SPEED_GAIN = 10;
+const int LOW_SPEED = 50;
 
 const int TANGO_SIZE = 20;
 const int EMERGENCY_DISTANCE = 40;
@@ -84,7 +83,6 @@ NewPing sonar[SENSORS_NUMBER] = {
 
 
 void setup() {
-    //Serial.begin(9600);
     Serial1.begin(9600);    // collegamento all'arduino di comunicazione
 
     startTime = millis();
@@ -99,13 +97,17 @@ void setup() {
     pinMode(SX_FORWARD_EN, OUTPUT);
     pinMode(SX_BACKWARD_EN, OUTPUT);
 
-    pinMode(EMERGENCY_PIN, OUTPUT);
-    pinMode(COMMUNICATION_PIN, OUTPUT);
+    digitalWrite(DX_FORWARD_EN, HIGH);
+    digitalWrite(SX_FORWARD_EN, HIGH);
+    digitalWrite(DX_BACKWARD_EN, HIGH);
+    digitalWrite(SX_BACKWARD_EN, HIGH);
 
+    pinMode(EMERGENCY_PIN, OUTPUT);
     pinMode(KEY, INPUT_PULLUP);
 
     pinMode(BUTTONS, INPUT_PULLUP);         // emergenza bottoni
-    pinMode(BUMPERS, INPUT_PULLUP);         // emergenza bumper
+    pinMode(BUMPER1, INPUT_PULLUP);         // emergenza bumper
+    pinMode(BUMPER2, INPUT_PULLUP);         // emergenza bumper
     pinMode(ARDUINO_EMERGENCIES, INPUT);    // emergenza arduino
 
     pinMode(TRIG_PIN_U, OUTPUT);
@@ -131,13 +133,13 @@ void setup() {
 void loop() {
     currentTime = millis();
 
-    if (!Serial1 || emergency || digitalRead(BUTTONS) || digitalRead(BUMPERS) || digitalRead(ARDUINO_EMERGENCIES) || digitalRead(KEY)) {
+    if (!Serial1 || emergency || digitalRead(BUTTONS) || digitalRead(BUMPER1) || digitalRead(BUMPER2) || digitalRead(ARDUINO_EMERGENCIES) || digitalRead(KEY)) {
         emergencyState();
         return;
     }
 
     readSerial();
-    distanceManagement();
+    // distanceManagement();    da testare
     movement();
 }
 
@@ -148,26 +150,13 @@ void emergencyState() {
     if (!emergency){            // ferma la macchina e manda un messaggio di emergenza agli altri arduino
         emergency = true;
         emergencyStop();
-        emergencyComm();        // segnale di emergenza agli altri arduino
     }
 
     while (emergency || !digitalRead(KEY))      // rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
     {
-        if (!digitalRead(KEY) || digitalRead(START_FROM_APP)) emergency = false;
+        if (!digitalRead(KEY)) emergency = false;
     }
-
-    emergencyComm();            // segnale di fine emergenza agli altri arduino
 }
-
-// funzione di comunicazioni di emergenza
-void emergencyComm(){
-    if (emergency){
-        digitalWrite(EMERGENCY_PIN, HIGH);
-        return;
-    }
-
-    digitalWrite(EMERGENCY_PIN, LOW);
-}   
 
 // arresto di emergenza del motore
 void emergencyStop() {
@@ -183,15 +172,7 @@ void emergencyStop() {
 void readSerial(){
     if (Serial1.available()) {
         serialString = Serial1.readStringUntil('\r\n');
-        digitalWrite(COMMUNICATION_PIN, HIGH);
-        commTime = millis();
-        mapping(serialString);   
-        Serial1.flush();        // da testare
-    }
-
-    if (currentTime - commTime >= INTERVAL){
-        digitalWrite(COMMUNICATION_PIN, LOW);
-        commTime = currentTime;
+        mapping(serialString);
     }
 }
 
@@ -214,7 +195,7 @@ void mapping(String serialString) {
         movementInt = 4;
         return;
     }
-    if (serialString == "emergencyStop"){
+    if (serialString == "brake"){
         movementInt = 5;
         return;
     }
@@ -341,8 +322,9 @@ void accelerate(){
             if (speed >= MAX_SPEED) return;      // se la velocità è al massimo, non fare niente
 
             speed += SPEED_GAIN;
-            if (speed > 50) speed += SPEED_GAIN;
-            if (speed > 100) speed += SPEED_GAIN;
+            if (speed > 30) speed += SPEED_GAIN;
+            if (speed > 80) speed += SPEED_GAIN;
+            if (speed > MAX_SPEED) speed -= SPEED_GAIN;
 
             driveMotor(DX_FORWARD, SX_FORWARD, speed);
             return;
@@ -352,7 +334,8 @@ void accelerate(){
             if (speed <= MIN_SPEED) return;      // se la velocità è al minimo, non fare niente
 
             speed -= SPEED_GAIN;
-            if(speed < -50) speed -= SPEED_GAIN;
+            if(speed < -30) speed -= SPEED_GAIN;
+            if(speed < MIN_SPEED) speed += SPEED_GAIN;
 
             driveMotor(DX_BACKWARD, SX_BACKWARD, speed);
             return;
@@ -388,7 +371,7 @@ void brake(){
 void measureDistance(int sonarNum) {
 
     float distance = (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
-    Serial.print(printDistance(distance)); //DEBUG da cancellare
+    // Serial.print(printDistance(distance)); DEBUG da cancellare
 
     if (distance < TANGO_SIZE) return;
 
