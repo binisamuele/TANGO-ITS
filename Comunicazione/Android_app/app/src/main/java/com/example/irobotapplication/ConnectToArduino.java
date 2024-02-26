@@ -24,7 +24,7 @@ public class ConnectToArduino {
                     String message = "Android IP";
                     if (!GlobalVars.arduinoIP.equals("")) {
                         message = "ok";   // Notify arduino that its IP has been received
-                        threadFrequency = 450;
+                        threadFrequency = 4500;
                     }
                     DatagramPacket packet = new DatagramPacket(
                         message.getBytes(),
@@ -49,24 +49,29 @@ public class ConnectToArduino {
     public void startListening() {
         new Thread(() -> {
             int retries = 0;
+            DatagramSocket socket = null;
             while (true){
-                DatagramSocket socket = null;
-                if (retries > 5) {
+                if (retries > 4) {
                     GlobalVars.isArduinoConnected = false;
                     GlobalVars.arduinoIP = "";
                     retries = 0;
                 }
                 try {
+                    if (socket != null){
+                        socket.close();
+                    }
                     socket = new DatagramSocket(RECEIVE_PORT);
-                    socket.setSoTimeout(1000);
+                    socket.setSoTimeout(2500);
                     byte[] buffer = new byte[1024];
                     DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                     socket.receive(packet);
                     String received = new String(packet.getData(), 0, packet.getLength());
+                    Log.d("ConnectToArduino", received);
                     //get the IP address of the arduino
                     GlobalVars.arduinoIP = packet.getAddress().getHostAddress();
                     if (received.contains("ok")){
                         GlobalVars.isArduinoConnected = true;
+                        retries = 0;
                     }
                     if (GlobalVars.isArduinoConnected && !GlobalVars.arduinoIP.equals("") && !received.contains("ok")) {
                         retries++;
@@ -79,7 +84,7 @@ public class ConnectToArduino {
                             retries++;
                         }
                     } else if (e instanceof SocketException) {
-                        Log.d("ConnectToArduino", "SocketException occurred");
+
                     } else {
                         e.printStackTrace();
                     }
