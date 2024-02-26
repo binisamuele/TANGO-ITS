@@ -8,7 +8,7 @@ LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
 //constanti gestione millis
 
-const long twoMinutes = 2200;
+const long twoMinutes = 4200;
 bool inizio = true; 
 long t0 = millis();
 
@@ -54,8 +54,10 @@ float measureVoltmeters() {
   // Misura tensione da voltmeter1Pin
    
   float letturaValore= analogRead(voltmeter1Pin);
-  // lettura/1023=x/5
-  return letturaValore*5/1023;
+  //vecchio versione lettura/1023=x/28
+  //nuova vers lettura/1023=x/28
+  return (letturaValore*28/1023) +5.7;
+
 
 }
 
@@ -63,14 +65,17 @@ String printVoltmeters() {
   char buffer[40];
   float voltage1=measureVoltmeters();
   
-  //      voltage1/12=x/100
+  // calcolo in percentuale solo per valori intorno al valore nominale 
   float test = voltage1; 
   float voltCarico=28;
   float voltScarico=23.8;
   float delta= voltCarico-voltScarico;
   voltage1 = ((voltage1-voltScarico)*100)/delta;
 
-  if(voltage1<0) voltage1=0;
+//  String stato;//stato 3 fasi batteria
+//   if (voltage1>90) stato=verde;
+//   else if(voltage1>40) stato=giallo;
+//  if(voltage1<0) voltage1=0;
 
   sprintf(buffer, "Batteria:%d.%d %%     ", (int)voltage1, ((int)(voltage1*10) % 10));
   sprintf(batteria, "Batteria:%d misura:%d.%d", (int)voltage1,(int)test, ((int)(test*1000) % 1000));
