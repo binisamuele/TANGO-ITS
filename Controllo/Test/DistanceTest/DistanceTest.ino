@@ -15,30 +15,30 @@ const int COMMUNICATION_PIN;            // pin per la rispota ai messaggi
 
 // SENSORI PROSSIMITA'
 // frontale
-const int TRIG_PIN_U = 0;     
-const int ECHO_PIN_U = 1;
+const int TRIG_PIN_U = 32;     
+const int ECHO_PIN_U = 33;
 const int SENSOR_U_INDEX = 0;     
 // frontale destro
-const int TRIG_PIN_UR = 2;
-const int ECHO_PIN_UR = 3;
+const int TRIG_PIN_UR = 34;
+const int ECHO_PIN_UR = 35;
 const int SENSOR_UR_INDEX = 1;    
 // frontale sinistro
-const int TRIG_PIN_UL = 4;  
-const int ECHO_PIN_UL = 5;
+const int TRIG_PIN_UL = 36;  
+const int ECHO_PIN_UL = 37;
 const int SENSOR_UL_INDEX = 2;     
 
 // posteriore
-const int TRIG_PIN_D = 6;
-const int ECHO_PIN_D = 7;
+const int TRIG_PIN_D = 38;
+const int ECHO_PIN_D = 39;
 const int SENSOR_D_INDEX = 3;    
 // posteriore destro
-const int TRIG_PIN_DR = 8;
-const int ECHO_PIN_DR = 9;
+const int TRIG_PIN_DR = 40;
+const int ECHO_PIN_DR = 41;
 const int SENSOR_DR_INDEX = 4;    
 // posteriore sinistro
-const int TRIG_PIN_DL = 10;
-const int ECHO_PIN_DL = 11;
-const int SENSOR_DL_INDEX = 5;    
+const int TRIG_PIN_DL = 42;
+const int ECHO_PIN_DL = 43;
+const int SENSOR_DL_INDEX = 5;        
 
 // COSTANTI
 const int SENSORS_NUMBER = 6;
@@ -130,21 +130,16 @@ void setup() {
 void loop() {
 
     currentTime = millis();
-    
-    //if(!digitalRead(buttons))toDelete();
-	// controllo della comunicazione seriale (anche gli altri arduino devono fare il controllo del seriale)
-	if (emergency) {
-        emergencyState();
-        return;
+
+    measureDistance(0);
+    //measureDistance(1);
+    /*
+    for (int i = 0; i < 1; i++)
+    {
+        measureDistance(i);
     }
-
-	if (speed == 0){
-        movementInt = 0;
-    }
-
-    distanceManagement();
-   
-
+    */
+    //distanceManagement();
 }
 
 // funzione stato emergenza
