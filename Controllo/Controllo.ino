@@ -80,10 +80,11 @@ NewPing sonar[SENSORS_NUMBER] = {
     NewPing(TRIG_PIN_D, ECHO_PIN_D, MAX_DISTANCE),      // sensore posteriore 
     NewPing(TRIG_PIN_DR, ECHO_PIN_DR, MAX_DISTANCE),    // sensore posteriore destro
     NewPing(TRIG_PIN_DL, ECHO_PIN_DL, MAX_DISTANCE)     // sensore posteriore sinistro
-}
+};
 
 
 void setup() {
+    //Serial.begin(9600);
     Serial1.begin(9600);    // collegamento all'arduino di comunicazione
 
     startTime = millis();
@@ -117,7 +118,13 @@ void setup() {
     pinMode(ECHO_PIN_UL, INPUT);
 
     pinMode(TRIG_PIN_D, OUTPUT);
-    pinMode(ECHO_PIN_D, INPUT);
+    pinMode(ECHO_PIN_D, INPUT);    
+
+    pinMode(TRIG_PIN_DR, OUTPUT);
+    pinMode(ECHO_PIN_DR, INPUT);
+    
+    pinMode(TRIG_PIN_DL, OUTPUT);
+    pinMode(ECHO_PIN_DL, INPUT);
 }
 
 
@@ -178,7 +185,8 @@ void readSerial(){
         serialString = Serial1.readStringUntil('\r\n');
         digitalWrite(COMMUNICATION_PIN, HIGH);
         commTime = millis();
-        mapping(serialString);
+        mapping(serialString);   
+        Serial1.flush();        // da testare
     }
 
     if (currentTime - commTime >= INTERVAL){
@@ -380,7 +388,7 @@ void brake(){
 void measureDistance(int sonarNum) {
 
     float distance = (sonar[sonarNum].ping() / 2) * SPEED_OF_SOUND;
-    serial.print(printDistance(distance)); //DEBUG da cancellare
+    Serial.print(printDistance(distance)); //DEBUG da cancellare
 
     if (distance < TANGO_SIZE) return;
 
@@ -391,12 +399,12 @@ void measureDistance(int sonarNum) {
 //funzione di debug
 String printDistance(float distance) {  
     
-    if (sensorIndex == SENSOR_U_INDEX)  Serial.print("\n S ");
-    if (sensorIndex == SENSOR_UR_INDEX) Serial.print("\n S1 ");
-    if (sensorIndex == SENSOR_UL_INDEX) Serial.print("\n S2 ");
-    if (sensorIndex == SENSOR_D_INDEX)  Serial.print("\n S3 ");
-    if (sensorIndex == SENSOR_DR_INDEX) Serial.print("\n S4 ");
-    if (sensorIndex == SENSOR_DL_INDEX) Serial.print("\n S5 ");
+    if (sensorIndex == SENSOR_U_INDEX)  Serial.print("\n U ");
+    if (sensorIndex == SENSOR_UR_INDEX) Serial.print("\n UR ");
+    if (sensorIndex == SENSOR_UL_INDEX) Serial.print("\n UL ");
+    if (sensorIndex == SENSOR_D_INDEX)  Serial.print("\n D ");
+    if (sensorIndex == SENSOR_DR_INDEX) Serial.print("\n DR ");
+    if (sensorIndex == SENSOR_DL_INDEX) Serial.print("\n DL ");
 
     return String("Distanza: " + (String)distance +"cm");
         
