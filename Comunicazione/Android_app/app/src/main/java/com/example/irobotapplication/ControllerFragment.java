@@ -38,8 +38,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ControllerFragment extends Fragment {
-
-    private ConnectivityCheck check;
     private ActionBar actionBar;
     private static final long CHECK_INTERVAL = 1000;
     private final Handler handler = new Handler();
@@ -123,9 +121,6 @@ public class ControllerFragment extends Fragment {
         AppCompatImageButton btnStop = requireView().findViewById(R.id.btnStop);
         switchOnOff.setChecked(false);
 
-        check = new ConnectivityCheck(requireActivity().getApplicationContext());
-        check.startSending();
-
         //using this boolean to prevent multiple buttons from being pressed at the same time
         AtomicBoolean anyButtonPressed = new AtomicBoolean(false);
 
@@ -133,13 +128,13 @@ public class ControllerFragment extends Fragment {
             if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is released
                 anyButtonPressed.set(false);
-                postToServer(getString(R.string.conn_string) + "control", "released");
+                postToServer("http://" + GlobalVars.arduinoIP + GlobalVars.arduinoPort, "released");
                 buttonForward.setImageResource(R.drawable.vettoreup_bianco__removebg_preview);
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
-                postToServer(getString(R.string.conn_string) + "control", "up");
+                postToServer("http://" + GlobalVars.arduinoIP + GlobalVars.arduinoPort, "up");
                 buttonForward.setImageResource((R.drawable.vettoreup_rosso__removebg_preview));
                 return true;
             }
@@ -167,13 +162,13 @@ public class ControllerFragment extends Fragment {
             if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is released
                 anyButtonPressed.set(false);
-                postToServer(getString(R.string.conn_string) + "control", "released");
+                postToServer("http://" + GlobalVars.arduinoIP + GlobalVars.arduinoPort, "released");
                 buttonBackwards.setImageResource(R.drawable.vettoredown_bianco__removebg_preview);
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
-                postToServer(getString(R.string.conn_string) + "control", "down");
+                postToServer("http://" + GlobalVars.arduinoIP + GlobalVars.arduinoPort, "down");
                 buttonBackwards.setImageResource((R.drawable.vettoredown_rosso__removebg_preview));
                 return true;
             }
@@ -184,13 +179,13 @@ public class ControllerFragment extends Fragment {
             if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is released
                 anyButtonPressed.set(false);
-                postToServer(getString(R.string.conn_string) + "control", "released");
+                postToServer("http://" + GlobalVars.arduinoIP + GlobalVars.arduinoPort, "released");
                 buttonRotSx.setImageResource(R.drawable.rotsx_bianco_2);
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
-                postToServer(getString(R.string.conn_string) + "control", "left");
+                postToServer("http://" + GlobalVars.arduinoIP + GlobalVars.arduinoPort, "left");
                 buttonRotSx.setImageResource(R.drawable.rotsx_rosso__removebg_preview);
                 return true;
             }
@@ -201,13 +196,13 @@ public class ControllerFragment extends Fragment {
             if (event.getAction() == MotionEvent.ACTION_UP && anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is released
                 anyButtonPressed.set(false);
-                postToServer(getString(R.string.conn_string) + "control", "released");
+                postToServer("http://" + GlobalVars.arduinoIP + GlobalVars.arduinoPort, "released");
                 buttonRotDx.setImageResource(R.drawable.rotdx_bianco);
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_DOWN && !anyButtonPressed.get() && switchOnOff.isChecked()) {
                 // when button is pressed
                 anyButtonPressed.set(true);
-                postToServer(getString(R.string.conn_string) + "control", "right");
+                postToServer("http://" + GlobalVars.arduinoIP + GlobalVars.arduinoPort, "right");
                 buttonRotDx.setImageResource(R.drawable.rotdx_rosso__removebg_preview);
                 return true;
             }
@@ -217,11 +212,10 @@ public class ControllerFragment extends Fragment {
         //CONTROLLO SWITCH
         switchOnOff.setOnCheckedChangeListener((v, event) -> {
             if (!switchOnOff.isChecked()) {
-                postToServer(getString(R.string.conn_string) + "control", "commStop");
-                check.stopSending();
+                postToServer("http://" + GlobalVars.arduinoIP + GlobalVars.arduinoPort, "commStop");
             }
             if (switchOnOff.isChecked()) {
-                check.startSending();
+
             }
         });
 
@@ -229,9 +223,8 @@ public class ControllerFragment extends Fragment {
         btnStop.setOnClickListener(v -> {
             if(!stopClicked.get()){
                 // se il bottone viene cliccato e stopclicked = false cambia immagine e stopclicked = true
-                postToServer(getString(R.string.conn_string) + "control", "emergencyStop");
+                postToServer("http://" + GlobalVars.arduinoIP + GlobalVars.arduinoPort, "emergencyStop");
                 switchOnOff.setChecked(false);
-                check.stopSending();
                 btnStop.setImageResource(R.drawable.stop_button_clicked);
                 stopClicked.set(true);
             }
@@ -250,19 +243,18 @@ public class ControllerFragment extends Fragment {
         if (actionBar != null) {
             actionBar.show();
         }
-        check.stopSending();
-        postToServer(getString(R.string.conn_string) + "control", "commStop");
+        postToServer("http://" + GlobalVars.arduinoIP + GlobalVars.arduinoPort, "commStop");
     }
 
     private void postToServer(String url, String direction) {
 
         RequestQueue queue = Volley.newRequestQueue(requireContext());
-
+        Log.d("PostToServer", "URL: " + url);
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url,
                 response -> Log.d("HTTP-POST", "Response: " + response),
                 error -> {
                     // Handle errors
-                    Toast.makeText(fragmentContext, "Errore di connessione", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(fragmentContext, "Errore di connessione", Toast.LENGTH_SHORT).show();
                     Log.e("HTTP-POST", "Error: " + error.toString());
                 })
         {

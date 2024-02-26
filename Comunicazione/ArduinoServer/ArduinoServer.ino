@@ -6,6 +6,7 @@
 
 //PINS
 int emergency = 13;
+int emergencyStatus = 12;
 
 // Connection Variables
 int UDP_PORT_OUT = 8989;
@@ -13,13 +14,12 @@ int UDP_PORT_IN = 7979;
 EthernetUDP udp;
 IPAddress defaultIP(23, 23, 23, 23);
 IPAddress androidIP;
-IPAddress broadcastIP(192, 168, 0, 255);
+IPAddress broadcastIP(192, 168, 1, 255);
 
 // Connection checks variables
 unsigned long startTime;
 unsigned long currentTime;
-unsigned long duration = 2000;
-unsigned long rcvTimeOut = 500;
+unsigned long duration = 3000;
 String messageCheck;
 bool rcvFailed = true;
 int retries = 0;
@@ -29,20 +29,22 @@ int arduinoPort = 80;
 
 // Network Settings
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };  // MAC address
-IPAddress ip(192, 168, 0, 4); // IP address
+IPAddress ip(192, 168, 1, 6); // IP address
 
 EthernetClient client;
 EthernetServer server(80);
 
 void setup() {
   // emergency PIN
-  pinMode(13, OUTPUT);
+  pinMode(emergency, OUTPUT);
+  pinMode(emergencyStatus, INPUT);
   
   // Initialize the start time
   startTime = millis();
 
   // Start the serial communications
   Serial.begin(9600);
+  Serial1.begin(9600);
   
   // Setup the Ethernet connection
   Ethernet.begin(mac);
@@ -56,7 +58,6 @@ void setup() {
   }
 
   // Start the UDP connection with the Android app
-  Serial.println("Connecting to Android...");
   udp.begin(UDP_PORT_IN);
   connectToAndroidApp();
 
@@ -98,6 +99,7 @@ void loop() {
               if (key == "direction"){
                 if (value != "emergencyStop"){
                   forwardToControlArduino(value);
+                  if(value == "commStop");
                 }
                 else {
                   Serial.println("EMERGENCY!");
@@ -105,7 +107,7 @@ void loop() {
                   startEmergencyStop();
                 }
               }
-              Serial.print(key);
+              //Serial.print(key);
           }
           Serial.println();
 
@@ -125,63 +127,65 @@ void loop() {
         } 
       }
     }
+    udp.beginPacket(broadcastIP, UDP_PORT_OUT);
+    udp.write("ok");
+    udp.endPacket();
   }
 
   if (currentTime - startTime > duration){
-    Serial.println("Testing connection...");
-
     udp.beginPacket(broadcastIP, UDP_PORT_OUT);
     messageCheck = "ok";
     udp.write(messageCheck.c_str());
     udp.endPacket();
-
-    currentTime = millis();
-    startTime = currentTime;
-    while (currentTime - startTime < rcvTimeOut){
-      int pkt = udp.parsePacket();
-      if (pkt) {
-        char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
-        udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
-        String received = String(packetBuffer);
-        if (received.indexOf("ok") != -1){
-          rcvFailed = false;
-        }
-      }
-      currentTime = millis();
-    }
-    if (rcvFailed){
-      retries++;
-      if (retries >= 2){
+  
+    int pkt = udp.parsePacket();
+    if (pkt) {
+      char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
+      udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
+      String received = String(packetBuffer);
+      if (received.indexOf("ok") != -1){
+        rcvFailed = false;
         retries = 0;
-        connectToAndroidApp();
       }
+    }
+    for (int i=0; i<10; i++){
+      udp.parsePacket();
+    }
+
+    if (rcvFailed)
+      retries++;
+    if (retries >= 3){
+      retries = 0;
+      // stop motors
+      forwardToControlArduino("brake");
+      Serial.println("DISCONNECTED!");
+      connectToAndroidApp();
     }
 
     rcvFailed = true;
     currentTime = millis();
     startTime = currentTime;
-    Serial.println("Test Finished!");
   }
   
   // read another arduino's serial to get sensors values 
-  readSensorValues();
+  //readSensorValues();
 }
 
 void connectToAndroidApp(){
+  Serial.println("Connecting to Android...");
   androidIP = defaultIP;
   bool ipHasBeenReceived = false;
   
   while (androidIP == defaultIP || !ipHasBeenReceived){
     int packetSize = udp.parsePacket();
     if (packetSize) {
-      Serial.println("Datagram Received");
       // Read the packet
       char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
       udp.read(packetBuffer, UDP_TX_PACKET_MAX_SIZE);
       
       // DEBUG: print the received packet
-      Serial.print("Received packet: ");
-      Serial.println(packetBuffer);
+      //Serial.print("Received packet: ");
+      //Serial.println(packetBuffer);
 
       // Parse the packet and check if contains "ok"
       String received = String(packetBuffer);
@@ -196,7 +200,7 @@ void connectToAndroidApp(){
     udp.beginPacket(broadcastIP, UDP_PORT_OUT);
     String message;
     if (ipHasBeenReceived){
-      //periodically send ok!
+      message = "ok";
     }
     else {
       message = "Arduino IP";
@@ -205,18 +209,21 @@ void connectToAndroidApp(){
     udp.endPacket();
     delay(1000);
   }
+
+  Serial.println("CONNECTED");
 }
 
 // send interrupt to control arduino to perform an emergency stop
 void startEmergencyStop(){
-        digitalWrite(emergency, HIGH);
-        delay(1000);
-        digitalWrite(emergency, LOW);
+  digitalWrite(emergency, HIGH);
+  delay(50);
+  digitalWrite(emergency, LOW);
 }
 
 // function to send direction string to the other arduino
 void forwardToControlArduino(String value){
   Serial.println(value);
+  Serial1.print(value);
 }
 
 void readSensorValues(){
