@@ -185,7 +185,8 @@ void readSerial(){
         serialString = Serial1.readStringUntil('\r\n');
         digitalWrite(COMMUNICATION_PIN, HIGH);
         commTime = millis();
-        mapping(serialString);
+        mapping(serialString);   
+        Serial1.flush();        // da testare
     }
 
     if (currentTime - commTime >= INTERVAL){

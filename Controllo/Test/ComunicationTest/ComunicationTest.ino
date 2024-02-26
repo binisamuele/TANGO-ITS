@@ -59,7 +59,7 @@ void setup() {
     pinMode(SX_FORWARD_EN, OUTPUT);
     pinMode(SX_BACKWARD_EN, OUTPUT);
 
-	digitalWrite(DX_FORWARD_EN, HIGH);
+	  digitalWrite(DX_FORWARD_EN, HIGH);
     digitalWrite(SX_FORWARD_EN, HIGH);
     digitalWrite(DX_BACKWARD_EN, HIGH);
     digitalWrite(SX_BACKWARD_EN, HIGH);
@@ -83,7 +83,7 @@ void loop() {
         return;
     }
 */
-	readSerial();
+	  readSerial();
 
     if (currentTime - startTime >= INTERVAL){
 	      Serial.println(movementInt);
