@@ -5,56 +5,92 @@ import android.util.Log;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 
 public class ConnectToArduino {
+    private static final int RECEIVE_PORT = 8989;
+    private static final int SEND_PORT = 7979;
+    private static final String BROADCAST_ADDRESS = "192.168.1.255"; // Broadcast address
 
-    private static final int UDP_PORT = 8888;
-    private static final String BROADCAST_IP = "192.168.1.255";
+    public void startBroadcasting() {
+        new Thread(() -> {
+            DatagramSocket socket = null;
+            int threadFrequency;
+            try {
+                while (true) {
+                    threadFrequency = 1000;
+                    socket = new DatagramSocket();
+                    String message = "Android IP";
+                    if (!GlobalVars.arduinoIP.equals("")) {
+                        message = "ok";   // Notify arduino that its IP has been received
+                        threadFrequency = 450;
+                    }
+                    DatagramPacket packet = new DatagramPacket(
+                        message.getBytes(),
+                        message.length(),
+                        InetAddress.getByName(BROADCAST_ADDRESS),
+                        SEND_PORT
+                    );
+                    socket.send(packet);
+                    Thread.sleep(threadFrequency);
+                    socket.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (socket != null) {
+                    socket.close();
+                }
+            }
+        }).start();
+    }
 
-    public String tryConnection() {
-        try {
-            DatagramSocket socket = new DatagramSocket();
+    public void startListening() {
+        new Thread(() -> {
+            int retries = 0;
+            while (true){
+                DatagramSocket socket = null;
+                if (retries > 5) {
+                    GlobalVars.isArduinoConnected = false;
+                    GlobalVars.arduinoIP = "";
+                    retries = 0;
+                }
+                try {
+                    socket = new DatagramSocket(RECEIVE_PORT);
+                    socket.setSoTimeout(1000);
+                    byte[] buffer = new byte[1024];
+                    DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+                    socket.receive(packet);
+                    String received = new String(packet.getData(), 0, packet.getLength());
+                    //get the IP address of the arduino
+                    GlobalVars.arduinoIP = packet.getAddress().getHostAddress();
+                    if (received.contains("ok")){
+                        GlobalVars.isArduinoConnected = true;
+                    }
+                    if (GlobalVars.isArduinoConnected && !GlobalVars.arduinoIP.equals("") && !received.contains("ok")) {
+                        retries++;
+                    }
+                    socket.close();
+                } catch (Exception e) {
+                    if (e instanceof SocketTimeoutException) {
+                        Log.d("ConnectToArduino", "Timeout occurred");
+                        if (GlobalVars.isArduinoConnected && !GlobalVars.arduinoIP.equals("")) {
+                            retries++;
+                        }
+                    } else if (e instanceof SocketException) {
+                        Log.d("ConnectToArduino", "SocketException occurred");
+                    } else {
+                        e.printStackTrace();
+                    }
 
-            // broadcast address
-            InetAddress broadcastAddress = InetAddress.getByName(BROADCAST_IP);
-
-            String message = "start";
-            byte[] buffer = message.getBytes();
-            DatagramPacket packet = new DatagramPacket(
-                    buffer,
-                    buffer.length,
-                    broadcastAddress,
-                    UDP_PORT
-            );
-
-            // sending the message on broadcast address
-            socket.send(packet);
-
-            // receive Arduino's IP address
-            byte[] receiveBuffer = new byte[1024];
-            DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
-            socket.receive(receivePacket);
-            String arduinoIP = new String(receivePacket.getData(), 0, receivePacket.getLength());
-            System.out.println("Arduino's IP address: " + arduinoIP);
-
-            byte[] androidIPBytes = InetAddress.getLocalHost().getAddress();
-            DatagramPacket androidIPPacket = new DatagramPacket(
-                    androidIPBytes,
-                    androidIPBytes.length,
-                    InetAddress.getByName(arduinoIP),
-                    UDP_PORT
-            );
-            socket.send(androidIPPacket);
-
-            // Close the socket
-            socket.close();
-
-            Log.d("UDP Broadcast", "Broadcasted message received: " + message);
-
-            return arduinoIP;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+                }
+                finally {
+                    if (socket != null) {
+                        socket.close();
+                    }
+                }
         }
+        }).start();
     }
 }

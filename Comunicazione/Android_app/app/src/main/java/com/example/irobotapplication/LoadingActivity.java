@@ -5,10 +5,13 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageButton;
+
+import java.util.Objects;
 
 public class LoadingActivity extends AppCompatActivity {
     private ConnectToArduino connect;
@@ -23,17 +26,18 @@ public class LoadingActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                do {
-                    GlobalVars.arduinoIP = connect.tryConnection();
-                } while (GlobalVars.arduinoIP == null);
-                // Una volta che la connessione è stabilita, avvia MainActivity
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        startActivity(new Intent(LoadingActivity.this, MainActivity.class));
-                        finish(); // Chiudi la LoadingActivity per evitare di tornarci con il tasto indietro
+                connect.startListening();
+                connect.startBroadcasting();
+                while (Objects.equals(GlobalVars.arduinoIP, "") || !GlobalVars.isArduinoConnected) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
-                });
+                }
+                // Una volta che la connessione è stabilita, avvia MainActivity
+                startActivity(new Intent(LoadingActivity.this, MainActivity.class));
+                finish(); // Chiudi la LoadingActivity per evitare di tornarci con il tasto indietro
             }
         }).start(); //start() avvia l'esecuzione del thread, in modo che run() sia asincrono rispetto al thread principale dell'UI
     }

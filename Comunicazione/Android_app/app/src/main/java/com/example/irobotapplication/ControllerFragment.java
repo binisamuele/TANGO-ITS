@@ -2,6 +2,7 @@ package com.example.irobotapplication;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 
@@ -11,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -39,6 +41,32 @@ public class ControllerFragment extends Fragment {
 
     private ConnectivityCheck check;
     private ActionBar actionBar;
+    private static final long CHECK_INTERVAL = 1000;
+    private final Handler handler = new Handler();
+    private final Runnable periodicTask = new Runnable() {
+        @Override
+        public void run() {
+            if (!GlobalVars.isArduinoConnected) {
+                startActivity(new Intent(getActivity(), LoadingActivity.class));
+            }
+            // Schedule the task to run again after CHECK_INTERVAL
+            handler.postDelayed(this, CHECK_INTERVAL);
+        }
+    };
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Start the periodic task when the fragment resumes
+        handler.postDelayed(periodicTask, CHECK_INTERVAL);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // Stop the periodic task when the fragment is paused to prevent memory leaks
+        handler.removeCallbacks(periodicTask);
+    }
 
     public ControllerFragment() {
         // Required empty public constructor
@@ -69,6 +97,11 @@ public class ControllerFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        /* Test UpdateSpeed
+        float currentSpeed = 2.5f;
+        updateSpeed(currentSpeed);
+         */
 
         // Nasconde la toolbar nell'activity associata al fragment
         AppCompatActivity activity = (AppCompatActivity) getActivity();
@@ -273,24 +306,23 @@ public class ControllerFragment extends Fragment {
     //TODO (bisogna richiamare il metodo in modo continuo per aggiornare la velocità.
     // la si chiama tramite i button forward e backwards o ????)
 
-    private void updateSpeed(int currentSpeed) {
 
-        //Aggiornamento della velocità
+    private void updateSpeed(float currentSpeed) {
+        
+        // Aggiornamento della velocità
         TextView speedTextView = requireView().findViewById(R.id.Speed);
-        speedTextView.setText(currentSpeed);
+        speedTextView.setText(Float.toString(currentSpeed));
 
-        //Cambio colori in base alla velocità
-        if(currentSpeed == 0){
+        // Cambio colori in base alla velocità
+        if (currentSpeed == 0) {
             speedTextView.setTextColor(getResources().getColor(R.color.Panna));
-        }
-        else if (currentSpeed > 0 && currentSpeed <= 15) {
+        } else if (currentSpeed > 0 && currentSpeed <= 2) {
             speedTextView.setTextColor(getResources().getColor(R.color.Green));
-        }
-        else if (currentSpeed > 15 && currentSpeed <= 35) {
+        } else if (currentSpeed > 2 && currentSpeed <= 4) {
             speedTextView.setTextColor(getResources().getColor(R.color.Yellow));
-        }
-        else {
+        } else {
             speedTextView.setTextColor(getResources().getColor(R.color.red));
         }
     }
+
 }
