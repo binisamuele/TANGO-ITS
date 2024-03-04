@@ -134,7 +134,7 @@ void setup() {
 void loop() {
     currentTime = millis();
 
-    if (!Serial1 || emergency || digitalRead(KEY) || digitalRead(BUTTONS)){// || digitalRead(BUMPER1) || digitalRead(BUMPER2) || digitalRead(ARDUINO_EMERGENCIES)) {
+    if (emergency || digitalRead(BUTTONS)) {//  || digitalRead(BUMPER1) || digitalRead(BUMPER2) || digitalRead(ARDUINO_EMERGENCIES) || !Serial1  || digitalRead(KEY)) {
         emergencyState();
         return;
     }
@@ -148,19 +148,21 @@ void loop() {
 ///////////////////////////////////////////////////////////////////////////////
 // funzione stato emergenza
 void emergencyState() {
-    if (!emergency){            // ferma la macchina e manda un messaggio di emergenza agli altri arduino
-        emergency = true;
-        emergencyStop();
-    }
+    //if (!emergency){            // ferma la macchina e manda un messaggio di emergenza agli altri arduino
+    //    emergency = true;
+    //}
 
-    Serial.print("Emergenza"); // DEBUG
+    Serial.println("Emergenza"); // DEBUG
+    
+    emergencyStop();
+    emergency = false;
 
-    while (emergency || !digitalRead(KEY))      // rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
-    {
-        if (!digitalRead(KEY)) emergency = false;
-    }
+    //while (emergency || !digitalRead(KEY))      // rimane nel loop finché non viene girata la chiave o viene mandato un messaggio dall'app
+    //{
+    //    if (!digitalRead(KEY)) emergency = false;
+    //}
 
-    Serial.print("Fine Emergenza"); // DEBUG
+    Serial.println("Fine Emergenza"); // DEBUG
 }
 
 // arresto di emergenza del motore
