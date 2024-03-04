@@ -42,13 +42,14 @@ const int SENSOR_DL_INDEX = 5;
 // COSTANTI
 const int SENSORS_NUMBER = 6;
 const int MAX_DISTANCE = 200;
-const int INTERVAL = 1000;
+const int INTERVAL = 250;
 const int SONAR_INTERVAL = 50;
 
 const int MAX_SPEED = 150;
 const int MIN_SPEED = -100;
 const int SPEED_GAIN = 10;
 const int LOW_SPEED = 50;
+const int ROTATION_SPEED = 80;
 
 const int TANGO_SIZE = 20;
 const int EMERGENCY_DISTANCE = 40;
@@ -254,7 +255,7 @@ void movement(){
                 break;
             }
 
-            driveMotor(SX_FORWARD, DX_BACKWARD, LOW_SPEED);
+            driveMotor(DX_FORWARD, SX_BACKWARD, ROTATION_SPEED);
 
             isRotating = true;
             break;
@@ -266,7 +267,7 @@ void movement(){
                 break;
             }
 
-            driveMotor(DX_FORWARD, SX_BACKWARD, LOW_SPEED);
+            driveMotor(SX_FORWARD, DX_BACKWARD, ROTATION_SPEED);
 
             isRotating = true;
             break;
