@@ -1,0 +1,11 @@
+>> Guide
+
+• If the app doesn't connect to Arduino:
+
+-> Make sure that WiFi router is powered ON
+
+-> Make sure that your phone is connected to 
+ the Tango's WiFi router
+
+-> Disconnect all the arduinos power sources and 
+ connect those again while Tango power switch is ON
